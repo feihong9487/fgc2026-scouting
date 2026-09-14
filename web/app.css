@@ -39,16 +39,25 @@ button,input,select,textarea{font-family:inherit;font-size:16px;touch-action:man
 /* ───────── aurora background ───────── */
 #bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg);pointer-events:none}
 #bg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:var(--a-op);will-change:transform}
-#bg .b1{width:62vmax;height:62vmax;left:-18vmax;top:-22vmax;background:radial-gradient(circle at 40% 40%,var(--a1),transparent 62%);animation:drift1 26s ease-in-out infinite alternate}
-#bg .b2{width:58vmax;height:58vmax;right:-20vmax;top:6vmax;background:radial-gradient(circle at 60% 40%,var(--a2),transparent 62%);animation:drift2 31s ease-in-out infinite alternate}
-#bg .b3{width:66vmax;height:66vmax;left:8vmax;bottom:-30vmax;background:radial-gradient(circle at 50% 50%,var(--a3),transparent 62%);animation:drift3 36s ease-in-out infinite alternate}
-#bg .b4{width:40vmax;height:40vmax;right:4vmax;bottom:-8vmax;background:radial-gradient(circle at 50% 50%,var(--a4),transparent 62%);animation:drift1 22s ease-in-out infinite alternate-reverse}
+#bg .b1{width:62vmax;height:62vmax;left:-18vmax;top:-22vmax;background:radial-gradient(circle at 40% 40%,var(--a1),transparent 62%);animation:drift1 18s ease-in-out infinite alternate}
+#bg .b2{width:58vmax;height:58vmax;right:-20vmax;top:6vmax;background:radial-gradient(circle at 60% 40%,var(--a2),transparent 62%);animation:drift2 23s ease-in-out infinite alternate}
+#bg .b3{width:66vmax;height:66vmax;left:8vmax;bottom:-30vmax;background:radial-gradient(circle at 50% 50%,var(--a3),transparent 62%);animation:drift3 27s ease-in-out infinite alternate}
+#bg .b4{width:40vmax;height:40vmax;right:4vmax;bottom:-8vmax;background:radial-gradient(circle at 50% 50%,var(--a4),transparent 62%);animation:drift1 15s ease-in-out infinite alternate-reverse}
 #bg .noise{position:absolute;inset:0;opacity:var(--noise-op);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");background-size:180px 180px}
 #bg .sp{position:absolute;bottom:-12px;border-radius:50%;background:var(--a4);box-shadow:0 0 6px 2px var(--a1);opacity:0;animation:rise linear infinite;will-change:transform,opacity}
 @keyframes rise{0%{transform:translate3d(0,0,0) scale(.5);opacity:0}8%{opacity:var(--sp-op,.9)}60%{opacity:var(--sp-op,.9)}100%{transform:translate3d(var(--dx,20px),-108vh,0) scale(1.1);opacity:0}}
-@keyframes drift1{to{transform:translate3d(12vmax,10vmax,0) scale(1.15)}}
-@keyframes drift2{to{transform:translate3d(-14vmax,14vmax,0) scale(.9)}}
-@keyframes drift3{to{transform:translate3d(10vmax,-12vmax,0) scale(1.1)}}
+@keyframes drift1{
+  0%{transform:translate3d(0,0,0) scale(1);opacity:var(--a-op)}
+  50%{transform:translate3d(16vmax,9vmax,0) scale(1.28);opacity:calc(var(--a-op) * 1.3)}
+  100%{transform:translate3d(5vmax,17vmax,0) scale(.92);opacity:calc(var(--a-op) * .75)}}
+@keyframes drift2{
+  0%{transform:translate3d(0,0,0) scale(1.05);opacity:var(--a-op)}
+  50%{transform:translate3d(-18vmax,11vmax,0) scale(.82);opacity:calc(var(--a-op) * .7)}
+  100%{transform:translate3d(-7vmax,20vmax,0) scale(1.2);opacity:calc(var(--a-op) * 1.25)}}
+@keyframes drift3{
+  0%{transform:translate3d(0,0,0) scale(1);opacity:var(--a-op)}
+  50%{transform:translate3d(13vmax,-15vmax,0) scale(1.22);opacity:calc(var(--a-op) * 1.2)}
+  100%{transform:translate3d(-6vmax,-6vmax,0) scale(.9);opacity:calc(var(--a-op) * .8)}}
 
 @keyframes fadeUp{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(1)}42%{transform:scale(1.16)}100%{transform:scale(1)}}
@@ -223,19 +232,27 @@ input:focus,textarea:focus{outline:0;border-color:var(--ember);box-shadow:0 0 0 
 @media (min-width:700px){main{padding-left:20px;padding-right:20px}.card{padding:22px 20px}nav{max-width:560px;left:50%;right:auto;width:100%;transform:translateX(-50%);border-radius:22px 22px 0 0;border:1px solid var(--line);border-bottom:0}nav button{font-size:12px}}
 
 /* ───────── Igniting Innovation theme extras ───────── */
-#bg .sky{position:absolute;left:0;right:0;bottom:0;width:100%;height:min(34vh,300px);opacity:.9}
-#bg .sky .w1{animation:skyA 14s ease-in-out infinite alternate;transform-origin:50% 100%}
-#bg .sky .w2{animation:skyB 18s ease-in-out infinite alternate;transform-origin:50% 100%}
-@keyframes skyA{to{transform:translateX(-24px) scaleY(1.06)}}
-@keyframes skyB{to{transform:translateX(28px) scaleY(.95)}}
+#bg .sky{position:absolute;left:0;bottom:0;width:200%;height:min(38vh,340px);opacity:.95}
+/* 每一層都是兩塊一模一樣的波形並排，往左推一整塊之後無縫接回原點 */
+#bg .sky .w{transform-box:view-box;transform-origin:0 0;will-change:transform;
+  animation:waveScroll var(--ws,30s) linear infinite}
+#bg .sky .w2{animation-direction:reverse}            /* 中間那層反方向，做出視差 */
+#bg .sky .w path{transform-box:view-box;transform-origin:0 0;
+  animation:waveBob var(--wb,8s) ease-in-out infinite alternate}
+@keyframes waveScroll{from{transform:translateX(0)}to{transform:translateX(-1440px)}}
+@keyframes waveBob{from{transform:translateY(0)}to{transform:translateY(-16px)}}
 .logo svg{width:22px;height:22px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .logo svg .in{fill:#ffe08a;transform-origin:50% 100%;animation:flicker 1.6s ease-in-out infinite}
 @keyframes flicker{0%,100%{transform:scaleY(1)}35%{transform:scaleY(.86) translateY(.5px)}70%{transform:scaleY(1.08)}}
 .brand h1{background:linear-gradient(90deg,var(--ink) 0%,var(--ink) 55%,var(--ember) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 footer.made{text-align:center;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.04em;padding:22px 8px 4px;opacity:.85;animation:fadeUp .5s var(--e) .25s both}
-footer.made .hb{color:var(--ember-2);display:inline-block;animation:beat 1.4s ease-in-out infinite}
+footer.made .hb{color:var(--ember-2);display:inline-block;will-change:transform;
+  text-shadow:0 0 8px color-mix(in srgb,var(--ember-2) 55%,transparent);
+  animation:beat 1.6s cubic-bezier(.2,.6,.3,1) infinite}
 footer.made .zh{font-weight:500;opacity:.8}
-@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.25)}45%{transform:scale(1)}60%{transform:scale(1.18)}}
+/* 真正的心跳是雙拍：碰-碰…休息 */
+@keyframes beat{0%{transform:scale(1)}10%{transform:scale(1.38)}20%{transform:scale(1)}
+  30%{transform:scale(1.24)}42%{transform:scale(1)}100%{transform:scale(1)}}
 
 /* ───────── sign-in overlay ───────── */
 #auth{position:fixed;inset:0;z-index:50;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}

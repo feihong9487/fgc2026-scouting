@@ -31,6 +31,9 @@ function relabel(){
   DIMS.length=0; DIMS.push(['shoot',t('n.dShoot')],['fire',t('n.dFire')],['speed',t('n.dSpeed')],['climb',t('n.dClimb')],['carry',t('n.dSupport')],['port',t('n.dFeed')]); }
 function applyLang(){ relabel(); document.documentElement.lang=LANG; document.documentElement.dir=RTL.includes(LANG)?'rtl':'ltr';
   document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  /* 頁尾的愛心要能跳動，所以從翻譯字串裡把它抽出來包成元素 */
+  document.querySelectorAll('footer.made [data-i18n]').forEach(el=>{
+    el.innerHTML=esc(t(el.dataset.i18n)).replace('♥','<span class="hb">♥</span>'); });
   document.querySelectorAll('[data-hint]').forEach(el=>{ const s=hintFor(el.dataset.hint); el.textContent=s; el.hidden=!s; });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
   document.querySelectorAll('select.langsel').forEach(sel=>{ if(!sel.options.length) META.forEach(([c,n])=>{ const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); sel.value=LANG; });
