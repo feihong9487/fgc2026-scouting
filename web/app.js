@@ -611,10 +611,41 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
 
 /* ---------- offline cache (needs https or localhost; silently skipped otherwise) ---------- */
 (function(){ if(!('serviceWorker' in navigator)||!HTTP) return;
-  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js',{scope:'./'})
-    .then(r=>{ r.addEventListener&&r.addEventListener('updatefound',()=>{ const w=r.installing; if(!w) return;
-      w.addEventListener('statechange',()=>{ if(w.state==='installed'&&navigator.serviceWorker.controller) w.postMessage('skipWaiting'); }); }); })
+  const sw=navigator.serviceWorker;
+  const hadController=!!sw.controller;   // 第一次造訪是 null，不算更新
+  let reloading=false;
+  // 新的 worker 接手 = 有新版了。存檔再重載，不然使用者會一直卡在舊版。
+  sw.addEventListener('controllerchange',()=>{
+    if(!hadController||reloading) return; reloading=true;
+    try{ saveNow(); }catch(e){}
+    try{ toast(t('s.updating')); }catch(e){}
+    setTimeout(()=>location.reload(),900);
+  });
+  window.addEventListener('load',()=>{ sw.register('sw.js',{scope:'./'})
+    .then(r=>{
+      const ask=()=>{ try{ r.update(); }catch(e){} };
+      r.addEventListener&&r.addEventListener('updatefound',()=>{ const w=r.installing; if(!w) return;
+        w.addEventListener('statechange',()=>{ if(w.state==='installed'&&sw.controller) w.postMessage('skipWaiting'); }); });
+      if(r.waiting&&sw.controller) r.waiting.postMessage('skipWaiting');
+      // 回到前景就問一次有沒有新版（iOS 主畫面 App 會直接從快照喚醒，不會重新載入）
+      document.addEventListener('visibilitychange',()=>{ if(!document.hidden) ask(); });
+      setInterval(ask,30*60*1000);
+    })
     .catch(()=>{}); }); })();
+
+/* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
+const APP_VER='v20';
+(function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
+  const b=$('verCheck'); if(!b) return;
+  b.onclick=async e=>{ e.preventDefault();
+    try{
+      if('serviceWorker' in navigator){ const r=await navigator.serviceWorker.getRegistration(); if(r) await r.update(); }
+      const res=await fetch('sw.js?ts='+Date.now(),{cache:'no-store'});
+      const m=(await res.text()).match(/fgc2026-(v\d+)/);
+      if(m&&m[1]!==APP_VER){ toast(t('s.updating')); saveNow(); setTimeout(()=>location.reload(true),900); }
+      else toast(t('s.upToDate'),'ok');
+    }catch(err){ toast(t('s.offline')); }
+  }; })();
 
 /* ---------- init ---------- */
 (async function init(){
