@@ -561,3 +561,24 @@ svg.trend.dn polyline{stroke:var(--red)}
 #mineList .it.me{background:var(--ember-soft);border-color:color-mix(in srgb,var(--ember) 40%,var(--line))}
 #mineList .it .x{flex:none;align-self:center}
 #scMine h2 .pill{margin-left:auto}
+/* 賽程表：一場一列，兩個盟友各一格，問到資料就打勾 */
+.it.sched{gap:10px;align-items:center;cursor:pointer}
+.it.sched .n{min-width:44px;text-align:center;font-weight:900;font-size:14px;color:var(--muted);
+  background:var(--line);border-radius:9px;padding:6px 0;flex:none}
+.it.sched.me{background:var(--ember-soft);border-color:color-mix(in srgb,var(--ember) 40%,var(--line))}
+.it.sched.me .n{background:var(--ember);color:#1a0d06}
+.sc-cells{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;min-width:0}
+.sc-p{display:flex;align-items:center;gap:7px;min-width:0;min-height:40px;padding:6px 9px;
+  border:1.5px dashed var(--line-2);border-radius:11px;background:transparent;color:var(--muted);
+  font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-align:left;
+  transition:transform var(--d-s) var(--e),border-color var(--d-s),background var(--d-s)}
+.sc-p:active{transform:scale(.96)}
+.sc-p.set{border-style:solid;border-color:var(--line-2);background:var(--bg);color:var(--ink)}
+.sc-p.set.got{border-color:color-mix(in srgb,var(--ok) 55%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.sc-p .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sc-p .fl{flex:none;font-size:15px;line-height:1}
+.sc-p img.flag{height:12px;width:auto;border-radius:2px}
+.sc-p .tk{margin-left:auto;color:var(--ok);font-weight:900;flex:none}
+#scSched h2 .pill{margin-left:auto}
+#schedList{max-height:none}
+@media (max-width:380px){ .sc-p .nm{display:none} .sc-cells{grid-template-columns:1fr 1fr} }

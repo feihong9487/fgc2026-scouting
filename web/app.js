@@ -61,6 +61,8 @@ function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cf
   d.cfg.recent=Array.isArray(d.cfg.recent)?d.cfg.recent:[]; d.cfg.fx=d.cfg.fx||'auto'; d.cfg.custom=(d.cfg.custom&&typeof d.cfg.custom==='object')?d.cfg.custom:{};
   d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:'',phase:'qual'};
   d.cfg.plan.phase=d.cfg.plan.phase||'qual';
+  if(!d.cfg.plan.n||typeof d.cfg.plan.n!=='object') d.cfg.plan.n={prac:1,qual:8,play:4};
+  if(!d.cfg.plan.rows||typeof d.cfg.plan.rows!=='object') d.cfg.plan.rows={};
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -89,7 +91,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); renderSched(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -340,7 +342,7 @@ function pitFor(slug,ph){
 function rec(){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
   if(!DB.pit[k]||DB.pit[k].del) DB.pit[k]=blankPit();   // 刪掉之後再填等於重新開一份
   return DB.pit[k]; }
-function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); renderMine(); }
+function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); renderMine(); renderSched(); }
 function showSaved(ts){
   const el=$('pSaved'); if(!el) return;
   el.textContent = ts ? t('sc.autosaved')+' '+String(ts).replace('T',' ').slice(11,16) : t('sc.nothingYet');
@@ -378,7 +380,19 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
 $('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine(); haptic(12); });
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
-function plan(){ const p=DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:'',phase:'qual'}); if(!p.phase) p.phase='qual'; return p; }
+/* 每個賽段預設開幾列。手冊：模擬賽每隊一場、季後賽每個聯盟四場、決賽兩場；
+   正賽是「依賽程時間決定」，所以只能給個常見值讓使用者自己改。 */
+const SCHED_DEF={prac:1,qual:8,play:4};
+function plan(){ const p=DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:'',phase:'qual'});
+  if(!p.phase) p.phase='qual';
+  if(!p.n||typeof p.n!=='object') p.n=Object.assign({},SCHED_DEF);
+  if(!p.rows||typeof p.rows!=='object') p.rows={};
+  return p; }
+function schedCount(){ const p=plan(); const v=parseInt(p.n[pitPhase],10); return v>0?Math.min(v,60):SCHED_DEF[pitPhase]||8; }
+function schedKey(m){ return pitPhase+':'+m; }
+function schedRow(m){ const p=plan(); return p.rows[schedKey(m)]||{}; }
+function schedSet(m,slot,slug){ const p=plan(); const k=schedKey(m);
+  const row=p.rows[k]||(p.rows[k]={}); row[slot]=slug||''; planSave(); }
 function planSave(){ DB.cfg.ts=now(); save(); }
 function scWhoRender(){
   const pl=plan(), el=$('scWho'), both=[['A',pl.a],['B',pl.b]].filter(x=>x[1]);
@@ -391,7 +405,8 @@ function scPick(slot){
   openPicker(sl=>{
     const pl=plan(); pl[slot.toLowerCase()]=sl; planSave();
     setCbtn($('sc'+slot),sl,t('m.whichCountry'));
-    curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); mPlanBar(); renderMine(); haptic(12);
+    const mm=parseInt($('scMatch').value,10)||0; if(mm) schedSet(mm,slot.toLowerCase(),sl);
+    curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); mPlanBar(); renderMine(); renderSched(); haptic(12);
   });
 }
 function scLoad(){
@@ -400,14 +415,14 @@ function scLoad(){
   segInit($('scPhase'),pitPhase,v=>{
     pitPhase=v||'qual'; plan().phase=pitPhase; planSave();
     if(curTeam) loadPit();      // 換賽段等於換一份紀錄
-    scWhoRender(); renderMine();
+    scWhoRender(); renderMine(); renderSched();
   });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
   scWhoRender(); mPlanBar();
 }
 $('scA').onclick=()=>scPick('A'); $('scB').onclick=()=>scPick('B');
-$('scMatch').oninput=e=>{ plan().match=parseInt(e.target.value,10)||0; planSave(); mPlanBar(); };
+$('scMatch').oninput=e=>{ plan().match=parseInt(e.target.value,10)||0; planSave(); mPlanBar(); renderSched(); };
 /* 我們自己打過的場次對這一隊的統計，賽前先看一眼 */
 function scNowRender(){
   const el=$('scNow'); if(!el) return;
@@ -522,16 +537,88 @@ function openPitRecord(key){
   haptic(12);
   $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function delPit(key){
+function delPit(key){ // 刪完賽程表的勾勾也要消失
+
   const cur=DB.pit[key]; if(!cur||cur.del) return;
   if(!confirm(t('sc.delConfirm')+'\n\n'+nName(pitSlugOf(key))+' \u00b7 '+(PHASE_LABEL[pitPhaseOf(key)]||pitPhaseOf(key)))) return;
   /* 墓碑而不是直接刪 key，不然下次同步伺服器會把它送回來 */
   DB.pit[key]={del:true,ts:now()};
   saveNow();
   if(pitSlugOf(key)===curTeam&&pitPhaseOf(key)===pitPhase) loadPit();
-  renderMine(); refreshData(); toast(t('sc.deleted'),'ok'); haptic(18);
+  renderMine(); renderSched(); refreshData(); toast(t('sc.deleted'),'ok'); haptic(18);
   push(true);
 }
+/* ---------- 賽程表：賽前開好空格，填到哪裡一目了然 ---------- */
+function renderSched(){
+  const list=$('schedList'); if(!list) return;
+  const ph=$('schedPhase'); if(ph) ph.textContent=PHASE_LABEL[pitPhase]||pitPhase;
+  const n=schedCount(), cur=parseInt($('scMatch').value,10)||0;
+  const box=$('schedN'); if(box&&String(box.value)!==String(n)) box.value=n;
+  let h='';
+  for(let m=1;m<=n;m++){
+    const r=schedRow(m);
+    const cell=(slot)=>{
+      const sl=r[slot];
+      if(!sl) return `<button class="sc-p" data-m="${m}" data-slot="${slot}">+</button>`;
+      const got=!!pitFor(sl,pitPhase);
+      return `<button class="sc-p set${got?' got':''}" data-m="${m}" data-slot="${slot}" title="${esc(nName(sl))}">
+        <span class="fl">${nFlag(sl)}</span><span class="nm">${esc(nName(sl))}</span>${got?'<span class="tk">\u2713</span>':''}</button>`;
+    };
+    h+=`<div class="it sched${m===cur?' me':''}" data-m="${m}">
+      <div class="n">M${m}</div>
+      <div class="d sc-cells">${cell('a')}${cell('b')}</div></div>`;
+  }
+  list.innerHTML=h;
+  list.querySelectorAll('.sc-p').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const m=parseInt(b.dataset.m,10), slot=b.dataset.slot;
+    openPicker(sl=>{ schedSet(m,slot,sl); if(m===(parseInt($('scMatch').value,10)||0)) scLoad(); renderSched(); haptic(12); });
+  });
+  list.querySelectorAll('.it.sched').forEach(el=>el.onclick=()=>useSchedMatch(parseInt(el.dataset.m,10)));
+}
+function useSchedMatch(m){
+  const p=plan(), r=schedRow(m);
+  p.match=m; p.a=r.a||''; p.b=r.b||''; planSave();
+  $('scMatch').value=m;
+  setCbtn($('scA'),p.a,t('m.whichCountry')); setCbtn($('scB'),p.b,t('m.whichCountry'));
+  scWhoRender(); mPlanBar(); renderSched();
+  if(p.a){ curTeam=p.a; setCbtn($('pCountry'),''); loadPit(); renderMine();
+    $('pitBody').scrollIntoView({behavior:'smooth',block:'start'}); }
+  toast('M'+m+(p.a?' \u00b7 '+nName(p.a):'')+(p.b?' + '+nName(p.b):''));
+  haptic(12);
+}
+/* 官方賽程一出來就把自己的場次帶進來，不用手打 */
+function importSched(){
+  const all=(typeof OFF!=='undefined'&&OFF.data&&OFF.data.matches)||[];
+  if(!all.length){ toast(t('sc.importNone')); return; }
+  const me=AUTH.team;
+  const phaseOfName=nm=>{ const s=String(nm||'').toLowerCase();
+    if(s.indexOf('practice')>=0) return 'prac';
+    if(s.indexOf('playoff')>=0||s.indexOf('final')>=0) return 'play';
+    return 'qual'; };
+  const slugOfKey=k=>{ const n=BY_CC[(k||'').slice(0,2).toLowerCase()]; return n?n.slug:''; };
+  const p=plan(); let added=0, maxM={};
+  all.forEach(mt=>{
+    const parts=mt.participants||[];
+    const mine=parts.find(x=>slugOfKey(x.teamKey)===me);
+    if(!mine) return;
+    const myStation=String(mine.station||'').toUpperCase().charAt(0);
+    const mates=parts.filter(x=>x!==mine&&String(x.station||'').toUpperCase().charAt(0)===myStation)
+                     .map(x=>slugOfKey(x.teamKey)).filter(Boolean);
+    const ph=phaseOfName(mt.name);
+    const num=parseInt(String(mt.name||'').replace(/[^0-9]/g,''),10)||0;
+    if(!num) return;
+    const k=ph+':'+num;
+    p.rows[k]=Object.assign({},p.rows[k],{a:mates[0]||'',b:mates[1]||''});
+    maxM[ph]=Math.max(maxM[ph]||0,num);
+    added++;
+  });
+  Object.keys(maxM).forEach(ph=>{ p.n[ph]=Math.max(p.n[ph]||0,maxM[ph]); });
+  planSave(); renderSched();
+  toast(added?t('sc.imported')+' '+added:t('sc.importNone'), added?'ok':'');
+}
+$('schedN').oninput=e=>{ const p=plan(); p.n[pitPhase]=Math.max(1,Math.min(60,parseInt(e.target.value,10)||1)); planSave(); renderSched(); };
+$('schedImport').onclick=importSched;
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 $('pSave').onclick=async()=>{
   if(!curTeam){ toast(t('sc.pickFirst')); return; }
@@ -830,7 +917,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v25';
+const APP_VER='v26';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
