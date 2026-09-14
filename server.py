@@ -139,13 +139,18 @@ def _write_json(path, obj):
     os.replace(tmp, path)
 
 
+NATION_NAMES = {}
+
+
 def load_nations():
     """從 web/nations.js 取出合法的隊伍 slug（只有這些能登入）。"""
     global NATION_SLUGS
     try:
         txt = open(os.path.join(WEB, "nations.js"), encoding="utf-8").read()
         m = re.search(r"window\.NATIONS\s*=\s*(\[.*\]);", txt, re.S)
-        NATION_SLUGS = {n["slug"] for n in json.loads(m.group(1))}
+        nations = json.loads(m.group(1))
+        NATION_SLUGS = {n["slug"] for n in nations}
+        NATION_NAMES.update({n["slug"]: n.get("name", n["slug"]) for n in nations})
     except Exception as e:
         print(f"[warn] 讀不到 web/nations.js（{e}），任何 slug 都可登入")
         NATION_SLUGS = set()
@@ -782,6 +787,10 @@ def main():
     ap.add_argument("--gen-claims", action="store_true",
                     help="替所有還沒認領的國家產生認領碼，印出清單後結束（清單請私下發，不要貼群組）")
     ap.add_argument("--show-claim", metavar="SLUG", help="印出某一國目前的認領碼")
+    ap.add_argument("--claim-link", metavar="SLUG",
+                    help="印出可以直接私訊給該隊的一鍵認領連結")
+    ap.add_argument("--base-url", default="https://fgc-scout.duckdns.org/",
+                    help="產生認領連結時用的網址")
     ap.add_argument("--audit", nargs="?", const=40, type=int, metavar="N",
                     help="印出最近 N 筆登入/認領/改密碼紀錄")
     ap.add_argument("--revoke-all", action="store_true",
@@ -847,6 +856,31 @@ def main():
             print(f"[info] {slug} 的認領碼已經被用掉了（{c.get('usedAt','')} from {c.get('ip','')}）")
         else:
             print(f"{slug} 的認領碼：{c['code']}")
+        return
+
+    if a.claim_link:
+        slug = a.claim_link.strip().lower()
+        c = CLAIM.get(slug)
+        if slug in ACC:
+            print(f"[info] {slug} 已經認領過了。要重發請用 --reset-password {slug}")
+            return
+        if not c or c.get("used"):
+            c = {"code": issue_claim(slug)}
+            print(f"[info] {slug} 原本沒有可用的碼，已經發一張新的")
+        base = a.base_url if a.base_url.endswith("/") else a.base_url + "/"
+        link = f"{base}?claim={slug}&code={c['code']}"
+        name = NATION_NAMES.get(slug, slug)
+        print()
+        print("把下面整段私訊給該隊（不要貼群組）：")
+        print("-" * 64)
+        print(f"Here is your team's sign-in link for the FGC 2026 scouting app.")
+        print(f"Open it on your phone, then choose a password for your whole team:")
+        print(f"{link}")
+        print(f"The link works once and is only for {name}. Keep the password")
+        print(f"somewhere everyone on your team can find it.")
+        print("-" * 64)
+        print()
+        print(f"（認領碼本身：{c['code']}，如果他們想手動輸入）")
         return
 
     if a.audit is not None:

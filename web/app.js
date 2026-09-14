@@ -727,7 +727,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v21';
+const APP_VER='v22';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
@@ -741,10 +741,23 @@ const APP_VER='v21';
   }; })();
 
 /* ---------- init ---------- */
+/* 主辦方發的一鍵認領連結：?claim=<slug>&code=<CODE>
+   帶進畫面後立刻把網址清乾淨，免得留在網址列或被截圖傳出去。 */
+function claimFromURL(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const tm=(q.get('claim')||'').trim().toLowerCase(), code=(q.get('code')||'').trim();
+    if(!tm||!NMAP[tm]) return null;
+    history.replaceState(null,'',location.pathname);
+    return {team:tm,code:code};
+  }catch(e){ return null; }
+}
+
 (async function init(){
   window.addEventListener('pagehide',saveNow); window.addEventListener('beforeunload',saveNow);
   applyLang(); applyFX();
   if(!HTTP&&$('cInstall')) $('cInstall').hidden=true;
+  const invite=claimFromURL();
   const last=(()=>{ try{ return localStorage.getItem('fgc.team')||''; }catch(e){ return ''; } })();
   if(!HTTP){ AUTH.offline=true; setSync('s.local'); if(last&&NMAP[last]) setCbtn($('aTeamOff'),last,t('auth.selectCountry')); showAuth('authOffline'); return; }
   setSync('s.connecting');
@@ -752,6 +765,14 @@ const APP_VER='v21';
     if(a&&a.token){ AUTH.token=a.token; const me=await api('/api/me'); AUTH.team=me.team;
       if(me.mustChange&&!skipped(me.team)){ showAuth('authSet'); } else boot(me.team); return; } }
   catch(e){}
+  if(invite){
+    CLAIMING=invite.team;
+    setCbtn($('aTeam'),invite.team,t('auth.selectCountry'));
+    setSync('s.notSigned');
+    showClaim(invite.team);
+    if(invite.code){ $('aCode').value=invite.code; setTimeout(()=>$('aCNew').focus(),250); }
+    return;
+  }
   if(last&&NMAP[last]) setCbtn($('aTeam'),last,t('auth.selectCountry'));
   setSync('s.notSigned'); showAuth('authLogin');
 })();
