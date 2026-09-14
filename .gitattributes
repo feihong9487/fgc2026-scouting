@@ -1,0 +1,14 @@
+# 預設用 LF 存進 repo
+* text=auto eol=lf
+
+# 這兩種一定要是 LF，不然在 Linux 上會壞掉（我們已經被咬過一次）
+*.sh   text eol=lf
+*.py   text eol=lf
+
+# PowerShell 用 CRLF（而且檔案本身需要 UTF-8 BOM，PS 5.1 才不會把中文當 Big5）
+*.ps1  text eol=crlf working-tree-encoding=UTF-8
+
+# 二進位
+*.png  binary
+*.jpg  binary
+*.ico  binary

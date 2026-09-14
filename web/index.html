@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FGC Scout">
+<meta name="theme-color" content="#0b0d12">
+<title>FGC 2026 Scouting</title>
+<link rel="icon" type="image/png" sizes="64x64" href="fgc2026-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="fgc2026-192.png">
+<link rel="apple-touch-icon" href="fgc2026-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css?v=15">
+</head>
+<body>
+<div id="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><div class="noise"></div>
+  <svg class="sky" viewBox="0 0 1440 260" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--a1)" stop-opacity=".55"/><stop offset="1" stop-color="var(--a2)" stop-opacity=".12"/></linearGradient>
+      <linearGradient id="skyB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--a2)" stop-opacity=".45"/><stop offset="1" stop-color="var(--a3)" stop-opacity=".08"/></linearGradient>
+      <linearGradient id="skyC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bg)" stop-opacity=".9"/><stop offset="1" stop-color="var(--bg)" stop-opacity="1"/></linearGradient>
+    </defs>
+    <path class="w1" fill="url(#skyA)" d="M0 150 C120 100 200 180 330 140 S560 60 700 120 S930 190 1080 130 S1330 70 1440 120 V260 H0 Z"/>
+    <path class="w2" fill="url(#skyB)" d="M0 190 C160 150 260 210 400 180 S620 110 780 170 S1010 230 1150 180 S1370 130 1440 170 V260 H0 Z"/>
+    <path fill="url(#skyC)" d="M0 225 C140 205 220 240 360 222 S600 190 760 220 S1000 250 1160 224 S1360 200 1440 222 V260 H0 Z"/>
+  </svg>
+</div>
+
+<!-- ───────── SIGN IN ───────── -->
+<div id="auth">
+  <div class="auth-card">
+    <select class="langsel top" aria-label="Language"></select>
+    <div class="auth-logo"><img src="fgc2026-512.png" alt="FIRST Global Challenge 2026 · Incheon"></div>
+    <h1>FGC 2026 Scouting</h1>
+    <div class="ev">IGNITING INNOVATION · INCHEON</div>
+
+    <div id="authLogin" class="auth-view">
+      <div class="f"><label><span data-i18n="auth.who">Who are you?</span> <span class="zh" data-hint="auth.who"></span></label>
+        <button class="cbtn" id="aTeam" data-v=""><span class="fl">🌍</span><span class="ph" data-i18n="auth.selectCountry">Select your country…</span><span class="arr">›</span></button></div>
+      <div class="f"><label><span data-i18n="auth.pw">Team password</span></label>
+        <div class="pw"><input type="password" id="aPw" placeholder="password" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
+      <button class="btn pri wide" id="aGo" data-i18n="auth.signin">Sign in</button>
+      <p class="note" data-i18n="auth.defaultNote">Default password is “password” — you'll set your own on first sign-in. Each team's data is separate.</p>
+      <p class="err" id="aErr" hidden></p>
+    </div>
+
+    <div id="authSet" class="auth-view" hidden>
+      <div class="who" id="aWho"></div>
+      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
+        <input type="password" id="aNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
+      <div class="f"><input type="password" id="aNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
+      <button class="btn pri wide" id="aSet" data-i18n="auth.saveStart">Save &amp; start scouting</button>
+      <p class="note" data-i18n="auth.shareNote">Share it only with your own team. Forgot it? Ask the organizer to reset it.</p>
+      <p class="err" id="aErr2" hidden></p>
+      <div class="row" style="margin-top:8px"><button class="btn" id="aSkip" data-i18n="auth.skip">Skip for now (keep “password”)</button><button class="btn" id="aBack" data-i18n="auth.back">Back</button></div>
+    </div>
+
+    <div id="authOffline" class="auth-view" hidden>
+      <p class="note" data-i18n="auth.offlineNote">Opened as a local file — no server, data stays on this device only.</p>
+      <div class="f"><button class="cbtn" id="aTeamOff" data-v=""><span class="fl">🌍</span><span class="ph" data-i18n="auth.selectCountry">Select your country…</span><span class="arr">›</span></button></div>
+      <button class="btn pri wide" id="aGoOff" data-i18n="auth.startOffline">Start offline</button>
+    </div>
+  </div>
+  <footer class="made"><span data-i18n="f.made">Made with ♥ in Chinese Taipei</span> 🇹🇼</footer>
+</div>
+
+<header>
+  <div class="logo"><img src="fgc2026-192.png" alt=""></div>
+  <div class="brand"><h1>FGC 2026 Scouting</h1><div class="ev">IGNITING INNOVATION · INCHEON</div></div>
+  <button class="lang" id="langBtn" aria-label="Language">🌐</button>
+  <button class="team" id="teamBtn"><span class="fl">🌍</span><span class="nm">—</span></button>
+  <span class="sync" id="syncBadge">—</span>
+</header>
+<div id="toast" aria-live="polite"></div>
+<main id="main" class="fab-on" hidden>
+
+<!-- ───────── MATCH ───────── -->
+<section id="tab-match">
+  <div class="card" id="mHead">
+    <div class="whoami" id="mWho"></div>
+    <div class="row" style="margin-top:12px">
+      <div class="f" style="margin:0"><label><span data-i18n="m.match">Match</span> <span class="zh" data-hint="m.match"></span></label>
+        <div class="step" data-k="mMatch"><button data-d="-1">−</button><input type="number" id="mMatch" inputmode="numeric" value="1"><button data-d="1">+</button></div></div>
+      <div class="f" style="margin:0"><label><span data-i18n="m.ourAlliance">Our alliance</span> <span class="zh" data-hint="m.ourAlliance"></span></label>
+        <div class="seg n2" id="mAl"><button data-v="R" data-c="R">🔴 <span data-i18n="m.red">RED</span></button><button data-v="B" data-c="B">🔵 <span data-i18n="m.blue">BLUE</span></button></div></div>
+    </div>
+    <p class="note" style="margin:12px 0 0" data-i18n="m.twoSlotsNote">Each match you have two partner countries — fill in one card for each. Your own robot is not scouted here.</p>
+  </div>
+
+  <div id="slotA"></div>
+  <div id="slotB"></div>
+
+  <div class="card">
+    <h2><span class="ic">📋</span><span data-i18n="m.recorded">Recorded</span> <span class="pill gray" id="mCount">0</span><span class="zh" data-hint="m.recorded"></span></h2>
+    <div class="list" id="mList"></div>
+  </div>
+</section>
+<div class="fab" id="mFab">
+  <button class="btn pri" id="mSave">✓ <span data-i18n="m.saveBoth">Save · next match</span></button>
+  <button class="btn" id="mClear" data-i18n="m.clearForm">Clear</button>
+</div>
+
+<!-- ───────── PIT ───────── -->
+<section id="tab-pit" hidden>
+  <div class="card">
+    <div class="f"><label><span data-i18n="p.team">Team</span> <span class="zh" data-hint="p.team"></span></label>
+      <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
+  </div>
+  <div id="pitBody" hidden>
+    <div class="card self" id="pSelf" hidden></div>
+    <div class="card">
+      <h2><span class="ic">🏀</span><span data-i18n="p.shooting">Shooting</span><span class="zh" data-hint="p.shooting"></span></h2>
+      <div class="f"><label><span data-i18n="p.cap">Ball capacity</span> <span class="zh" data-hint="p.cap"></span></label>
+        <div class="step" data-k="pCap" style="max-width:260px"><button data-d="-1">−</button><input type="number" id="pCap" inputmode="numeric" value="0"><button data-d="1">+</button></div></div>
+      <div class="f"><label><span data-i18n="p.type">Shooter type</span> <span class="zh" data-hint="p.type"></span></label>
+        <div class="seg" id="pType"><button data-v="s1"><span data-i18n="p.single">Single</span><small data-hint="p.single"></small></button><button data-v="s2"><span data-i18n="p.dual">Dual</span><small data-hint="p.dual"></small></button><button data-v="s3"><span data-i18n="p.triple">Triple</span><small data-hint="p.triple"></small></button><button data-v="wf"><span data-i18n="p.waterfall">Waterfall</span><small data-hint="p.waterfall"></small></button></div></div>
+      <div class="f"><label><span data-i18n="p.empty">Time to empty a full load (sec)</span> <span class="zh" data-hint="p.empty"></span></label>
+        <div class="step" data-k="pEmpty"><button class="big" data-d="-5">−5</button><button data-d="-1">−</button><input type="number" id="pEmpty" inputmode="numeric" value="0"><button data-d="1">+</button><button class="big" data-d="5">+5</button></div></div>
+      <div class="f"><label><span data-i18n="p.canScore">Can score in the SUPPRESSION UNIT (165 cm)?</span> <span class="zh" data-hint="p.canScore"></span></label>
+        <div class="seg n3" id="pSup"><button data-v="2" data-c="ok">✓ <span data-i18n="p.reliable">Reliable</span></button><button data-v="1" data-c="mid">△ <span data-i18n="p.sometimes">Sometimes</span></button><button data-v="0" data-c="bad">✗ <span data-i18n="p.cant">No</span></button></div></div>
+      <div class="f"><label><span data-i18n="p.canPort">Can push balls into the FIRE SHIELD PORT?</span> <span class="zh" data-hint="p.canPort"></span></label>
+        <div class="seg n3" id="pPort"><button data-v="2" data-c="ok">✓ <span data-i18n="p.reliable">Reliable</span></button><button data-v="1" data-c="mid">△ <span data-i18n="p.sometimes">Sometimes</span></button><button data-v="0" data-c="bad">✗ <span data-i18n="p.cant">No</span></button></div></div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">🧗</span><span data-i18n="m.climb">BRACE climb</span><span class="zh" data-hint="m.climb"></span></h2>
+      <div class="f"><label><span data-i18n="p.highest">Highest zone reached</span> <span class="zh" data-hint="p.highest"></span></label>
+        <div class="seg n5" id="pClimb"><button data-v="0" data-c="gray" data-i18n="m.none">None</button><button data-v="C" data-c="mid" data-i18n="m.contact">Contact</button><button data-v="1" data-c="z1"><span data-i18n="m.zone">Zone</span> 1</button><button data-v="2" data-c="z2"><span data-i18n="m.zone">Zone</span> 2</button><button data-v="3" data-c="z3"><span data-i18n="m.zone">Zone</span> 3</button></div></div>
+      <div class="f"><label><span data-i18n="p.secs">Seconds to get there</span> <span class="zh" data-hint="p.secs"></span></label>
+        <div class="step" data-k="pClimbSec"><button class="big" data-d="-5">−5</button><button data-d="-1">−</button><input type="number" id="pClimbSec" inputmode="numeric" value="0"><button data-d="1">+</button><button class="big" data-d="5">+5</button></div></div>
+      <div class="row">
+        <div class="f"><button class="tg" id="pCarry" aria-pressed="false"><span data-i18n="p.canCarry">Can carry a partner</span> <span class="zh" data-hint="p.canCarry"></span></button></div>
+        <div class="f"><button class="tg" id="pCarried" aria-pressed="false"><span data-i18n="p.canBeCarried">Can be carried</span> <span class="zh" data-hint="p.canBeCarried"></span></button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">📍</span><span data-i18n="p.pos">Preferred field position</span><span class="zh" data-hint="p.pos"></span></h2>
+      <div class="fmap" id="pMapWrap"></div>
+      <div class="chips" id="pPos">
+        <button data-v="wall"><span data-i18n="p.wall">Own wall</span><small data-hint="p.wall"></small></button>
+        <button data-v="front"><span data-i18n="p.front">Shooting line</span><small data-hint="p.front"></small></button>
+        <button data-v="center"><span data-i18n="p.center">Center pile</span><small data-hint="p.center"></small></button>
+        <button data-v="port"><span data-i18n="p.portZone">Corner PORT</span><small data-hint="p.portZone"></small></button>
+        <button data-v="brace"><span data-i18n="p.brace">Brace lane</span><small data-hint="p.brace"></small></button>
+        <button data-v="roam"><span data-i18n="p.roam">Roaming</span><small data-hint="p.roam"></small></button>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">🤝</span><span data-i18n="p.rolesTitle">Role &amp; comms</span><span class="zh" data-hint="p.rolesTitle"></span></h2>
+      <div class="f"><label><span data-i18n="p.roles">Preferred roles</span> <span class="zh" data-hint="p.roles"></span></label>
+        <div class="chips" id="pRoles"><button data-v="shoot">🎯 <span data-i18n="p.shooter">Shooter</span></button><button data-v="feed">🚚 <span data-i18n="p.feeder">Port feeder</span></button><button data-v="climb">🧗 <span data-i18n="p.climber">Climber</span></button><button data-v="carry">🤝 <span data-i18n="p.carrier">Carrier</span></button></div></div>
+      <div class="f"><label><span data-i18n="p.hp">Human player skill</span> <span class="zh" data-hint="p.hp"></span></label>
+        <div class="seg n5" id="pHP"><button data-v="1" data-c="bad">1</button><button data-v="2" data-c="mid">2</button><button data-v="3">3</button><button data-v="4" data-c="ok">4</button><button data-v="5" data-c="ok">5</button></div></div>
+      <div class="f"><label><span data-i18n="p.drive">Drivetrain</span> <span class="zh" data-hint="p.drive"></span></label>
+        <div class="seg n3" id="pDrive"><button data-v="tank"><span data-i18n="p.tank">Tank</span></button><button data-v="mec"><span data-i18n="p.mec">Mecanum</span></button><button data-v="omni"><span data-i18n="p.omni">Omni</span></button></div></div>
+      <div class="f"><label><span data-i18n="p.lang">Languages</span> <span class="zh" data-hint="p.lang"></span></label>
+        <div class="chips" id="pLang"><button data-v="EN">EN</button><button data-v="ES">ES</button><button data-v="FR">FR</button><button data-v="AR">AR</button><button data-v="PT">PT</button><button data-v="ZH">中文</button><button data-v="KO">한국어</button><button data-v="JA">日本語</button></div></div>
+      <div class="f"><label><span data-i18n="p.breaks">Breakdowns today</span> <span class="zh" data-hint="p.breaks"></span></label>
+        <div class="step" data-k="pBreak" style="max-width:220px"><button data-d="-1">−</button><input type="number" id="pBreak" inputmode="numeric" value="0"><button data-d="1">+</button></div></div>
+      <div class="f"><label><span data-i18n="m.notes">Notes</span> <span class="zh" data-hint="m.notes"></span></label><input type="text" id="pNotes" data-i18n-ph="p.notesPh" placeholder="e.g. intake jams often"></div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">⏱️</span><span data-i18n="p.huddle">3-min alliance huddle</span><span class="zh" data-hint="p.huddle"></span></h2>
+      <div class="chips col" id="pCoord">
+        <button data-v="0"><span data-i18n="p.h0">Who rushes the ball pile, who goes wide?</span> <span class="zh" data-hint="p.h0"></span></button>
+        <button data-v="1"><span data-i18n="p.h1">Who shoots SUPPRESSION, who feeds the PORT?</span> <span class="zh" data-hint="p.h1"></span></button>
+        <button data-v="2"><span data-i18n="p.h2">Climb order: who goes to Zone 1 first, who carries whom?</span> <span class="zh" data-hint="p.h2"></span></button>
+        <button data-v="3"><span data-i18n="p.h3">Start climbing with ≥30 s left?</span> <span class="zh" data-hint="p.h3"></span></button>
+        <button data-v="4"><span data-i18n="p.h4">Signal: raised hand = stuck, don't bump me</span> <span class="zh" data-hint="p.h4"></span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── NATIONS ───────── -->
+<section id="tab-teams" hidden>
+  <div class="card">
+    <h2><span class="ic">🌍</span><span data-i18n="n.lookup">Look up a nation</span><span class="zh" data-hint="n.lookup"></span></h2>
+    <button class="cbtn" id="nLookup" data-v=""><span class="fl">🔎</span><span class="ph" data-i18n="n.pick">Pick a country to open its page…</span><span class="arr">›</span></button>
+    <p class="note" style="margin:10px 0 0" data-i18n="n.lookupH">Robot photos, what they say about themselves, our scouting numbers, a 6-axis radar and a power score.</p>
+  </div>
+  <div class="card">
+    <h2><span class="ic">🏆</span><span data-i18n="n.rank">Rankings</span><span class="zh" data-hint="n.rank"></span></h2>
+    <div class="seg" id="tSort"><button data-v="sup" data-i18n="n.balls">Balls</button><button data-v="climb" data-i18n="n.climb">Climb</button><button data-v="rel" data-i18n="n.rel">Reliability</button><button data-v="n" data-i18n="n.matches">Matches</button></div>
+  </div>
+  <div class="list" id="tList"></div>
+</section>
+
+<!-- ───────── NATION PAGE (lobby) ───────── -->
+<div id="nation" hidden><div class="nwrap" id="nBody"></div></div>
+
+<!-- ───────── OUR ROBOT (shared with every team) ───────── -->
+<section id="tab-robot" hidden>
+  <div class="card">
+    <h2><span class="ic">📢</span><span data-i18n="r.title">Our robot</span> <span class="pill" data-i18n="r.shared">shared</span><span class="zh" data-hint="r.title"></span></h2>
+    <p class="note" data-i18n="r.intro">Fill this in once and publish — every signed-in team can read it in their Pit tab, and you can read theirs. Honest numbers help partners plan the huddle.</p>
+    <div class="f" style="margin-top:12px"><button class="tg" id="rPub" aria-pressed="false"><span data-i18n="r.publish">Publish to all teams</span> <span class="zh" data-hint="r.publish"></span></button></div>
+    <div class="warn nudge" id="rNudge" hidden>
+      <span data-i18n="r.nudge">Saved — but only your team can see it. Publish it so the teams you play with can plan around your robot, and you can read theirs.</span>
+      <div class="bar"><button class="btn pri" id="rNudgeGo" data-i18n="r.publishNow">Publish now</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">🏀</span><span data-i18n="p.shooting">Shooting</span><span class="zh" data-hint="p.shooting"></span></h2>
+    <div class="f"><label><span data-i18n="p.cap">Ball capacity</span> <span class="zh" data-hint="p.cap"></span></label>
+      <div class="step" data-k="rCap" style="max-width:260px"><button data-d="-1">−</button><input type="number" id="rCap" inputmode="numeric" value="0"><button data-d="1">+</button></div></div>
+    <div class="f"><label><span data-i18n="p.type">Shooter type</span> <span class="zh" data-hint="p.type"></span></label>
+      <div class="seg" id="rType"><button data-v="s1"><span data-i18n="p.single">Single</span><small data-hint="p.single"></small></button><button data-v="s2"><span data-i18n="p.dual">Dual</span><small data-hint="p.dual"></small></button><button data-v="s3"><span data-i18n="p.triple">Triple</span><small data-hint="p.triple"></small></button><button data-v="wf"><span data-i18n="p.waterfall">Waterfall</span><small data-hint="p.waterfall"></small></button></div></div>
+    <div class="f"><label><span data-i18n="p.empty">Time to empty a full load (sec)</span> <span class="zh" data-hint="p.empty"></span></label>
+      <div class="step" data-k="rEmpty"><button class="big" data-d="-5">−5</button><button data-d="-1">−</button><input type="number" id="rEmpty" inputmode="numeric" value="0"><button data-d="1">+</button><button class="big" data-d="5">+5</button></div></div>
+    <div class="f"><label><span data-i18n="r.weScore">We score in the SUPPRESSION UNIT (165 cm)</span> <span class="zh" data-hint="r.weScore"></span></label>
+      <div class="seg n3" id="rSup"><button data-v="2" data-c="ok">✓ <span data-i18n="p.reliable">Reliable</span></button><button data-v="1" data-c="mid">△ <span data-i18n="p.sometimes">Sometimes</span></button><button data-v="0" data-c="bad">✗ <span data-i18n="p.cant">No</span></button></div></div>
+    <div class="f"><label><span data-i18n="r.wePush">We push balls into the FIRE SHIELD PORT</span> <span class="zh" data-hint="r.wePush"></span></label>
+      <div class="seg n3" id="rPort"><button data-v="2" data-c="ok">✓ <span data-i18n="p.reliable">Reliable</span></button><button data-v="1" data-c="mid">△ <span data-i18n="p.sometimes">Sometimes</span></button><button data-v="0" data-c="bad">✗ <span data-i18n="p.cant">No</span></button></div></div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">🧗</span><span data-i18n="m.climb">BRACE climb</span><span class="zh" data-hint="m.climb"></span></h2>
+    <div class="f"><label><span data-i18n="r.highest">Highest zone we can reach</span> <span class="zh" data-hint="r.highest"></span></label>
+      <div class="seg n5" id="rClimb"><button data-v="0" data-c="gray" data-i18n="m.none">None</button><button data-v="C" data-c="mid" data-i18n="m.contact">Contact</button><button data-v="1" data-c="z1"><span data-i18n="m.zone">Zone</span> 1</button><button data-v="2" data-c="z2"><span data-i18n="m.zone">Zone</span> 2</button><button data-v="3" data-c="z3"><span data-i18n="m.zone">Zone</span> 3</button></div></div>
+    <div class="f"><label><span data-i18n="p.secs">Seconds to get there</span> <span class="zh" data-hint="p.secs"></span></label>
+      <div class="step" data-k="rClimbSec"><button class="big" data-d="-5">−5</button><button data-d="-1">−</button><input type="number" id="rClimbSec" inputmode="numeric" value="0"><button data-d="1">+</button><button class="big" data-d="5">+5</button></div></div>
+    <div class="row">
+      <div class="f"><button class="tg" id="rCarry" aria-pressed="false"><span data-i18n="r.weCarry">We can carry a partner</span> <span class="zh" data-hint="r.weCarry"></span></button></div>
+      <div class="f"><button class="tg" id="rCarried" aria-pressed="false"><span data-i18n="r.weCarried">We can be carried</span> <span class="zh" data-hint="r.weCarried"></span></button></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">📍</span><span data-i18n="r.where">Where we like to play</span><span class="zh" data-hint="r.where"></span></h2>
+    <div class="fmap" id="rMapWrap"></div>
+    <div class="chips" id="rPos">
+      <button data-v="wall"><span data-i18n="p.wall">Own wall</span><small data-hint="p.wall"></small></button>
+      <button data-v="front"><span data-i18n="p.front">Shooting line</span><small data-hint="p.front"></small></button>
+      <button data-v="center"><span data-i18n="p.center">Center pile</span><small data-hint="p.center"></small></button>
+      <button data-v="port"><span data-i18n="p.portZone">Corner PORT</span><small data-hint="p.portZone"></small></button>
+      <button data-v="brace"><span data-i18n="p.brace">Brace lane</span><small data-hint="p.brace"></small></button>
+      <button data-v="roam"><span data-i18n="p.roam">Roaming</span><small data-hint="p.roam"></small></button>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">🤝</span><span data-i18n="p.rolesTitle">Role &amp; comms</span><span class="zh" data-hint="p.rolesTitle"></span></h2>
+    <div class="f"><label><span data-i18n="r.rolesWe">Roles we prefer</span> <span class="zh" data-hint="r.rolesWe"></span></label>
+      <div class="chips" id="rRoles"><button data-v="shoot">🎯 <span data-i18n="p.shooter">Shooter</span></button><button data-v="feed">🚚 <span data-i18n="p.feeder">Port feeder</span></button><button data-v="climb">🧗 <span data-i18n="p.climber">Climber</span></button><button data-v="carry">🤝 <span data-i18n="p.carrier">Carrier</span></button></div></div>
+    <div class="f"><label><span data-i18n="p.hp">Human player skill</span> <span class="zh" data-hint="p.hp"></span></label>
+      <div class="seg n5" id="rHP"><button data-v="1" data-c="bad">1</button><button data-v="2" data-c="mid">2</button><button data-v="3">3</button><button data-v="4" data-c="ok">4</button><button data-v="5" data-c="ok">5</button></div></div>
+    <div class="f"><label><span data-i18n="p.drive">Drivetrain</span> <span class="zh" data-hint="p.drive"></span></label>
+      <div class="seg n3" id="rDrive"><button data-v="tank"><span data-i18n="p.tank">Tank</span></button><button data-v="mec"><span data-i18n="p.mec">Mecanum</span></button><button data-v="omni"><span data-i18n="p.omni">Omni</span></button></div></div>
+    <div class="f"><label><span data-i18n="r.langWe">Languages we speak</span> <span class="zh" data-hint="r.langWe"></span></label>
+      <div class="chips" id="rLang"><button data-v="EN">EN</button><button data-v="ES">ES</button><button data-v="FR">FR</button><button data-v="AR">AR</button><button data-v="PT">PT</button><button data-v="ZH">中文</button><button data-v="KO">한국어</button><button data-v="JA">日本語</button></div></div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">📷</span><span data-i18n="r.photos">Robot photos</span> <span class="pill gray" data-i18n="r.optional">optional</span><span class="zh" data-hint="r.photos"></span></h2>
+    <div class="photos" id="rPhotos"></div>
+    <div class="bar"><label class="btn" for="rFile" id="rFileBtn">📷 <span data-i18n="r.take">Take / choose photo</span></label><input type="file" id="rFile" accept="image/*" multiple hidden></div>
+    <p class="note" style="margin:8px 0 0" data-i18n="r.photoNote">Photos are shrunk on your device before upload and are visible to every team once you publish.</p>
+  </div>
+  <div class="card">
+    <h2><span class="ic">✍️</span><span data-i18n="r.about">About our robot</span><span class="zh" data-hint="r.about"></span></h2>
+    <div class="f"><textarea id="rDesc" style="min-height:110px" data-i18n-ph="r.descPh" placeholder="Strengths, what we need from partners, how to coordinate with us…"></textarea></div>
+    <div class="bar"><button class="btn pri" id="rSave">Save &amp; publish</button></div>
+    <p class="note" id="rStatus" style="margin:8px 0 0"></p>
+  </div>
+</section>
+
+<!-- ───────── SCORE ───────── -->
+<section id="tab-calc" hidden>
+  <div class="card">
+    <div class="note" style="margin-bottom:6px"><span data-i18n="c.title">REGIONAL ALLIANCE score</span> <span class="zh" data-hint="c.title"></span></div>
+    <div class="score" id="cTotal">0</div>
+    <div class="kv" id="cOut" style="margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <div class="f"><label><span data-i18n="c.sup">Balls in SUPPRESSION UNIT</span> <span class="zh" data-hint="c.sup"></span></label>
+      <div class="step" data-k="cSup"><button class="big" data-d="-10">−10</button><button data-d="-1">−</button><input type="number" id="cSup" inputmode="numeric" value="60"><button data-d="1">+</button><button class="big" data-d="10">+10</button></div></div>
+    <div class="f"><label><span data-i18n="c.each">Climb of each robot</span> <span class="zh" data-hint="c.each"></span></label>
+      <div class="seg n5" id="cR1"><button data-v="0" data-c="gray" data-i18n="m.none">None</button><button data-v="C" data-c="mid" data-i18n="m.contact">Contact</button><button data-v="1" data-c="z1">Z1</button><button data-v="2" data-c="z2">Z2</button><button data-v="3" data-c="z3">Z3</button></div>
+      <div class="seg n5" id="cR2" style="margin-top:7px"><button data-v="0" data-c="gray" data-i18n="m.none">None</button><button data-v="C" data-c="mid" data-i18n="m.contact">Contact</button><button data-v="1" data-c="z1">Z1</button><button data-v="2" data-c="z2">Z2</button><button data-v="3" data-c="z3">Z3</button></div>
+      <div class="seg n5" id="cR3" style="margin-top:7px"><button data-v="0" data-c="gray" data-i18n="m.none">None</button><button data-v="C" data-c="mid" data-i18n="m.contact">Contact</button><button data-v="1" data-c="z1">Z1</button><button data-v="2" data-c="z2">Z2</button><button data-v="3" data-c="z3">Z3</button></div></div>
+    <div class="row">
+      <div class="f"><label><span data-i18n="c.partners">Partners carried</span> <span class="zh" data-hint="c.partners"></span></label>
+        <div class="seg n3" id="cPartner"><button data-v="0" data-c="gray">0</button><button data-v="1">1</button><button data-v="2">2</button></div></div>
+      <div class="f"><label><span data-i18n="c.ext">EXTINGUISHER balls</span> <span class="zh" data-hint="c.ext"></span></label>
+        <div class="step" data-k="cExt"><button class="big" data-d="-10">−10</button><button data-d="-1">−</button><input type="number" id="cExt" inputmode="numeric" value="40"><button data-d="1">+</button><button class="big" data-d="10">+10</button></div></div>
+    </div>
+    <div class="f"><label><span data-i18n="c.coop">Robots on Zone 3 (all 6) — Coopertition</span> <span class="zh" data-hint="c.coop"></span></label>
+      <div class="seg" id="cCoop"><button data-v="0" data-c="gray">≤3</button><button data-v="4">4<small>+10</small></button><button data-v="5">5<small>+25</small></button><button data-v="6" data-c="ok">6<small>+40</small></button></div></div>
+    <p class="note" style="margin:14px 0 0" data-i18n="c.formula">Formula (manual §3.6): SUPPRESSION × (1 + Σ climb multipliers) + 25 × partners carried + EXTINGUISHER + Coopertition, rounded up.</p>
+  </div>
+</section>
+
+<!-- ───────── DATA ───────── -->
+<section id="tab-data" hidden>
+  <div class="card">
+    <h2><span class="ic">📊</span><span data-i18n="d.stats">Stats</span><span class="zh" data-hint="d.stats"></span></h2>
+    <div class="row">
+      <div><div class="note" data-i18n="d.pitRec">Pit records</div><div class="stat" id="statPit">0</div></div>
+      <div><div class="note" data-i18n="d.matchRec">Match records</div><div class="stat" id="statMatch">0</div></div>
+      <div><div class="note" data-i18n="d.teams">Teams covered</div><div class="stat" id="statTeams">0</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">🛠️</span><span data-i18n="d.settings">Settings</span><span class="zh" data-hint="d.settings"></span></h2>
+    <div class="f"><label><span data-i18n="d.language">Language</span></label><select class="langsel" aria-label="Language"></select></div>
+    <div class="f"><label><span data-i18n="d.scout">Scout name</span> <span class="zh" data-hint="d.scout"></span></label><input type="text" id="cfgScout" placeholder="…"></div>
+    <div class="f"><label><span data-i18n="d.theme">Theme</span></label><div class="seg n3" id="cfgTheme"><button data-v="auto" data-i18n="d.system">System</button><button data-v="light" data-i18n="d.light">Light</button><button data-v="dark" data-i18n="d.dark">Dark</button></div></div>
+    <div class="f"><label><span data-i18n="d.effects">Visual effects</span> <span class="zh" data-hint="d.effects"></span></label><div class="seg n3" id="cfgFx"><button data-v="auto" data-i18n="d.system">System</button><button data-v="on" data-i18n="d.on">On</button><button data-v="off" data-i18n="d.off">Off</button></div></div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">📤</span><span data-i18n="d.export">Export</span><span class="zh" data-hint="d.export"></span></h2>
+    <div class="bar">
+      <button class="btn pri" id="expMatch" data-i18n="d.matchCsv">Match CSV</button>
+      <button class="btn pri" id="expPit" data-i18n="d.pitCsv">Pit CSV</button>
+      <button class="btn pri" id="expSum" data-i18n="d.sumCsv">Team summary CSV</button>
+      <button class="btn" id="expJson" data-i18n="d.backup">Backup (JSON)</button>
+    </div>
+    <p class="note" style="margin:10px 0 6px" data-i18n="d.exportNote">iPad: tap a button → text appears below → long-press, Select All, Copy. Desktop can use Download.</p>
+    <textarea id="out" readonly style="min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:12px"></textarea>
+    <div class="bar"><button class="btn" id="copyOut" data-i18n="d.copy">Copy</button><a class="btn" id="dlOut" download="fgc_export.csv" style="text-decoration:none;display:inline-block;line-height:24px" data-i18n="d.download">Download</a></div>
+  </div>
+  <div class="card">
+    <h2><span class="ic">📥</span><span data-i18n="d.restore">Restore / merge</span><span class="zh" data-hint="d.restore"></span></h2>
+    <div class="f"><textarea id="impBox" data-i18n-ph="d.paste" placeholder="paste a JSON backup here"></textarea></div>
+    <div class="bar"><button class="btn" id="impMerge" data-i18n="d.merge">Merge</button><button class="btn dgr" id="impReplace" data-i18n="d.replace">Replace</button></div>
+  </div>
+  <div class="card"><h2><span class="ic">🗑️</span><span data-i18n="d.clear">Clear</span><span class="zh" data-hint="d.clear"></span></h2><div class="bar"><button class="btn dgr" id="wipeMatch" data-i18n="d.clearMatch">Clear match records</button><button class="btn dgr" id="wipeAll" data-i18n="d.clearAll">Clear everything (this device)</button></div></div>
+  <div class="card" id="cInstall">
+    <h2><span class="ic">📲</span><span data-i18n="i.install">Install on phone</span></h2>
+    <p class="note" data-i18n="i.androidS">Chrome menu ⋮ → Add to Home screen / Install app.</p>
+    <div class="bar"><a class="btn pri" href="install" data-i18n="i.title">Install on your phone</a></div>
+  </div>
+  <div class="warn" data-i18n="d.syncNote">Your team's data syncs between all your devices once signed in (badge top-right). Offline entries are kept locally and merged later. Export a JSON backup at the end of each day.</div>
+</section>
+<footer class="made"><span data-i18n="f.made">Made with ♥ in Chinese Taipei</span> 🇹🇼 <span class="zh">· FGC 2026 Igniting Innovation</span></footer>
+</main>
+
+<nav role="tablist" id="nav" hidden>
+  <button role="tab" data-tab="match" aria-selected="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="nav.match">Match</span><span class="zh" data-hint="nav.match"></span></button>
+  <button role="tab" data-tab="pit" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18a2.1 2.1 0 0 1-3-3l6.7-6.7a4 4 0 0 0-5-5l2.6 2.6-1.4 1.4-2.6-2.6"/><path d="M4 20l3-3"/></svg><span data-i18n="nav.pit">Pit</span><span class="zh" data-hint="nav.pit"></span></button>
+  <button role="tab" data-tab="teams" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span data-i18n="nav.nations">Nations</span><span class="zh" data-hint="nav.nations"></span></button>
+  <button role="tab" data-tab="robot" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6M8 20v2M16 20v2"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="14" r="1.2"/></svg><span data-i18n="nav.robot">Robot</span><span class="zh" data-hint="nav.robot"></span></button>
+  <button role="tab" data-tab="calc" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg><span data-i18n="nav.score">Score</span><span class="zh" data-hint="nav.score"></span></button>
+  <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg><span data-i18n="nav.data">Data</span><span class="zh" data-hint="nav.data"></span></button>
+</nav>
+
+<script src="nations.js?v=15"></script>
+<script src="i18n.js?v=15"></script>
+<script src="i18n2.js?v=15"></script>
+<script src="i18n3.js?v=15"></script>
+<script src="i18n4.js?v=15"></script>
+<script src="i18n5.js?v=15"></script>
+<script src="i18n6.js?v=15"></script>
+<script src="app.js?v=15"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# ─── 絕對不能公開：隊伍帳號、密碼雜湊、scouting 資料、照片 ───
+data/
+backups/
+cloud-backup/
+scouting_data.json
+*.corrupt
+
+# ─── 我自己那台伺服器的資訊（IP、金鑰路徑）───
+deploy/MY-SERVER.md
+
+# ─── 官方手冊（版權屬於 FIRST Global，請自行從 first.global 下載）───
+manual/
+
+# ─── 產生物 / 暫存 ───
+__pycache__/
+*.py[cod]
+*.log
+tunnel.log
+_t_*.html
+_light_preview.html
+_vt.html
+.DS_Store
+Thumbs.db

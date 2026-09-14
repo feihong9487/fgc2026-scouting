@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<title>Install · FGC 2026 Scouting</title>
+<link rel="icon" type="image/png" sizes="64x64" href="fgc2026-64.png">
+<link rel="apple-touch-icon" href="fgc2026-180.png">
+<link rel="stylesheet" href="app.css?v=15">
+<style>
+body{padding:0}
+.iwrap{max-width:560px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
+.ihero{text-align:center;padding:10px 0 18px}
+.ihero img{width:96px;height:96px;border-radius:24px;background:#fff;padding:5px;box-shadow:0 14px 34px var(--glow)}
+.ihero h1{font-size:24px;font-weight:900;letter-spacing:-.03em;margin:14px 0 2px}
+.ihero .ev{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.08em}
+.steps{counter-reset:s;margin:14px 0 0;padding:0;list-style:none}
+.steps li{counter-increment:s;position:relative;padding:10px 0 10px 40px;font-size:14.5px;line-height:1.5;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:26px;height:26px;border-radius:50%;background:var(--ember);color:#fff;font-weight:900;font-size:13px;display:grid;place-items:center}
+.urlbox{font-family:ui-monospace,Menlo,monospace;font-size:13px;word-break:break-all;background:color-mix(in srgb,var(--panel-solid) 55%,transparent);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px}
+a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><div class="noise"></div></div>
+<div class="iwrap">
+  <div style="display:flex;justify-content:flex-end"><select class="langsel" style="width:auto" aria-label="Language"></select></div>
+  <div class="ihero">
+    <img src="fgc2026-512.png" alt="">
+    <h1 data-i18n="i.title">Install on your phone</h1>
+    <div class="ev">FGC 2026 SCOUTING · IGNITING INNOVATION</div>
+  </div>
+
+  <div class="card" id="cIos">
+    <h2><span class="ic">📱</span><span data-i18n="i.ios">iPhone / iPad</span></h2>
+    <a class="btn pri wide" id="dl" href="install.mobileconfig">⬇︎ <span data-i18n="i.iosBtn">Download install profile</span></a>
+    <p class="err" id="safariWarn" hidden data-i18n="i.needSafari">Open this page in Safari to install the profile.</p>
+    <ol class="steps">
+      <li data-i18n="i.iosS1">Tap the button above — Safari will say the profile was downloaded.</li>
+      <li data-i18n="i.iosS2">Open Settings → Profile Downloaded → Install (top right).</li>
+      <li data-i18n="i.iosS3">Enter your passcode, tap Install again, then Done.</li>
+      <li data-i18n="i.iosS4">The icon is now on your Home Screen.</li>
+    </ol>
+    <div class="warn" style="margin-top:12px" data-i18n="i.unsigned">iOS will show “Unverified” — the profile is unsigned. It only adds a Home Screen icon; it changes no other setting.</div>
+    <p class="note" style="margin:12px 0 0" data-i18n="i.iosAlt">Or without a profile: Share ⬆︎ → Add to Home Screen.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic">🤖</span><span data-i18n="i.android">Android / desktop</span></h2>
+    <button class="btn pri wide hide" id="pwaBtn" data-i18n="i.installApp">Install app</button>
+    <p class="note" style="margin:10px 0 0" data-i18n="i.androidS">Chrome menu ⋮ → Add to Home screen / Install app.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic">🔗</span><span data-i18n="i.urlNote">This profile opens</span></h2>
+    <div class="urlbox" id="url">…</div>
+    <p class="note" style="margin:10px 0 0" data-i18n="i.urlWarn">If the organizer's address changes, install the profile again from the new address.</p>
+    <div class="bar"><a class="btn" href="./" data-i18n="i.open">Open the app</a></div>
+  </div>
+  <footer class="made"><span data-i18n="f.made">Made with ♥ in Chinese Taipei</span> 🇹🇼</footer>
+</div>
+
+<script src="i18n.js?v=15"></script>
+<script src="i18n2.js?v=15"></script>
+<script src="i18n3.js?v=15"></script>
+<script src="i18n4.js?v=15"></script>
+<script src="i18n5.js?v=15"></script>
+<script>
+(function(){
+  var DICT=window.I18N||{en:{}}, META=window.I18N_META||[['en','English']], RTL=window.I18N_RTL||[];
+  var LANG='en'; try{ var l=localStorage.getItem('fgc.lang'); if(l&&DICT[l]) LANG=l; }catch(e){}
+  function t(k){ var d=DICT[LANG]||{}; return (k in d)?d[k]:((k in DICT.en)?DICT.en[k]:k); }
+  function apply(){
+    document.documentElement.lang=LANG; document.documentElement.dir=RTL.indexOf(LANG)>=0?'rtl':'ltr';
+    [].forEach.call(document.querySelectorAll('[data-i18n]'),function(el){ el.textContent=t(el.dataset.i18n); });
+    var sel=document.querySelector('select.langsel');
+    if(!sel.options.length) META.forEach(function(m){ var o=document.createElement('option'); o.value=m[0]; o.textContent=m[1]; sel.appendChild(o); });
+    sel.value=LANG;
+  }
+  document.querySelector('select.langsel').onchange=function(e){ LANG=e.target.value; try{ localStorage.setItem('fgc.lang',LANG); }catch(err){} apply(); };
+  apply();
+
+  document.getElementById('url').textContent=location.origin+'/';
+  var ua=navigator.userAgent;
+  var isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var isSafari=/^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua);
+  if(isIOS&&!isSafari) document.getElementById('safariWarn').hidden=false;
+  var prompt=null;
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); prompt=e;
+    var b=document.getElementById('pwaBtn'); b.classList.remove('hide');
+    b.onclick=function(){ prompt.prompt(); prompt=null; b.classList.add('hide'); }; });
+})();
+</script>
+</body>
+</html>
