@@ -21,3 +21,7 @@ _light_preview.html
 _vt.html
 .DS_Store
 Thumbs.db
+# 主辦方自己用的小工具，原始碼在 tools/，用 python tools/build.py 重建
+tools/FGC-Claim.exe
+tools/_ClaimTool.gen.cs
+tools/claimtool.ini
