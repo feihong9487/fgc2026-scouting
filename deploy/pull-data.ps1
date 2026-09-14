@@ -24,7 +24,6 @@ if ($LASTEXITCODE -ne 0) { throw "下載失敗" }
 
 & tar -xzf "$Out\fgc-data.tar.gz" -C $Out
 $teams = (Get-ChildItem "$Out\data\teams" -ErrorAction SilentlyContinue).Count
-$acc = 0
-if (Test-Path "$Out\data\accounts.json") { $acc = (Get-Content "$Out\data\accounts.json" -Raw | ConvertFrom-Json).PSObject.Properties.Count }
+if (Test-Path "$Out\data\accounts.json") { $acc = @((Get-Content "$Out\data\accounts.json" -Raw | ConvertFrom-Json).PSObject.Properties).Count }
 Write-Host "完成 ✓  $teams 隊有資料、$acc 個帳號" -ForegroundColor Green
 Write-Host "  $Out"
