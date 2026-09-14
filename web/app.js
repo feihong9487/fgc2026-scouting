@@ -91,7 +91,9 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); renderSched(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); autoSched(); renderMList(); refreshData(); calc();
+  /* 賽程要在任何分頁都能自己出現，所以開機就抓一次官方資料 */
+  if(!AUTH.offline && typeof ranksFetch==='function') setTimeout(()=>ranksFetch(true),400);
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -552,6 +554,8 @@ function delPit(key){ // 刪完賽程表的勾勾也要消失
 function renderSched(){
   const list=$('schedList'); if(!list) return;
   const ph=$('schedPhase'); if(ph) ph.textContent=PHASE_LABEL[pitPhase]||pitPhase;
+  const src=$('schedSrc');
+  if(src){ src.hidden=!SCHED_FROM_OFFICIAL; if(SCHED_FROM_OFFICIAL) src.textContent=t('sc.fromOfficial'); }
   const n=schedCount(), cur=parseInt($('scMatch').value,10)||0;
   const box=$('schedN'); if(box&&String(box.value)!==String(n)) box.value=n;
   let h='';
@@ -587,17 +591,17 @@ function useSchedMatch(m){
   toast('M'+m+(p.a?' \u00b7 '+nName(p.a):'')+(p.b?' + '+nName(p.b):''));
   haptic(12);
 }
-/* 官方賽程一出來就把自己的場次帶進來，不用手打 */
+/* 官方賽程一出來就自己帶進來。伺服器每兩分鐘抓一次，所以這裡只負責把
+   抓到的東西攤成表格，而且只有真的有變動才寫，免得每次輪詢都弄髒資料。 */
 function importSched(){
   const all=(typeof OFF!=='undefined'&&OFF.data&&OFF.data.matches)||[];
-  if(!all.length){ toast(t('sc.importNone')); return; }
+  if(!all.length) return 0;
   const me=AUTH.team;
   const phaseOfName=nm=>{ const s=String(nm||'').toLowerCase();
     if(s.indexOf('practice')>=0) return 'prac';
     if(s.indexOf('playoff')>=0||s.indexOf('final')>=0) return 'play';
     return 'qual'; };
-  const slugOfKey=k=>{ const n=BY_CC[(k||'').slice(0,2).toLowerCase()]; return n?n.slug:''; };
-  const p=plan(); let added=0, maxM={};
+  const p=plan(); let added=0, seen=0, maxM={};
   all.forEach(mt=>{
     const parts=mt.participants||[];
     const mine=parts.find(x=>slugOfKey(x.teamKey)===me);
@@ -608,17 +612,27 @@ function importSched(){
     const ph=phaseOfName(mt.name);
     const num=parseInt(String(mt.name||'').replace(/[^0-9]/g,''),10)||0;
     if(!num) return;
-    const k=ph+':'+num;
-    p.rows[k]=Object.assign({},p.rows[k],{a:mates[0]||'',b:mates[1]||''});
+    const k=ph+':'+num, cur=p.rows[k]||{};
+    const a=mates[0]||'', b=mates[1]||'';
+    if(cur.a!==a||cur.b!==b){ p.rows[k]={a:a,b:b}; added++; }
     maxM[ph]=Math.max(maxM[ph]||0,num);
-    added++;
+    seen++;
   });
-  Object.keys(maxM).forEach(ph=>{ p.n[ph]=Math.max(p.n[ph]||0,maxM[ph]); });
-  planSave(); renderSched();
-  toast(added?t('sc.imported')+' '+added:t('sc.importNone'), added?'ok':'');
+  let grew=false;
+  Object.keys(maxM).forEach(ph=>{ if((p.n[ph]||0)<maxM[ph]){ p.n[ph]=maxM[ph]; grew=true; } });
+  SCHED_FROM_OFFICIAL=seen>0;
+  if(added||grew) planSave();
+  return added;
+}
+let SCHED_FROM_OFFICIAL=false;
+/* 官方資料每次更新都叫一次；沒變就什麼都不做 */
+function autoSched(){
+  if(!DB||AUTH.offline) return;
+  const n=importSched();
+  renderSched();
+  if(n) toast(t('sc.autoLoaded')+' '+n,'ok');
 }
 $('schedN').oninput=e=>{ const p=plan(); p.n[pitPhase]=Math.max(1,Math.min(60,parseInt(e.target.value,10)||1)); planSave(); renderSched(); };
-$('schedImport').onclick=importSched;
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 $('pSave').onclick=async()=>{
   if(!curTeam){ toast(t('sc.pickFirst')); return; }
@@ -917,7 +931,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v26';
+const APP_VER='v27';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

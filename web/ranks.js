@@ -27,6 +27,22 @@ function nationOf(row) {
   return null;
 }
 function rowSlug(row) { const n = nationOf(row); return n ? n.slug : ''; }
+
+/* teamKey 是三碼（TWN、MLT…），直接砍前兩碼會出事：MLT 是馬爾他，ML 是馬利。
+   排名資料裡每一列同時有 teamKey 和國家，所以對照表直接從資料本身建。 */
+const KEY2SLUG = {};
+function buildKeyMap() {
+  ((OFF.data && OFF.data.rankings) || []).forEach(r => {
+    const n = nationOf(r);
+    if (n && r.teamKey) KEY2SLUG[String(r.teamKey).toUpperCase()] = n.slug;
+  });
+}
+function slugOfKey(k) {
+  k = String(k || '').toUpperCase();
+  if (KEY2SLUG[k]) return KEY2SLUG[k];
+  const n = BY_CC[k.slice(0, 2).toLowerCase()];   // 還沒有排名資料時的退路
+  return n ? n.slug : '';
+}
 function rowLabel(row) {
   const n = nationOf(row), t = (row && row.team) || {};
   const name = n ? nName(n.slug) : (t.country || t.shortName || t.name || row.teamKey || '—');
@@ -70,8 +86,11 @@ async function ranksFetch(quiet) {
     OFF.fetched = d.fetched || '';
     OFF.error = d.error || '';
     OFF.demo = false;
+    buildKeyMap();
   } catch (e) { OFF.error = e.message; }
   renderRanks();
+  /* 賽程表自己跟著更新，不用使用者按任何東西 */
+  if (typeof autoSched === 'function') { try { autoSched(); } catch (e) {} }
   if (!quiet) haptic(8);
 }
 /* 賽前想先看介面長怎樣：造一份明顯標示 SAMPLE 的假資料 */
@@ -116,7 +135,7 @@ function ranksLoad() {
   else renderRanks();
   clearInterval(OFF.timer);
   OFF.timer = setInterval(() => {                      // 只有停在這一頁而且是官方資料才自動刷新
-    if (!$('tab-teams').hidden && !document.hidden && !OFF.demo) ranksFetch(true);
+    if ((!$('tab-teams').hidden || !$('tab-pit').hidden) && !document.hidden && !OFF.demo) ranksFetch(true);
   }, 60000);
 }
 function renderRanks() {
@@ -195,7 +214,7 @@ function matchesHTML() {
   rows = rows.slice(-60).reverse();
   if (!rows.length) return `<div class="list"><div class="empty">${esc(t('rk.noneHere'))}</div></div>`;
   const side = (m, s) => (m.participants || []).filter(p => (p.station || '').toUpperCase().startsWith(s))
-    .map(p => { const n = BY_CC[(p.teamKey || '').slice(0, 2).toLowerCase()]; return n ? nFlag(n.slug) : '🏳️'; }).join(' ');
+    .map(p => { const sl = slugOfKey(p.teamKey); return sl ? nFlag(sl) : '🏳️'; }).join(' ');
   return '<div class="list">' + rows.map(m => {
     const rs = m.redScore ?? m.red_score, bs = m.blueScore ?? m.blue_score;
     const redWin = m.played && rs > bs, blueWin = m.played && bs > rs;
