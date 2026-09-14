@@ -49,6 +49,13 @@ PHOTO_DIR = os.path.join(DATA_DIR, "photos")     # data/photos/<slug>/<hex>.jpg�
 PHOTO_MAX = 4
 PHOTO_RE = re.compile(r"^/photos/([a-z0-9-]{2,64})/([a-f0-9]{16}\.(?:jpg|png|webp))$")
 
+# ── 官方即時比分（results.first.global 是 Next.js，資料直接嵌在頁面的 __NEXT_DATA__）──
+OFFICIAL_FILE = os.path.join(DATA_DIR, "official.json")
+OFFICIAL_SITE = "https://results.first.global/"
+OFFICIAL = {"fetched": "", "error": "", "build": "", "data": {}, "history": []}
+OFFICIAL_POLL = 120          # 秒；--official-poll 可調，0 = 關閉
+HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時）
+
 DEFAULT_PASSWORD = "password"
 SESSION_DAYS = 45
 PBKDF2_ITER = 120_000
@@ -252,6 +259,93 @@ def too_many_fails(ip):
     return len(lst) >= 8
 
 
+
+# ───────────────────────── 官方比分 ─────────────────────────
+def _official_parse(html):
+    """從 results.first.global 的 HTML 取出 __NEXT_DATA__ 裡的資料。"""
+    m = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html, re.S)
+    if not m:
+        raise ValueError("找不到 __NEXT_DATA__")
+    doc = json.loads(m.group(1))
+    return doc.get("buildId", ""), (doc.get("props", {}).get("pageProps", {}) or {}).get("data", {}) or {}
+
+
+def official_fetch():
+    """先試 Next.js 的 JSON 端點（快），失敗就回頭解析整頁 HTML（穩）。"""
+    import urllib.request
+    hdr = {"User-Agent": "fgc2026-scouting/1.0 (+https://github.com/feihong9487/fgc2026-scouting)"}
+    build = OFFICIAL.get("build") or ""
+    if build:
+        try:
+            url = OFFICIAL_SITE + "_next/data/%s/index.json" % build
+            with urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=20) as r:
+                doc = json.loads(r.read().decode("utf-8"))
+            data = (doc.get("pageProps", {}) or {}).get("data")
+            if isinstance(data, dict):
+                return build, data
+        except Exception:
+            pass          # buildId 過期是正常的，改走 HTML
+    with urllib.request.urlopen(urllib.request.Request(OFFICIAL_SITE, headers=hdr), timeout=25) as r:
+        html = r.read().decode("utf-8", "replace")
+    return _official_parse(html)
+
+
+def official_store(build, data):
+    """存檔並記一筆名次快照，之後用來算升降箭頭與走勢。呼叫前必須持有 LOCK。"""
+    OFFICIAL["build"] = build or OFFICIAL.get("build", "")
+    OFFICIAL["data"] = data
+    OFFICIAL["fetched"] = datetime.now().isoformat(timespec="seconds")
+    OFFICIAL["error"] = ""
+    ranks = {}
+    for row in (data.get("rankings") or []):
+        key = row.get("teamKey") or (row.get("team") or {}).get("countryCode")
+        if key and isinstance(row.get("rank"), int):
+            ranks[key] = row["rank"]
+    if ranks:
+        hist = OFFICIAL.setdefault("history", [])
+        if not hist or hist[-1].get("ranks") != ranks:
+            hist.append({"t": OFFICIAL["fetched"], "ranks": ranks})
+            del hist[:-HISTORY_MAX]
+    _write_json(OFFICIAL_FILE, OFFICIAL)
+
+
+def official_view():
+    """給前端的整理結果：名次升降 + 近期走勢。呼叫前必須持有 LOCK。"""
+    data = OFFICIAL.get("data") or {}
+    hist = OFFICIAL.get("history") or []
+    cur = hist[-1]["ranks"] if hist else {}
+    prev = hist[-2]["ranks"] if len(hist) > 1 else {}
+    movement = {k: prev[k] - v for k, v in cur.items() if k in prev and prev[k] != v}
+    spark = {}
+    for snap in hist[-20:]:
+        for k, v in snap["ranks"].items():
+            spark.setdefault(k, []).append(v)
+    return {
+        "fetched": OFFICIAL.get("fetched", ""),
+        "error": OFFICIAL.get("error", ""),
+        "source": OFFICIAL_SITE,
+        "data": data,
+        "movement": movement,
+        "spark": spark,
+    }
+
+
+def official_loop():
+    while True:
+        try:
+            build, data = official_fetch()
+            with LOCK:
+                official_store(build, data)
+            n = len((data.get("rankings") or []))
+            m = len((data.get("matches") or []))
+            print("[official] %s  rankings=%d matches=%d" % (OFFICIAL["fetched"], n, m))
+        except Exception as e:
+            with LOCK:
+                OFFICIAL["error"] = "%s: %s" % (type(e).__name__, e)
+            print("[official] 取得失敗：%s" % OFFICIAL["error"])
+        time.sleep(max(30, OFFICIAL_POLL))
+
+
 # ───────────────────────── HTTP ─────────────────────────
 class H(BaseHTTPRequestHandler):
     server_version = "FGCScout/3.0"
@@ -376,6 +470,14 @@ class H(BaseHTTPRequestHandler):
             with LOCK:
                 raw = json.dumps(team_state(slug), ensure_ascii=False).encode("utf-8")
             return self._json(200, raw=raw)
+        if p == "/api/official":
+            slug = self._team()
+            if not slug:
+                return
+            with LOCK:
+                raw = json.dumps(official_view(), ensure_ascii=False).encode("utf-8")
+            return self._json(200, raw=raw)
+
         if p == "/api/profiles":
             # 所有隊伍公開的機器介紹（要登入才看得到，但任何隊都看得到）
             slug = self._team()
@@ -570,6 +672,9 @@ def main():
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--host", default="0.0.0.0", help="0.0.0.0 允許區網連入；127.0.0.1 只允許本機/隧道")
     ap.add_argument("--reset-password", metavar="SLUG", help="把該隊密碼重設回預設並結束")
+    ap.add_argument("--official-poll", type=int, default=120,
+                    help="幾秒抓一次 results.first.global 的官方比分（預設 120）")
+    ap.add_argument("--no-official", action="store_true", help="完全不抓官方比分")
     a = ap.parse_args()
 
     os.makedirs(TEAM_DIR, exist_ok=True)
@@ -577,6 +682,9 @@ def main():
     ACC = _read_json(ACCOUNTS, {}) or {}
     SESS = _read_json(SESSIONS, {}) or {}
     PROF = _read_json(PROFILES, {}) or {}
+    global OFFICIAL, OFFICIAL_POLL
+    OFFICIAL = _read_json(OFFICIAL_FILE, OFFICIAL) or OFFICIAL
+    OFFICIAL_POLL = 0 if a.no_official else a.official_poll
 
     if a.reset_password:
         slug = a.reset_password.strip().lower()
@@ -590,6 +698,9 @@ def main():
 
     if not os.path.isfile(os.path.join(WEB, "index.html")):
         print(f"[warn] 找不到 {os.path.join(WEB, 'index.html')}")
+
+    if OFFICIAL_POLL:
+        threading.Thread(target=official_loop, daemon=True).start()
 
     srv = ThreadingHTTPServer((a.host, a.port), H)
     srv.daemon_threads = True
@@ -609,6 +720,7 @@ def main():
     print(f"  隊伍數    {len(NATION_SLUGS) or '（不限）'}   預設密碼 \"{DEFAULT_PASSWORD}\"（第一次登入必須改）")
     print(f"  資料目錄  {DATA_DIR}")
     print(f"  每日備份  {BACKUP_DIR}")
+    print(f"  官方比分  {'每 %d 秒抓一次 results.first.global' % OFFICIAL_POLL if OFFICIAL_POLL else '關閉'}")
     print(f"  重設密碼  python server.py --reset-password <slug>")
     print("=" * 60)
     print("  Ctrl+C 停止")

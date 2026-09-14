@@ -486,6 +486,75 @@ html.no-fx *,html.no-fx *::before,html.no-fx *::after{
   animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 html.no-fx #bg i,html.no-fx .sp{animation:none!important}
 html.no-fx .sp{display:none}
+
+/* ═════════ 排位賽排行榜 ═════════ */
+.rkhead h2{flex-wrap:nowrap}
+.rkstatus{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+.rkstatus .live{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 1.6s ease-in-out infinite;flex:none}
+.rkstatus .live.wait{background:var(--muted);box-shadow:none;animation:pulse 1.6s ease-in-out infinite}
+.rkstatus .live.bad{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
+.rkstatus .live.demo{width:auto;height:auto;border-radius:20px;padding:2px 8px;background:var(--warn);color:#1a1400;font-size:10px;font-weight:900;letter-spacing:.08em;animation:none;box-shadow:none}
+.chips.conts{gap:6px}
+.chips.conts button{min-height:38px;padding:6px 13px;font-size:13px}
+#rkFilters[hidden]{display:none}
+
+/* 自己那一隊的大卡片 */
+.card.you{border-width:2px;position:relative;overflow:hidden}
+.card.you.champ{border-color:#f5c542;box-shadow:var(--sh-1),0 0 0 4px rgba(245,197,66,.16)}
+.card.you.podium{border-color:#c9d1d9;box-shadow:var(--sh-1),0 0 0 4px rgba(201,209,217,.14)}
+.card.you.playoff{border-color:var(--ember);box-shadow:var(--sh-1),0 0 0 4px var(--ember-soft)}
+.card.you.contend{border-color:var(--z2)}
+.card.you.rising{border-color:var(--line-2)}
+.youtop{display:flex;align-items:center;gap:12px}
+.youtop .fl{font-size:34px;line-height:1}
+.youtop .lb{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.youtop b{font-size:18px;letter-spacing:-.02em}
+.bigrank{margin-left:auto;font-size:34px;font-weight:900;letter-spacing:-.04em;display:flex;align-items:baseline;gap:6px;
+  background:linear-gradient(135deg,var(--ember),var(--ember-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tierbar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 12px;border-radius:12px;font-weight:800;font-size:13px;
+  background:var(--line);color:var(--ink)}
+.tierbar.champ{background:linear-gradient(90deg,rgba(245,197,66,.3),transparent);color:#f5c542}
+.tierbar.podium{background:linear-gradient(90deg,rgba(201,209,217,.25),transparent)}
+.tierbar.playoff{background:linear-gradient(90deg,var(--ember-soft),transparent);color:var(--ember)}
+.tierbar .togo{margin-left:auto;font-weight:700;font-size:11.5px;color:var(--muted)}
+
+/* 排行榜列 */
+.list.ladder .it.lad{gap:10px}
+.it.lad .rk{min-width:38px;text-align:center;font-weight:900;font-size:17px;letter-spacing:-.02em;color:var(--muted);flex:none}
+.it.lad.champ .rk{color:#f5c542}.it.lad.podium .rk{color:#c9d1d9}.it.lad.playoff .rk{color:var(--ember)}
+.it.lad.me{background:var(--ember-soft)}
+.it.lad.playoff{border-left:3px solid color-mix(in srgb,var(--ember) 55%,transparent)}
+.it.lad.champ{border-left:3px solid #f5c542}
+.mv{display:inline-block;font-size:11px;font-weight:900;margin-left:6px;padding:1px 6px;border-radius:6px}
+.mv.up{color:var(--ok);background:var(--ok-soft)}
+.mv.dn{color:var(--red);background:var(--red-soft)}
+/* 名次走勢圖（注意：.spark 已經被存檔火花用掉了，這裡叫 .trend）*/
+svg.trend{width:52px;height:20px;flex:none;overflow:visible;align-self:center;margin-left:auto}
+svg.trend polyline{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.trend.up polyline{stroke:var(--ok)}
+svg.trend.dn polyline{stroke:var(--red)}
+.card.you svg.trend{width:100%;height:34px;margin:12px 0 0;display:block}
+
+/* 比賽列 */
+.it.mt{align-items:stretch}
+.it.mt.me{background:var(--ember-soft)}
+.mhead{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.vs{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:20px}
+.vs .al{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:10px;flex:1}
+.vs .al b{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.vs .al.R{background:var(--red-soft)}
+.vs .al.B{background:var(--blue-soft);justify-content:flex-end}
+.vs .al.win{outline:2px solid currentColor;outline-offset:-2px}
+.vs .al.R.win{color:var(--red)}.vs .al.B.win{color:var(--blue)}
+.vsx{font-size:11px;font-weight:800;color:var(--muted);flex:none}
+#rkCont[hidden],#rkMatchFilter[hidden]{display:none}
+.it.lad .d{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.it.lad .lstats{display:flex;align-items:baseline;gap:8px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it.lad .lstats b{font-size:15px;font-weight:900;color:var(--ember);letter-spacing:-.02em}
+.it.lad .lstats span+span::before,.it.lad .lstats b+span::before{content:'·';margin-right:8px;opacity:.55}
+.it.lad .lname{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.it.lad .lname b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.it.lad .lname .mv{margin-left:0}
 </style>
 </head>
 <body>
@@ -560,6 +629,12 @@ html.no-fx .sp{display:none}
       <div class="f" style="margin:0"><label><span data-i18n="m.ourAlliance">Our alliance</span> <span class="zh" data-hint="m.ourAlliance"></span></label>
         <div class="seg n2" id="mAl"><button data-v="R" data-c="R">🔴 <span data-i18n="m.red">RED</span></button><button data-v="B" data-c="B">🔵 <span data-i18n="m.blue">BLUE</span></button></div></div>
     </div>
+    <div class="f" style="margin:14px 0 0"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="m.phase"></span></label>
+      <div class="seg n3" id="mPhase">
+        <button data-v="prac" data-c="gray" data-i18n="m.practice">Practice</button>
+        <button data-v="qual" data-i18n="m.quals">Quals</button>
+        <button data-v="play" data-c="z3" data-i18n="m.playoffs">Playoffs</button>
+      </div></div>
     <p class="note" style="margin:12px 0 0" data-i18n="m.twoSlotsNote">Each match you have two partner countries — fill in one card for each. Your own robot is not scouted here.</p>
   </div>
 
@@ -647,18 +722,44 @@ html.no-fx .sp{display:none}
   </div>
 </section>
 
-<!-- ───────── NATIONS ───────── -->
+<!-- ───────── RANKS (official live ladder + match history + our scouting) ───────── -->
 <section id="tab-teams" hidden>
-  <div class="card">
-    <h2><span class="ic">🌍</span><span data-i18n="n.lookup">Look up a nation</span><span class="zh" data-hint="n.lookup"></span></h2>
-    <button class="cbtn" id="nLookup" data-v=""><span class="fl">🔎</span><span class="ph" data-i18n="n.pick">Pick a country to open its page…</span><span class="arr">›</span></button>
-    <p class="note" style="margin:10px 0 0" data-i18n="n.lookupH">Robot photos, what they say about themselves, our scouting numbers, a 6-axis radar and a power score.</p>
+  <div class="card rkhead">
+    <h2><span class="ic">🏆</span><span data-i18n="rk.title">Rankings</span><span class="rkstatus" id="rkStatus"></span></h2>
+    <div class="seg n3" id="rkMode">
+      <button data-v="ladder" data-i18n="rk.ladder">Ladder</button>
+      <button data-v="matches" data-i18n="rk.matches">Matches</button>
+      <button data-v="teams" data-i18n="rk.scouted">Scouted</button>
+    </div>
+    <div id="rkFilters">
+      <div class="chips conts" id="rkCont" style="margin-top:12px"></div>
+      <div class="seg n4" id="rkMatchFilter" style="margin-top:8px">
+        <button data-v="all" data-i18n="rk.all">All</button>
+        <button data-v="mine" data-i18n="rk.mine">Mine</button>
+        <button data-v="played" data-i18n="rk.done">Played</button>
+        <button data-v="next" data-i18n="rk.upcoming">Upcoming</button>
+      </div>
+    </div>
   </div>
-  <div class="card">
-    <h2><span class="ic">🏆</span><span data-i18n="n.rank">Rankings</span><span class="zh" data-hint="n.rank"></span></h2>
+
+  <div id="rkBody"></div>
+
+  <div class="card" id="rkLookup">
+    <h2><span class="ic">🌍</span><span data-i18n="n.lookup">Look up a nation</span></h2>
+    <button class="cbtn" id="nLookup" data-v=""><span class="fl">🔎</span><span class="ph" data-i18n="n.pick">Pick a country…</span><span class="arr">›</span></button>
+  </div>
+
+  <div class="card" id="tSortCard">
+    <h2><span class="ic">🔧</span><span data-i18n="rk.ours">Our scouting</span><span class="zh" data-hint="rk.ours"></span></h2>
+    <div class="seg n4" id="tPhase" style="margin-bottom:8px">
+      <button data-v="all" data-i18n="n.phaseAll">All phases</button>
+      <button data-v="prac" data-i18n="m.practice">Practice</button>
+      <button data-v="qual" data-i18n="m.quals">Quals</button>
+      <button data-v="play" data-i18n="m.playoffs">Playoffs</button>
+    </div>
     <div class="seg" id="tSort"><button data-v="sup" data-i18n="n.balls">Balls</button><button data-v="climb" data-i18n="n.climb">Climb</button><button data-v="rel" data-i18n="n.rel">Reliability</button><button data-v="n" data-i18n="n.matches">Matches</button></div>
   </div>
-  <div class="list" id="tList"></div>
+  <div class="list" id="tList" hidden></div>
 </section>
 
 <!-- ───────── NATION PAGE (lobby) ───────── -->
@@ -810,15 +911,17 @@ html.no-fx .sp{display:none}
 <nav role="tablist" id="nav" hidden>
   <button role="tab" data-tab="match" aria-selected="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="nav.match">Match</span><span class="zh" data-hint="nav.match"></span></button>
   <button role="tab" data-tab="pit" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18a2.1 2.1 0 0 1-3-3l6.7-6.7a4 4 0 0 0-5-5l2.6 2.6-1.4 1.4-2.6-2.6"/><path d="M4 20l3-3"/></svg><span data-i18n="nav.pit">Pit</span><span class="zh" data-hint="nav.pit"></span></button>
-  <button role="tab" data-tab="teams" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span data-i18n="nav.nations">Nations</span><span class="zh" data-hint="nav.nations"></span></button>
+  <button role="tab" data-tab="teams" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span data-i18n="rk.nav">Ranks</span><span class="zh" data-hint="rk.nav"></span></button>
   <button role="tab" data-tab="robot" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6M8 20v2M16 20v2"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="14" r="1.2"/></svg><span data-i18n="nav.robot">Robot</span><span class="zh" data-hint="nav.robot"></span></button>
   <button role="tab" data-tab="calc" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg><span data-i18n="nav.score">Score</span><span class="zh" data-hint="nav.score"></span></button>
   <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg><span data-i18n="nav.data">Data</span><span class="zh" data-hint="nav.data"></span></button>
 </nav>
 
 <script>
-// FGC 2026 participating nations (source: first.global) — slug, English name, flag emoji, ISO code (flags/<cc>.svg), Chinese name
-window.NATIONS=[{"slug":"afghanistan","name":"Afghanistan","flag":"🇦🇫","zh":"阿富汗","cc":"af"},{"slug":"albania","name":"Albania","flag":"🇦🇱","zh":"阿爾巴尼亞","cc":"al"},{"slug":"algeria","name":"Algeria","flag":"🇩🇿","zh":"阿爾及利亞","cc":"dz"},{"slug":"american-samoa","name":"American Samoa","flag":"🇦🇸","zh":"薩摩亞","cc":"as"},{"slug":"angola","name":"Angola","flag":"🇦🇴","zh":"安哥拉","cc":"ao"},{"slug":"antigua-and-barbuda","name":"Antigua and Barbuda","flag":"🇦🇬","zh":"安地卡及巴布達","cc":"ag"},{"slug":"aruba","name":"Aruba","flag":"🇦🇼","zh":"阿魯巴","cc":"aw"},{"slug":"australia","name":"Australia","flag":"🇦🇺","zh":"澳洲","cc":"au"},{"slug":"austria","name":"Austria","flag":"🇦🇹","zh":"奧地利","cc":"at"},{"slug":"azerbaijan","name":"Azerbaijan","flag":"🇦🇿","zh":"亞塞拜然","cc":"az"},{"slug":"bahamas","name":"Bahamas","flag":"🇧🇸","zh":"巴哈馬","cc":"bs"},{"slug":"bangladesh","name":"Bangladesh","flag":"🇧🇩","zh":"孟加拉","cc":"bd"},{"slug":"barbados","name":"Barbados","flag":"🇧🇧","zh":"巴貝多","cc":"bb"},{"slug":"belarus","name":"Belarus","flag":"🇧🇾","zh":"白俄羅斯","cc":"by"},{"slug":"belgium","name":"Belgium","flag":"🇧🇪","zh":"比利時","cc":"be"},{"slug":"belize","name":"Belize","flag":"🇧🇿","zh":"貝里斯","cc":"bz"},{"slug":"benin","name":"Benin","flag":"🇧🇯","zh":"貝南","cc":"bj"},{"slug":"bhutan","name":"Bhutan","flag":"🇧🇹","zh":"不丹","cc":"bt"},{"slug":"bolivia","name":"Bolivia","flag":"🇧🇴","zh":"玻利維亞","cc":"bo"},{"slug":"bosnia-and-herzegovina","name":"Bosnia and Herzegovina","flag":"🇧🇦","zh":"波士尼亞","cc":"ba"},{"slug":"botswana","name":"Botswana","flag":"🇧🇼","zh":"波札那","cc":"bw"},{"slug":"brazil","name":"Brazil","flag":"🇧🇷","zh":"巴西","cc":"br"},{"slug":"british-virgin-islands","name":"British Virgin Islands","flag":"🇻🇬","zh":"英屬維京群島","cc":"vg"},{"slug":"brunei-darussalam","name":"Brunei Darussalam","flag":"🇧🇳","zh":"汶萊","cc":"bn"},{"slug":"bulgaria","name":"Bulgaria","flag":"🇧🇬","zh":"保加利亞","cc":"bg"},{"slug":"burkina-faso","name":"Burkina Faso","flag":"🇧🇫","zh":"布吉納法索","cc":"bf"},{"slug":"cabo-verde","name":"Cabo Verde","flag":"🇨🇻","zh":"維德角","cc":"cv"},{"slug":"cambodia","name":"Cambodia","flag":"🇰🇭","zh":"柬埔寨","cc":"kh"},{"slug":"cameroon","name":"Cameroon","flag":"🇨🇲","zh":"喀麥隆","cc":"cm"},{"slug":"canada","name":"Canada","flag":"🇨🇦","zh":"加拿大","cc":"ca"},{"slug":"cayman-islands","name":"Cayman Islands","flag":"🇰🇾","zh":"開曼群島","cc":"ky"},{"slug":"central-african-republic","name":"Central African Republic","flag":"🇨🇫","zh":"中非","cc":"cf"},{"slug":"chad","name":"Chad","flag":"🇹🇩","zh":"查德","cc":"td"},{"slug":"chile","name":"Chile","flag":"🇨🇱","zh":"智利","cc":"cl"},{"slug":"chinese-taipei","name":"Chinese Taipei","flag":"🇹🇼","zh":"中華台北（台灣）","cc":"tw"},{"slug":"colombia","name":"Colombia","flag":"🇨🇴","zh":"哥倫比亞","cc":"co"},{"slug":"comoros","name":"Comoros","flag":"🇰🇲","zh":"葛摩","cc":"km"},{"slug":"cook-island","name":"Cook Island","flag":"🇨🇰","zh":"庫克群島","cc":"ck"},{"slug":"costa-rica","name":"Costa Rica","flag":"🇨🇷","zh":"哥斯大黎加","cc":"cr"},{"slug":"croatia","name":"Croatia","flag":"🇭🇷","zh":"克羅埃西亞","cc":"hr"},{"slug":"cuba","name":"Cuba","flag":"🇨🇺","zh":"古巴","cc":"cu"},{"slug":"czechia","name":"Czechia","flag":"🇨🇿","zh":"捷克","cc":"cz"},{"slug":"cote-divoire","name":"Côte d’Ivoire","flag":"🇨🇮","zh":"象牙海岸","cc":"ci"},{"slug":"democratic-republic-of-the-congo","name":"Democratic Republic of the Congo","flag":"🇨🇩","zh":"剛果民主共和國","cc":"cd"},{"slug":"denmark","name":"Denmark","flag":"🇩🇰","zh":"丹麥","cc":"dk"},{"slug":"djibouti","name":"Djibouti","flag":"🇩🇯","zh":"吉布地","cc":"dj"},{"slug":"dominica","name":"Dominica","flag":"🇩🇲","zh":"多米尼克","cc":"dm"},{"slug":"dominican-republic","name":"Dominican Republic","flag":"🇩🇴","zh":"多明尼加","cc":"do"},{"slug":"ecuador","name":"Ecuador","flag":"🇪🇨","zh":"厄瓜多","cc":"ec"},{"slug":"egypt","name":"Egypt","flag":"🇪🇬","zh":"埃及","cc":"eg"},{"slug":"el-salvador","name":"El Salvador","flag":"🇸🇻","zh":"薩爾瓦多","cc":"sv"},{"slug":"equatorial-guinea","name":"Equatorial Guinea","flag":"🇬🇶","zh":"赤道幾內亞","cc":"gq"},{"slug":"eritrea","name":"Eritrea","flag":"🇪🇷","zh":"厄利垂亞","cc":"er"},{"slug":"estonia","name":"Estonia","flag":"🇪🇪","zh":"愛沙尼亞","cc":"ee"},{"slug":"eswatini","name":"Eswatini","flag":"🇸🇿","zh":"史瓦帝尼","cc":"sz"},{"slug":"ethiopia","name":"Ethiopia","flag":"🇪🇹","zh":"衣索比亞","cc":"et"},{"slug":"micronesia","name":"Federated States of Micronesia","flag":"🇫🇲","zh":"密克羅尼西亞","cc":"fm"},{"slug":"fiji","name":"Fiji","flag":"🇫🇯","zh":"斐濟","cc":"fj"},{"slug":"finland","name":"Finland","flag":"🇫🇮","zh":"芬蘭","cc":"fi"},{"slug":"france","name":"France","flag":"🇫🇷","zh":"法國","cc":"fr"},{"slug":"gabon","name":"Gabon","flag":"🇬🇦","zh":"加彭","cc":"ga"},{"slug":"gambia","name":"Gambia","flag":"🇬🇲","zh":"甘比亞","cc":"gm"},{"slug":"georgia","name":"Georgia","flag":"🇬🇪","zh":"喬治亞","cc":"ge"},{"slug":"germany","name":"Germany","flag":"🇩🇪","zh":"德國","cc":"de"},{"slug":"ghana","name":"Ghana","flag":"🇬🇭","zh":"迦納","cc":"gh"},{"slug":"great-britain","name":"Great Britain","flag":"🇬🇧","zh":"英國","cc":"gb"},{"slug":"greece","name":"Greece","flag":"🇬🇷","zh":"希臘","cc":"gr"},{"slug":"grenada","name":"Grenada","flag":"🇬🇩","zh":"格瑞那達","cc":"gd"},{"slug":"guam","name":"Guam","flag":"🇬🇺","zh":"關島","cc":"gu"},{"slug":"guatemala","name":"Guatemala","flag":"🇬🇹","zh":"瓜地馬拉","cc":"gt"},{"slug":"guinea","name":"Guinea","flag":"🇬🇳","zh":"幾內亞","cc":"gn"},{"slug":"guinea-bissau","name":"Guinea-Bissau","flag":"🇬🇼","zh":"幾內亞比索","cc":"gw"},{"slug":"guyana","name":"Guyana","flag":"🇬🇾","zh":"蓋亞那","cc":"gy"},{"slug":"haiti","name":"Haiti","flag":"🇭🇹","zh":"海地","cc":"ht"},{"slug":"honduras","name":"Honduras","flag":"🇭🇳","zh":"宏都拉斯","cc":"hn"},{"slug":"hong-kong","name":"Hong Kong","flag":"🇭🇰","zh":"香港","cc":"hk"},{"slug":"hope","name":"Hope (Refugees)","flag":"🕊️","zh":"希望隊（難民）"},{"slug":"hungary","name":"Hungary","flag":"🇭🇺","zh":"匈牙利","cc":"hu"},{"slug":"india","name":"India","flag":"🇮🇳","zh":"印度","cc":"in"},{"slug":"indonesia","name":"Indonesia","flag":"🇮🇩","zh":"印尼","cc":"id"},{"slug":"iraq","name":"Iraq","flag":"🇮🇶","zh":"伊拉克","cc":"iq"},{"slug":"ireland","name":"Ireland","flag":"🇮🇪","zh":"愛爾蘭","cc":"ie"},{"slug":"israel","name":"Israel","flag":"🇮🇱","zh":"以色列","cc":"il"},{"slug":"italy","name":"Italy","flag":"🇮🇹","zh":"義大利","cc":"it"},{"slug":"jamaica","name":"Jamaica","flag":"🇯🇲","zh":"牙買加","cc":"jm"},{"slug":"japan","name":"Japan","flag":"🇯🇵","zh":"日本","cc":"jp"},{"slug":"jordan","name":"Jordan","flag":"🇯🇴","zh":"約旦","cc":"jo"},{"slug":"kenya","name":"Kenya","flag":"🇰🇪","zh":"肯亞","cc":"ke"},{"slug":"kiribati","name":"Kiribati","flag":"🇰🇮","zh":"吉里巴斯","cc":"ki"},{"slug":"kosovo","name":"Kosovo","flag":"🇽🇰","zh":"科索沃","cc":"xk"},{"slug":"kyrgyzstan","name":"Kyrgyzstan","flag":"🇰🇬","zh":"吉爾吉斯","cc":"kg"},{"slug":"laos","name":"Lao People’s Democratic Republic","flag":"🇱🇦","zh":"寮國","cc":"la"},{"slug":"latvia","name":"Latvia","flag":"🇱🇻","zh":"拉脫維亞","cc":"lv"},{"slug":"lebanon","name":"Lebanon","flag":"🇱🇧","zh":"黎巴嫩","cc":"lb"},{"slug":"lesotho","name":"Lesotho","flag":"🇱🇸","zh":"賴索托","cc":"ls"},{"slug":"liberia","name":"Liberia","flag":"🇱🇷","zh":"賴比瑞亞","cc":"lr"},{"slug":"libya","name":"Libya","flag":"🇱🇾","zh":"利比亞","cc":"ly"},{"slug":"lithuania","name":"Lithuania","flag":"🇱🇹","zh":"立陶宛","cc":"lt"},{"slug":"luxembourg","name":"Luxembourg","flag":"🇱🇺","zh":"盧森堡","cc":"lu"},{"slug":"madagascar","name":"Madagascar","flag":"🇲🇬","zh":"馬達加斯加","cc":"mg"},{"slug":"malawi","name":"Malawi","flag":"🇲🇼","zh":"馬拉威","cc":"mw"},{"slug":"malaysia","name":"Malaysia","flag":"🇲🇾","zh":"馬來西亞","cc":"my"},{"slug":"maldives","name":"Maldives","flag":"🇲🇻","zh":"馬爾地夫","cc":"mv"},{"slug":"mali","name":"Mali","flag":"🇲🇱","zh":"馬利","cc":"ml"},{"slug":"malta","name":"Malta","flag":"🇲🇹","zh":"馬爾他","cc":"mt"},{"slug":"mauritania","name":"Mauritania","flag":"🇲🇷","zh":"茅利塔尼亞","cc":"mr"},{"slug":"mauritius","name":"Mauritius","flag":"🇲🇺","zh":"模里西斯","cc":"mu"},{"slug":"mexico","name":"Mexico","flag":"🇲🇽","zh":"墨西哥","cc":"mx"},{"slug":"montenegro","name":"Montenegro","flag":"🇲🇪","zh":"蒙特內哥羅","cc":"me"},{"slug":"morocco","name":"Morocco","flag":"🇲🇦","zh":"摩洛哥","cc":"ma"},{"slug":"myanmar","name":"Myanmar","flag":"🇲🇲","zh":"緬甸","cc":"mm"},{"slug":"namibia","name":"Namibia","flag":"🇳🇦","zh":"納米比亞","cc":"na"},{"slug":"nepal","name":"Nepal","flag":"🇳🇵","zh":"尼泊爾","cc":"np"},{"slug":"netherlands","name":"Netherlands","flag":"🇳🇱","zh":"荷蘭","cc":"nl"},{"slug":"nicaragua","name":"Nicaragua","flag":"🇳🇮","zh":"尼加拉瓜","cc":"ni"},{"slug":"niger","name":"Niger","flag":"🇳🇪","zh":"尼日","cc":"ne"},{"slug":"nigeria","name":"Nigeria","flag":"🇳🇬","zh":"奈及利亞","cc":"ng"},{"slug":"north-macedonia","name":"North Macedonia","flag":"🇲🇰","zh":"北馬其頓","cc":"mk"},{"slug":"oman","name":"Oman","flag":"🇴🇲","zh":"阿曼","cc":"om"},{"slug":"pakistan","name":"Pakistan","flag":"🇵🇰","zh":"巴基斯坦","cc":"pk"},{"slug":"palestine","name":"Palestine","flag":"🇵🇸","zh":"巴勒斯坦","cc":"ps"},{"slug":"panama","name":"Panama","flag":"🇵🇦","zh":"巴拿馬","cc":"pa"},{"slug":"papua-new-guinea","name":"Papua New Guinea","flag":"🇵🇬","zh":"巴布亞紐幾內亞","cc":"pg"},{"slug":"paraguay","name":"Paraguay","flag":"🇵🇾","zh":"巴拉圭","cc":"py"},{"slug":"peoples-republic-of-china","name":"People’s Republic of China","flag":"🇨🇳","zh":"中國","cc":"cn"},{"slug":"peru","name":"Peru","flag":"🇵🇪","zh":"秘魯","cc":"pe"},{"slug":"philippines","name":"Philippines","flag":"🇵🇭","zh":"菲律賓","cc":"ph"},{"slug":"poland","name":"Poland","flag":"🇵🇱","zh":"波蘭","cc":"pl"},{"slug":"portugal","name":"Portugal","flag":"🇵🇹","zh":"葡萄牙","cc":"pt"},{"slug":"puerto-rico","name":"Puerto Rico","flag":"🇵🇷","zh":"波多黎各","cc":"pr"},{"slug":"qatar","name":"Qatar","flag":"🇶🇦","zh":"卡達","cc":"qa"},{"slug":"republic-of-korea","name":"Republic of Korea","flag":"🇰🇷","zh":"韓國","cc":"kr"},{"slug":"moldova","name":"Republic of Moldova","flag":"🇲🇩","zh":"摩爾多瓦","cc":"md"},{"slug":"romania","name":"Romania","flag":"🇷🇴","zh":"羅馬尼亞","cc":"ro"},{"slug":"russian-federation","name":"Russian Federation","flag":"🇷🇺","zh":"俄羅斯","cc":"ru"},{"slug":"rwanda","name":"Rwanda","flag":"🇷🇼","zh":"盧安達","cc":"rw"},{"slug":"saint-kitts-and-nevis","name":"Saint Kitts and Nevis","flag":"🇰🇳","zh":"聖克里斯多福","cc":"kn"},{"slug":"saint-lucia","name":"Saint Lucia","flag":"🇱🇨","zh":"聖露西亞","cc":"lc"},{"slug":"saint-vincent-and-the-grenadines","name":"Saint Vincent and the Grenadines","flag":"🇻🇨","zh":"聖文森","cc":"vc"},{"slug":"senegal","name":"Senegal","flag":"🇸🇳","zh":"塞內加爾","cc":"sn"},{"slug":"serbia","name":"Serbia","flag":"🇷🇸","zh":"塞爾維亞","cc":"rs"},{"slug":"seychelles","name":"Seychelles","flag":"🇸🇨","zh":"塞席爾","cc":"sc"},{"slug":"sierra-leone","name":"Sierra Leone","flag":"🇸🇱","zh":"獅子山","cc":"sl"},{"slug":"slovakia","name":"Slovakia","flag":"🇸🇰","zh":"斯洛伐克","cc":"sk"},{"slug":"slovenia","name":"Slovenia","flag":"🇸🇮","zh":"斯洛維尼亞","cc":"si"},{"slug":"solomon-islands","name":"Solomon Islands","flag":"🇸🇧","zh":"索羅門群島","cc":"sb"},{"slug":"somalia","name":"Somalia","flag":"🇸🇴","zh":"索馬利亞","cc":"so"},{"slug":"south-africa","name":"South Africa","flag":"🇿🇦","zh":"南非","cc":"za"},{"slug":"south-sudan","name":"South Sudan","flag":"🇸🇸","zh":"南蘇丹","cc":"ss"},{"slug":"spain","name":"Spain","flag":"🇪🇸","zh":"西班牙","cc":"es"},{"slug":"sri-lanka","name":"Sri Lanka","flag":"🇱🇰","zh":"斯里蘭卡","cc":"lk"},{"slug":"sudan","name":"Sudan","flag":"🇸🇩","zh":"蘇丹","cc":"sd"},{"slug":"sweden","name":"Sweden","flag":"🇸🇪","zh":"瑞典","cc":"se"},{"slug":"syria","name":"Syrian Arab Republic","flag":"🇸🇾","zh":"敘利亞","cc":"sy"},{"slug":"sao-tome-and-principe","name":"São Tomé and Príncipe","flag":"🇸🇹","zh":"聖多美普林西比","cc":"st"},{"slug":"tajikistan","name":"Tajikistan","flag":"🇹🇯","zh":"塔吉克","cc":"tj"},{"slug":"timor-leste","name":"Timor-Leste","flag":"🇹🇱","zh":"東帝汶","cc":"tl"},{"slug":"togo","name":"Togo","flag":"🇹🇬","zh":"多哥","cc":"tg"},{"slug":"tonga","name":"Tonga","flag":"🇹🇴","zh":"東加","cc":"to"},{"slug":"trinidad-and-tobago","name":"Trinidad and Tobago","flag":"🇹🇹","zh":"千里達","cc":"tt"},{"slug":"tunisia","name":"Tunisia","flag":"🇹🇳","zh":"突尼西亞","cc":"tn"},{"slug":"turkmenistan","name":"Turkmenistan","flag":"🇹🇲","zh":"土庫曼","cc":"tm"},{"slug":"turkiye","name":"Türkiye","flag":"🇹🇷","zh":"土耳其","cc":"tr"},{"slug":"us-virgin-islands","name":"U.S. Virgin Islands","flag":"🇻🇮","zh":"美屬維京群島","cc":"vi"},{"slug":"uganda","name":"Uganda","flag":"🇺🇬","zh":"烏干達","cc":"ug"},{"slug":"ukraine","name":"Ukraine","flag":"🇺🇦","zh":"烏克蘭","cc":"ua"},{"slug":"united-arab-emirates","name":"United Arab Emirates","flag":"🇦🇪","zh":"阿聯","cc":"ae"},{"slug":"tanzania","name":"United Republic of Tanzania","flag":"🇹🇿","zh":"坦尚尼亞","cc":"tz"},{"slug":"united-states-of-america","name":"United States of America","flag":"🇺🇸","zh":"美國","cc":"us"},{"slug":"uruguay","name":"Uruguay","flag":"🇺🇾","zh":"烏拉圭","cc":"uy"},{"slug":"vanuatu","name":"Vanuatu","flag":"🇻🇺","zh":"萬那杜","cc":"vu"},{"slug":"venezuela","name":"Venezuela","flag":"🇻🇪","zh":"委內瑞拉","cc":"ve"},{"slug":"vietnam","name":"Vietnam","flag":"🇻🇳","zh":"越南","cc":"vn"},{"slug":"yemen","name":"Yemen","flag":"🇾🇪","zh":"葉門","cc":"ye"},{"slug":"zimbabwe","name":"Zimbabwe","flag":"🇿🇼","zh":"辛巴威","cc":"zw"}];
+// FGC 2026 participating nations (source: first.global)
+// slug, English name, flag emoji, ISO code (flags/<cc>.svg), Chinese name, continent (af/am/as/eu/oc)
+window.NATIONS=[{"slug":"afghanistan","name":"Afghanistan","flag":"🇦🇫","zh":"阿富汗","cc":"af","cont":"as"},{"slug":"albania","name":"Albania","flag":"🇦🇱","zh":"阿爾巴尼亞","cc":"al","cont":"eu"},{"slug":"algeria","name":"Algeria","flag":"🇩🇿","zh":"阿爾及利亞","cc":"dz","cont":"af"},{"slug":"american-samoa","name":"American Samoa","flag":"🇦🇸","zh":"薩摩亞","cc":"as","cont":"oc"},{"slug":"angola","name":"Angola","flag":"🇦🇴","zh":"安哥拉","cc":"ao","cont":"af"},{"slug":"antigua-and-barbuda","name":"Antigua and Barbuda","flag":"🇦🇬","zh":"安地卡及巴布達","cc":"ag","cont":"am"},{"slug":"aruba","name":"Aruba","flag":"🇦🇼","zh":"阿魯巴","cc":"aw","cont":"am"},{"slug":"australia","name":"Australia","flag":"🇦🇺","zh":"澳洲","cc":"au","cont":"oc"},{"slug":"austria","name":"Austria","flag":"🇦🇹","zh":"奧地利","cc":"at","cont":"eu"},{"slug":"azerbaijan","name":"Azerbaijan","flag":"🇦🇿","zh":"亞塞拜然","cc":"az","cont":"as"},{"slug":"bahamas","name":"Bahamas","flag":"🇧🇸","zh":"巴哈馬","cc":"bs","cont":"am"},{"slug":"bangladesh","name":"Bangladesh","flag":"🇧🇩","zh":"孟加拉","cc":"bd","cont":"as"},{"slug":"barbados","name":"Barbados","flag":"🇧🇧","zh":"巴貝多","cc":"bb","cont":"am"},{"slug":"belarus","name":"Belarus","flag":"🇧🇾","zh":"白俄羅斯","cc":"by","cont":"eu"},{"slug":"belgium","name":"Belgium","flag":"🇧🇪","zh":"比利時","cc":"be","cont":"eu"},{"slug":"belize","name":"Belize","flag":"🇧🇿","zh":"貝里斯","cc":"bz","cont":"am"},{"slug":"benin","name":"Benin","flag":"🇧🇯","zh":"貝南","cc":"bj","cont":"af"},{"slug":"bhutan","name":"Bhutan","flag":"🇧🇹","zh":"不丹","cc":"bt","cont":"as"},{"slug":"bolivia","name":"Bolivia","flag":"🇧🇴","zh":"玻利維亞","cc":"bo","cont":"am"},{"slug":"bosnia-and-herzegovina","name":"Bosnia and Herzegovina","flag":"🇧🇦","zh":"波士尼亞","cc":"ba","cont":"eu"},{"slug":"botswana","name":"Botswana","flag":"🇧🇼","zh":"波札那","cc":"bw","cont":"af"},{"slug":"brazil","name":"Brazil","flag":"🇧🇷","zh":"巴西","cc":"br","cont":"am"},{"slug":"british-virgin-islands","name":"British Virgin Islands","flag":"🇻🇬","zh":"英屬維京群島","cc":"vg","cont":"am"},{"slug":"brunei-darussalam","name":"Brunei Darussalam","flag":"🇧🇳","zh":"汶萊","cc":"bn","cont":"as"},{"slug":"bulgaria","name":"Bulgaria","flag":"🇧🇬","zh":"保加利亞","cc":"bg","cont":"eu"},{"slug":"burkina-faso","name":"Burkina Faso","flag":"🇧🇫","zh":"布吉納法索","cc":"bf","cont":"af"},{"slug":"cabo-verde","name":"Cabo Verde","flag":"🇨🇻","zh":"維德角","cc":"cv","cont":"af"},{"slug":"cambodia","name":"Cambodia","flag":"🇰🇭","zh":"柬埔寨","cc":"kh","cont":"as"},{"slug":"cameroon","name":"Cameroon","flag":"🇨🇲","zh":"喀麥隆","cc":"cm","cont":"af"},{"slug":"canada","name":"Canada","flag":"🇨🇦","zh":"加拿大","cc":"ca","cont":"am"},{"slug":"cayman-islands","name":"Cayman Islands","flag":"🇰🇾","zh":"開曼群島","cc":"ky","cont":"am"},{"slug":"central-african-republic","name":"Central African Republic","flag":"🇨🇫","zh":"中非","cc":"cf","cont":"af"},{"slug":"chad","name":"Chad","flag":"🇹🇩","zh":"查德","cc":"td","cont":"af"},{"slug":"chile","name":"Chile","flag":"🇨🇱","zh":"智利","cc":"cl","cont":"am"},{"slug":"chinese-taipei","name":"Chinese Taipei","flag":"🇹🇼","zh":"中華台北（台灣）","cc":"tw","cont":"as"},{"slug":"colombia","name":"Colombia","flag":"🇨🇴","zh":"哥倫比亞","cc":"co","cont":"am"},{"slug":"comoros","name":"Comoros","flag":"🇰🇲","zh":"葛摩","cc":"km","cont":"af"},{"slug":"cook-island","name":"Cook Island","flag":"🇨🇰","zh":"庫克群島","cc":"ck","cont":"oc"},{"slug":"costa-rica","name":"Costa Rica","flag":"🇨🇷","zh":"哥斯大黎加","cc":"cr","cont":"am"},{"slug":"croatia","name":"Croatia","flag":"🇭🇷","zh":"克羅埃西亞","cc":"hr","cont":"eu"},{"slug":"cuba","name":"Cuba","flag":"🇨🇺","zh":"古巴","cc":"cu","cont":"am"},{"slug":"czechia","name":"Czechia","flag":"🇨🇿","zh":"捷克","cc":"cz","cont":"eu"},{"slug":"cote-divoire","name":"Côte d’Ivoire","flag":"🇨🇮","zh":"象牙海岸","cc":"ci","cont":"af"},{"slug":"democratic-republic-of-the-congo","name":"Democratic Republic of the Congo","flag":"🇨🇩","zh":"剛果民主共和國","cc":"cd","cont":"af"},{"slug":"denmark","name":"Denmark","flag":"🇩🇰","zh":"丹麥","cc":"dk","cont":"eu"},{"slug":"djibouti","name":"Djibouti","flag":"🇩🇯","zh":"吉布地","cc":"dj","cont":"af"},{"slug":"dominica","name":"Dominica","flag":"🇩🇲","zh":"多米尼克","cc":"dm","cont":"am"},{"slug":"dominican-republic","name":"Dominican Republic","flag":"🇩🇴","zh":"多明尼加","cc":"do","cont":"am"},{"slug":"ecuador","name":"Ecuador","flag":"🇪🇨","zh":"厄瓜多","cc":"ec","cont":"am"},{"slug":"egypt","name":"Egypt","flag":"🇪🇬","zh":"埃及","cc":"eg","cont":"af"},{"slug":"el-salvador","name":"El Salvador","flag":"🇸🇻","zh":"薩爾瓦多","cc":"sv","cont":"am"},{"slug":"equatorial-guinea","name":"Equatorial Guinea","flag":"🇬🇶","zh":"赤道幾內亞","cc":"gq","cont":"af"},{"slug":"eritrea","name":"Eritrea","flag":"🇪🇷","zh":"厄利垂亞","cc":"er","cont":"af"},{"slug":"estonia","name":"Estonia","flag":"🇪🇪","zh":"愛沙尼亞","cc":"ee","cont":"eu"},{"slug":"eswatini","name":"Eswatini","flag":"🇸🇿","zh":"史瓦帝尼","cc":"sz","cont":"af"},{"slug":"ethiopia","name":"Ethiopia","flag":"🇪🇹","zh":"衣索比亞","cc":"et","cont":"af"},{"slug":"micronesia","name":"Federated States of Micronesia","flag":"🇫🇲","zh":"密克羅尼西亞","cc":"fm","cont":"oc"},{"slug":"fiji","name":"Fiji","flag":"🇫🇯","zh":"斐濟","cc":"fj","cont":"oc"},{"slug":"finland","name":"Finland","flag":"🇫🇮","zh":"芬蘭","cc":"fi","cont":"eu"},{"slug":"france","name":"France","flag":"🇫🇷","zh":"法國","cc":"fr","cont":"eu"},{"slug":"gabon","name":"Gabon","flag":"🇬🇦","zh":"加彭","cc":"ga","cont":"af"},{"slug":"gambia","name":"Gambia","flag":"🇬🇲","zh":"甘比亞","cc":"gm","cont":"af"},{"slug":"georgia","name":"Georgia","flag":"🇬🇪","zh":"喬治亞","cc":"ge","cont":"as"},{"slug":"germany","name":"Germany","flag":"🇩🇪","zh":"德國","cc":"de","cont":"eu"},{"slug":"ghana","name":"Ghana","flag":"🇬🇭","zh":"迦納","cc":"gh","cont":"af"},{"slug":"great-britain","name":"Great Britain","flag":"🇬🇧","zh":"英國","cc":"gb","cont":"eu"},{"slug":"greece","name":"Greece","flag":"🇬🇷","zh":"希臘","cc":"gr","cont":"eu"},{"slug":"grenada","name":"Grenada","flag":"🇬🇩","zh":"格瑞那達","cc":"gd","cont":"am"},{"slug":"guam","name":"Guam","flag":"🇬🇺","zh":"關島","cc":"gu","cont":"oc"},{"slug":"guatemala","name":"Guatemala","flag":"🇬🇹","zh":"瓜地馬拉","cc":"gt","cont":"am"},{"slug":"guinea","name":"Guinea","flag":"🇬🇳","zh":"幾內亞","cc":"gn","cont":"af"},{"slug":"guinea-bissau","name":"Guinea-Bissau","flag":"🇬🇼","zh":"幾內亞比索","cc":"gw","cont":"af"},{"slug":"guyana","name":"Guyana","flag":"🇬🇾","zh":"蓋亞那","cc":"gy","cont":"am"},{"slug":"haiti","name":"Haiti","flag":"🇭🇹","zh":"海地","cc":"ht","cont":"am"},{"slug":"honduras","name":"Honduras","flag":"🇭🇳","zh":"宏都拉斯","cc":"hn","cont":"am"},{"slug":"hong-kong","name":"Hong Kong","flag":"🇭🇰","zh":"香港","cc":"hk","cont":"as"},{"slug":"hope","name":"Hope (Refugees)","flag":"🕊️","zh":"希望隊（難民）","cont":"xx"},{"slug":"hungary","name":"Hungary","flag":"🇭🇺","zh":"匈牙利","cc":"hu","cont":"eu"},{"slug":"india","name":"India","flag":"🇮🇳","zh":"印度","cc":"in","cont":"as"},{"slug":"indonesia","name":"Indonesia","flag":"🇮🇩","zh":"印尼","cc":"id","cont":"as"},{"slug":"iraq","name":"Iraq","flag":"🇮🇶","zh":"伊拉克","cc":"iq","cont":"as"},{"slug":"ireland","name":"Ireland","flag":"🇮🇪","zh":"愛爾蘭","cc":"ie","cont":"eu"},{"slug":"israel","name":"Israel","flag":"🇮🇱","zh":"以色列","cc":"il","cont":"as"},{"slug":"italy","name":"Italy","flag":"🇮🇹","zh":"義大利","cc":"it","cont":"eu"},{"slug":"jamaica","name":"Jamaica","flag":"🇯🇲","zh":"牙買加","cc":"jm","cont":"am"},{"slug":"japan","name":"Japan","flag":"🇯🇵","zh":"日本","cc":"jp","cont":"as"},{"slug":"jordan","name":"Jordan","flag":"🇯🇴","zh":"約旦","cc":"jo","cont":"as"},{"slug":"kenya","name":"Kenya","flag":"🇰🇪","zh":"肯亞","cc":"ke","cont":"af"},{"slug":"kiribati","name":"Kiribati","flag":"🇰🇮","zh":"吉里巴斯","cc":"ki","cont":"oc"},{"slug":"kosovo","name":"Kosovo","flag":"🇽🇰","zh":"科索沃","cc":"xk","cont":"eu"},{"slug":"kyrgyzstan","name":"Kyrgyzstan","flag":"🇰🇬","zh":"吉爾吉斯","cc":"kg","cont":"as"},{"slug":"laos","name":"Lao People’s Democratic Republic","flag":"🇱🇦","zh":"寮國","cc":"la","cont":"as"},{"slug":"latvia","name":"Latvia","flag":"🇱🇻","zh":"拉脫維亞","cc":"lv","cont":"eu"},{"slug":"lebanon","name":"Lebanon","flag":"🇱🇧","zh":"黎巴嫩","cc":"lb","cont":"as"},{"slug":"lesotho","name":"Lesotho","flag":"🇱🇸","zh":"賴索托","cc":"ls","cont":"af"},{"slug":"liberia","name":"Liberia","flag":"🇱🇷","zh":"賴比瑞亞","cc":"lr","cont":"af"},{"slug":"libya","name":"Libya","flag":"🇱🇾","zh":"利比亞","cc":"ly","cont":"af"},{"slug":"lithuania","name":"Lithuania","flag":"🇱🇹","zh":"立陶宛","cc":"lt","cont":"eu"},{"slug":"luxembourg","name":"Luxembourg","flag":"🇱🇺","zh":"盧森堡","cc":"lu","cont":"eu"},{"slug":"madagascar","name":"Madagascar","flag":"🇲🇬","zh":"馬達加斯加","cc":"mg","cont":"af"},{"slug":"malawi","name":"Malawi","flag":"🇲🇼","zh":"馬拉威","cc":"mw","cont":"af"},{"slug":"malaysia","name":"Malaysia","flag":"🇲🇾","zh":"馬來西亞","cc":"my","cont":"as"},{"slug":"maldives","name":"Maldives","flag":"🇲🇻","zh":"馬爾地夫","cc":"mv","cont":"as"},{"slug":"mali","name":"Mali","flag":"🇲🇱","zh":"馬利","cc":"ml","cont":"af"},{"slug":"malta","name":"Malta","flag":"🇲🇹","zh":"馬爾他","cc":"mt","cont":"eu"},{"slug":"mauritania","name":"Mauritania","flag":"🇲🇷","zh":"茅利塔尼亞","cc":"mr","cont":"af"},{"slug":"mauritius","name":"Mauritius","flag":"🇲🇺","zh":"模里西斯","cc":"mu","cont":"af"},{"slug":"mexico","name":"Mexico","flag":"🇲🇽","zh":"墨西哥","cc":"mx","cont":"am"},{"slug":"montenegro","name":"Montenegro","flag":"🇲🇪","zh":"蒙特內哥羅","cc":"me","cont":"eu"},{"slug":"morocco","name":"Morocco","flag":"🇲🇦","zh":"摩洛哥","cc":"ma","cont":"af"},{"slug":"myanmar","name":"Myanmar","flag":"🇲🇲","zh":"緬甸","cc":"mm","cont":"as"},{"slug":"namibia","name":"Namibia","flag":"🇳🇦","zh":"納米比亞","cc":"na","cont":"af"},{"slug":"nepal","name":"Nepal","flag":"🇳🇵","zh":"尼泊爾","cc":"np","cont":"as"},{"slug":"netherlands","name":"Netherlands","flag":"🇳🇱","zh":"荷蘭","cc":"nl","cont":"eu"},{"slug":"nicaragua","name":"Nicaragua","flag":"🇳🇮","zh":"尼加拉瓜","cc":"ni","cont":"am"},{"slug":"niger","name":"Niger","flag":"🇳🇪","zh":"尼日","cc":"ne","cont":"af"},{"slug":"nigeria","name":"Nigeria","flag":"🇳🇬","zh":"奈及利亞","cc":"ng","cont":"af"},{"slug":"north-macedonia","name":"North Macedonia","flag":"🇲🇰","zh":"北馬其頓","cc":"mk","cont":"eu"},{"slug":"oman","name":"Oman","flag":"🇴🇲","zh":"阿曼","cc":"om","cont":"as"},{"slug":"pakistan","name":"Pakistan","flag":"🇵🇰","zh":"巴基斯坦","cc":"pk","cont":"as"},{"slug":"palestine","name":"Palestine","flag":"🇵🇸","zh":"巴勒斯坦","cc":"ps","cont":"as"},{"slug":"panama","name":"Panama","flag":"🇵🇦","zh":"巴拿馬","cc":"pa","cont":"am"},{"slug":"papua-new-guinea","name":"Papua New Guinea","flag":"🇵🇬","zh":"巴布亞紐幾內亞","cc":"pg","cont":"oc"},{"slug":"paraguay","name":"Paraguay","flag":"🇵🇾","zh":"巴拉圭","cc":"py","cont":"am"},{"slug":"peoples-republic-of-china","name":"People’s Republic of China","flag":"🇨🇳","zh":"中國","cc":"cn","cont":"as"},{"slug":"peru","name":"Peru","flag":"🇵🇪","zh":"秘魯","cc":"pe","cont":"am"},{"slug":"philippines","name":"Philippines","flag":"🇵🇭","zh":"菲律賓","cc":"ph","cont":"as"},{"slug":"poland","name":"Poland","flag":"🇵🇱","zh":"波蘭","cc":"pl","cont":"eu"},{"slug":"portugal","name":"Portugal","flag":"🇵🇹","zh":"葡萄牙","cc":"pt","cont":"eu"},{"slug":"puerto-rico","name":"Puerto Rico","flag":"🇵🇷","zh":"波多黎各","cc":"pr","cont":"am"},{"slug":"qatar","name":"Qatar","flag":"🇶🇦","zh":"卡達","cc":"qa","cont":"as"},{"slug":"republic-of-korea","name":"Republic of Korea","flag":"🇰🇷","zh":"韓國","cc":"kr","cont":"as"},{"slug":"moldova","name":"Republic of Moldova","flag":"🇲🇩","zh":"摩爾多瓦","cc":"md","cont":"eu"},{"slug":"romania","name":"Romania","flag":"🇷🇴","zh":"羅馬尼亞","cc":"ro","cont":"eu"},{"slug":"russian-federation","name":"Russian Federation","flag":"🇷🇺","zh":"俄羅斯","cc":"ru","cont":"eu"},{"slug":"rwanda","name":"Rwanda","flag":"🇷🇼","zh":"盧安達","cc":"rw","cont":"af"},{"slug":"saint-kitts-and-nevis","name":"Saint Kitts and Nevis","flag":"🇰🇳","zh":"聖克里斯多福","cc":"kn","cont":"am"},{"slug":"saint-lucia","name":"Saint Lucia","flag":"🇱🇨","zh":"聖露西亞","cc":"lc","cont":"am"},{"slug":"saint-vincent-and-the-grenadines","name":"Saint Vincent and the Grenadines","flag":"🇻🇨","zh":"聖文森","cc":"vc","cont":"am"},{"slug":"senegal","name":"Senegal","flag":"🇸🇳","zh":"塞內加爾","cc":"sn","cont":"af"},{"slug":"serbia","name":"Serbia","flag":"🇷🇸","zh":"塞爾維亞","cc":"rs","cont":"eu"},{"slug":"seychelles","name":"Seychelles","flag":"🇸🇨","zh":"塞席爾","cc":"sc","cont":"af"},{"slug":"sierra-leone","name":"Sierra Leone","flag":"🇸🇱","zh":"獅子山","cc":"sl","cont":"af"},{"slug":"slovakia","name":"Slovakia","flag":"🇸🇰","zh":"斯洛伐克","cc":"sk","cont":"eu"},{"slug":"slovenia","name":"Slovenia","flag":"🇸🇮","zh":"斯洛維尼亞","cc":"si","cont":"eu"},{"slug":"solomon-islands","name":"Solomon Islands","flag":"🇸🇧","zh":"索羅門群島","cc":"sb","cont":"oc"},{"slug":"somalia","name":"Somalia","flag":"🇸🇴","zh":"索馬利亞","cc":"so","cont":"af"},{"slug":"south-africa","name":"South Africa","flag":"🇿🇦","zh":"南非","cc":"za","cont":"af"},{"slug":"south-sudan","name":"South Sudan","flag":"🇸🇸","zh":"南蘇丹","cc":"ss","cont":"af"},{"slug":"spain","name":"Spain","flag":"🇪🇸","zh":"西班牙","cc":"es","cont":"eu"},{"slug":"sri-lanka","name":"Sri Lanka","flag":"🇱🇰","zh":"斯里蘭卡","cc":"lk","cont":"as"},{"slug":"sudan","name":"Sudan","flag":"🇸🇩","zh":"蘇丹","cc":"sd","cont":"af"},{"slug":"sweden","name":"Sweden","flag":"🇸🇪","zh":"瑞典","cc":"se","cont":"eu"},{"slug":"syria","name":"Syrian Arab Republic","flag":"🇸🇾","zh":"敘利亞","cc":"sy","cont":"as"},{"slug":"sao-tome-and-principe","name":"São Tomé and Príncipe","flag":"🇸🇹","zh":"聖多美普林西比","cc":"st","cont":"af"},{"slug":"tajikistan","name":"Tajikistan","flag":"🇹🇯","zh":"塔吉克","cc":"tj","cont":"as"},{"slug":"timor-leste","name":"Timor-Leste","flag":"🇹🇱","zh":"東帝汶","cc":"tl","cont":"as"},{"slug":"togo","name":"Togo","flag":"🇹🇬","zh":"多哥","cc":"tg","cont":"af"},{"slug":"tonga","name":"Tonga","flag":"🇹🇴","zh":"東加","cc":"to","cont":"oc"},{"slug":"trinidad-and-tobago","name":"Trinidad and Tobago","flag":"🇹🇹","zh":"千里達","cc":"tt","cont":"am"},{"slug":"tunisia","name":"Tunisia","flag":"🇹🇳","zh":"突尼西亞","cc":"tn","cont":"af"},{"slug":"turkmenistan","name":"Turkmenistan","flag":"🇹🇲","zh":"土庫曼","cc":"tm","cont":"as"},{"slug":"turkiye","name":"Türkiye","flag":"🇹🇷","zh":"土耳其","cc":"tr","cont":"as"},{"slug":"us-virgin-islands","name":"U.S. Virgin Islands","flag":"🇻🇮","zh":"美屬維京群島","cc":"vi","cont":"am"},{"slug":"uganda","name":"Uganda","flag":"🇺🇬","zh":"烏干達","cc":"ug","cont":"af"},{"slug":"ukraine","name":"Ukraine","flag":"🇺🇦","zh":"烏克蘭","cc":"ua","cont":"eu"},{"slug":"united-arab-emirates","name":"United Arab Emirates","flag":"🇦🇪","zh":"阿聯","cc":"ae","cont":"as"},{"slug":"tanzania","name":"United Republic of Tanzania","flag":"🇹🇿","zh":"坦尚尼亞","cc":"tz","cont":"af"},{"slug":"united-states-of-america","name":"United States of America","flag":"🇺🇸","zh":"美國","cc":"us","cont":"am"},{"slug":"uruguay","name":"Uruguay","flag":"🇺🇾","zh":"烏拉圭","cc":"uy","cont":"am"},{"slug":"vanuatu","name":"Vanuatu","flag":"🇻🇺","zh":"萬那杜","cc":"vu","cont":"oc"},{"slug":"venezuela","name":"Venezuela","flag":"🇻🇪","zh":"委內瑞拉","cc":"ve","cont":"am"},{"slug":"vietnam","name":"Vietnam","flag":"🇻🇳","zh":"越南","cc":"vn","cont":"as"},{"slug":"yemen","name":"Yemen","flag":"🇾🇪","zh":"葉門","cc":"ye","cont":"as"},{"slug":"zimbabwe","name":"Zimbabwe","flag":"🇿🇼","zh":"辛巴威","cc":"zw","cont":"af"}];
+window.CONTINENTS={"af": "Africa", "am": "Americas", "as": "Asia", "eu": "Europe", "oc": "Oceania", "xx": "Other"};
 
 </script>
 <script>
@@ -2388,6 +2491,410 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 
 </script>
 <script>
+// FGC 2026 Scouting — translations part 7: live rankings / match history / match phase.
+// Languages beyond these fall back to English automatically.
+(function(){
+const I = window.I18N, ADD = {
+en:{"rk.ours":"Our scouting","rk.nav":"Ranks","rk.title":"Rankings","rk.ladder":"Ladder","rk.matches":"Matches","rk.scouted":"Scouted",
+ "rk.all":"All","rk.mine":"Mine","rk.done":"Played","rk.upcoming":"Upcoming","rk.myCont":"My continent",
+ "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"PLAYOFF ZONE","rk.contender":"CONTENDER","rk.rising":"RISING",
+ "rk.yourRank":"Your rank","rk.toPlayoff":"places off the playoff cut:","rk.you":"YOU",
+ "rk.rs":"Ranking score","rk.high":"Highest","rk.played":"Played","rk.record":"W-L-T",
+ "rk.updated":"updated","rk.loading":"loading…","rk.offline":"offline","rk.refresh":"Refresh",
+ "rk.notYet":"No official results yet","rk.notYetH":"This fills in automatically once matches start in Incheon. Data comes straight from results.first.global.",
+ "rk.preview":"Preview with sample data","rk.noneHere":"Nothing here with this filter",
+ "rk.needOnline":"Rankings need a connection","rk.suppression":"Suppression points (R/B)","rk.climbMult":"Climb multiplier (R/B)",
+ "rk.coop":"Coopertition","rk.field":"Field","rk.time":"Scheduled","rk.noDetail":"No score breakdown published for this match",
+ "rk.fromOfficial":"Official data from results.first.global",
+ "m.phase":"Phase","m.phaseH":"practice results are kept out of the averages",
+ "m.practice":"Practice","m.quals":"Quals","m.playoffs":"Playoffs","n.phaseAll":"All phases"},
+
+"zh-Hant":{"rk.ours":"我們自己記的","rk.nav":"排位","rk.title":"即時排名","rk.ladder":"排行榜","rk.matches":"賽程","rk.scouted":"我們的觀察",
+ "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即將開打","rk.myCont":"我這洲",
+ "rk.champion":"冠軍","rk.podium":"前三","rk.playoff":"晉級區","rk.contender":"競爭中","rk.rising":"上升中",
+ "rk.yourRank":"你們的名次","rk.toPlayoff":"距離晉級還差","rk.you":"你們",
+ "rk.rs":"排名分","rk.high":"單場最高","rk.played":"已打","rk.record":"勝-敗-平",
+ "rk.updated":"更新於","rk.loading":"載入中…","rk.offline":"連不上","rk.refresh":"重新整理",
+ "rk.notYet":"官方還沒有成績","rk.notYetH":"仁川開打之後會自動出現，資料直接來自 results.first.global。",
+ "rk.preview":"先用範例資料看看","rk.noneHere":"這個篩選沒有資料",
+ "rk.needOnline":"排名需要連線","rk.suppression":"滅火桶得分（紅/藍）","rk.climbMult":"爬升倍率（紅/藍）",
+ "rk.coop":"Coopertition 加分","rk.field":"場地","rk.time":"預定時間","rk.noDetail":"這場沒有公布計分細節",
+ "rk.fromOfficial":"官方資料來自 results.first.global",
+ "m.phase":"賽段","m.phaseH":"模擬賽不會算進平均",
+ "m.practice":"模擬賽","m.quals":"正賽","m.playoffs":"季後賽","n.phaseAll":"全部賽段"},
+
+"zh-Hans":{"rk.ours":"我们自己记的","rk.nav":"排位","rk.title":"实时排名","rk.ladder":"排行榜","rk.matches":"赛程","rk.scouted":"我们的观察",
+ "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即将开打","rk.myCont":"我这洲",
+ "rk.champion":"冠军","rk.podium":"前三","rk.playoff":"晋级区","rk.contender":"竞争中","rk.rising":"上升中",
+ "rk.yourRank":"你们的名次","rk.toPlayoff":"距离晋级还差","rk.you":"你们",
+ "rk.rs":"排名分","rk.high":"单场最高","rk.played":"已打","rk.record":"胜-负-平",
+ "rk.updated":"更新于","rk.loading":"加载中…","rk.offline":"连不上","rk.refresh":"刷新",
+ "rk.notYet":"官方还没有成绩","rk.notYetH":"仁川开打之后会自动出现，数据直接来自 results.first.global。",
+ "rk.preview":"先用示例数据看看","rk.noneHere":"这个筛选没有数据",
+ "rk.needOnline":"排名需要联网","rk.suppression":"灭火桶得分（红/蓝）","rk.climbMult":"爬升倍率（红/蓝）",
+ "rk.coop":"Coopertition 加分","rk.field":"场地","rk.time":"预定时间","rk.noDetail":"这场没有公布计分细节",
+ "rk.fromOfficial":"官方数据来自 results.first.global",
+ "m.phase":"赛段","m.phaseH":"模拟赛不会算进平均",
+ "m.practice":"模拟赛","m.quals":"正赛","m.playoffs":"季后赛","n.phaseAll":"全部赛段"},
+
+es:{"rk.ours":"Nuestros datos","rk.nav":"Clasif.","rk.title":"Clasificación","rk.ladder":"Tabla","rk.matches":"Partidos","rk.scouted":"Nuestros datos",
+ "rk.all":"Todos","rk.mine":"Míos","rk.done":"Jugados","rk.upcoming":"Próximos","rk.myCont":"Mi continente",
+ "rk.champion":"CAMPEÓN","rk.podium":"PODIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"ASPIRANTE","rk.rising":"EN ASCENSO",
+ "rk.yourRank":"Tu puesto","rk.toPlayoff":"puestos del corte de playoff:","rk.you":"TÚ",
+ "rk.rs":"Puntuación","rk.high":"Máximo","rk.played":"Jugados","rk.record":"V-D-E",
+ "rk.updated":"actualizado","rk.loading":"cargando…","rk.offline":"sin conexión","rk.refresh":"Actualizar",
+ "rk.notYet":"Aún no hay resultados oficiales","rk.notYetH":"Se llena solo cuando empiecen los partidos en Incheon. Los datos vienen de results.first.global.",
+ "rk.preview":"Ver con datos de ejemplo","rk.noneHere":"Nada con este filtro",
+ "rk.needOnline":"La clasificación necesita conexión","rk.suppression":"Puntos de supresión (R/A)","rk.climbMult":"Multiplicador (R/A)",
+ "rk.coop":"Coopertition","rk.field":"Campo","rk.time":"Programado","rk.noDetail":"Sin desglose publicado",
+ "rk.fromOfficial":"Datos oficiales de results.first.global",
+ "m.phase":"Fase","m.phaseH":"la práctica no cuenta en los promedios",
+ "m.practice":"Práctica","m.quals":"Clasif.","m.playoffs":"Playoffs","n.phaseAll":"Todas las fases"},
+
+fr:{"rk.ours":"Nos relevés","rk.nav":"Classement","rk.title":"Classement","rk.ladder":"Classement","rk.matches":"Matchs","rk.scouted":"Nos relevés",
+ "rk.all":"Tous","rk.mine":"Les miens","rk.done":"Joués","rk.upcoming":"À venir","rk.myCont":"Mon continent",
+ "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"ZONE PLAYOFF","rk.contender":"PRÉTENDANT","rk.rising":"EN PROGRÈS",
+ "rk.yourRank":"Votre rang","rk.toPlayoff":"places du seuil playoff :","rk.you":"VOUS",
+ "rk.rs":"Score de classement","rk.high":"Meilleur","rk.played":"Joués","rk.record":"V-D-N",
+ "rk.updated":"mis à jour","rk.loading":"chargement…","rk.offline":"hors ligne","rk.refresh":"Actualiser",
+ "rk.notYet":"Pas encore de résultats officiels","rk.notYetH":"Se remplit automatiquement dès le début des matchs à Incheon. Données issues de results.first.global.",
+ "rk.preview":"Aperçu avec des données d'exemple","rk.noneHere":"Rien avec ce filtre",
+ "rk.needOnline":"Le classement nécessite une connexion","rk.suppression":"Points suppression (R/B)","rk.climbMult":"Multiplicateur (R/B)",
+ "rk.coop":"Coopertition","rk.field":"Terrain","rk.time":"Prévu","rk.noDetail":"Aucun détail publié",
+ "rk.fromOfficial":"Données officielles de results.first.global",
+ "m.phase":"Phase","m.phaseH":"les essais ne comptent pas dans les moyennes",
+ "m.practice":"Essais","m.quals":"Qualifs","m.playoffs":"Playoffs","n.phaseAll":"Toutes les phases"},
+
+pt:{"rk.ours":"Nossos dados","rk.nav":"Ranking","rk.title":"Classificação","rk.ladder":"Ranking","rk.matches":"Partidas","rk.scouted":"Nossos dados",
+ "rk.all":"Todas","rk.mine":"Minhas","rk.done":"Jogadas","rk.upcoming":"A seguir","rk.myCont":"Meu continente",
+ "rk.champion":"CAMPEÃO","rk.podium":"PÓDIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"CANDIDATO","rk.rising":"EM ALTA",
+ "rk.yourRank":"Sua posição","rk.toPlayoff":"posições do corte do playoff:","rk.you":"VOCÊS",
+ "rk.rs":"Pontuação","rk.high":"Melhor","rk.played":"Jogadas","rk.record":"V-D-E",
+ "rk.updated":"atualizado","rk.loading":"carregando…","rk.offline":"sem conexão","rk.refresh":"Atualizar",
+ "rk.notYet":"Ainda sem resultados oficiais","rk.notYetH":"Preenche sozinho quando as partidas começarem em Incheon. Dados de results.first.global.",
+ "rk.preview":"Ver com dados de exemplo","rk.noneHere":"Nada com este filtro",
+ "rk.needOnline":"O ranking precisa de conexão","rk.suppression":"Pontos de supressão (V/A)","rk.climbMult":"Multiplicador (V/A)",
+ "rk.coop":"Coopertition","rk.field":"Campo","rk.time":"Agendado","rk.noDetail":"Sem detalhamento publicado",
+ "rk.fromOfficial":"Dados oficiais de results.first.global",
+ "m.phase":"Fase","m.phaseH":"o treino não entra nas médias",
+ "m.practice":"Treino","m.quals":"Classif.","m.playoffs":"Playoffs","n.phaseAll":"Todas as fases"},
+
+ar:{"rk.ours":"بياناتنا","rk.nav":"الترتيب","rk.title":"الترتيب المباشر","rk.ladder":"الترتيب","rk.matches":"المباريات","rk.scouted":"رصدنا",
+ "rk.all":"الكل","rk.mine":"مبارياتنا","rk.done":"انتهت","rk.upcoming":"قادمة","rk.myCont":"قارتي",
+ "rk.champion":"البطل","rk.podium":"المنصة","rk.playoff":"منطقة التأهل","rk.contender":"منافس","rk.rising":"صاعد",
+ "rk.yourRank":"ترتيبكم","rk.toPlayoff":"مركزاً عن حد التأهل:","rk.you":"أنتم",
+ "rk.rs":"نقاط الترتيب","rk.high":"الأعلى","rk.played":"لعبت","rk.record":"ف-خ-ت",
+ "rk.updated":"حُدّث","rk.loading":"جارٍ التحميل…","rk.offline":"غير متصل","rk.refresh":"تحديث",
+ "rk.notYet":"لا نتائج رسمية بعد","rk.notYetH":"سيمتلئ تلقائياً عند بدء المباريات في إنتشون. البيانات من results.first.global.",
+ "rk.preview":"معاينة ببيانات تجريبية","rk.noneHere":"لا شيء بهذا التصفية",
+ "rk.needOnline":"الترتيب يحتاج اتصالاً","rk.suppression":"نقاط الإخماد (أحمر/أزرق)","rk.climbMult":"مضاعف التسلّق",
+ "rk.coop":"التعاون","rk.field":"الملعب","rk.time":"الموعد","rk.noDetail":"لا تفاصيل منشورة",
+ "rk.fromOfficial":"بيانات رسمية من results.first.global",
+ "m.phase":"المرحلة","m.phaseH":"التدريب لا يدخل في المعدلات",
+ "m.practice":"تدريب","m.quals":"التصفيات","m.playoffs":"الأدوار الإقصائية","n.phaseAll":"كل المراحل"},
+
+ja:{"rk.ours":"自チームの記録","rk.nav":"順位","rk.title":"ライブ順位","rk.ladder":"ランキング","rk.matches":"試合","rk.scouted":"自分たちの記録",
+ "rk.all":"すべて","rk.mine":"自チーム","rk.done":"終了","rk.upcoming":"これから","rk.myCont":"同じ大陸",
+ "rk.champion":"首位","rk.podium":"表彰台","rk.playoff":"決勝進出圏","rk.contender":"接戦圏","rk.rising":"上昇中",
+ "rk.yourRank":"自チームの順位","rk.toPlayoff":"決勝進出まであと","rk.you":"自チーム",
+ "rk.rs":"ランキングスコア","rk.high":"最高得点","rk.played":"試合数","rk.record":"勝-敗-分",
+ "rk.updated":"更新","rk.loading":"読み込み中…","rk.offline":"接続なし","rk.refresh":"更新",
+ "rk.notYet":"公式結果はまだありません","rk.notYetH":"仁川で試合が始まると自動で表示されます。データは results.first.global から直接取得します。",
+ "rk.preview":"サンプルデータで見る","rk.noneHere":"この条件では表示なし",
+ "rk.needOnline":"順位には接続が必要です","rk.suppression":"消火ユニット得点（赤/青）","rk.climbMult":"クライム倍率（赤/青）",
+ "rk.coop":"Coopertition","rk.field":"フィールド","rk.time":"予定時刻","rk.noDetail":"この試合の内訳は未公開",
+ "rk.fromOfficial":"公式データ: results.first.global",
+ "m.phase":"フェーズ","m.phaseH":"練習試合は平均に含めません",
+ "m.practice":"練習","m.quals":"予選","m.playoffs":"決勝","n.phaseAll":"すべて"},
+
+ko:{"rk.ours":"우리 기록","rk.nav":"순위","rk.title":"실시간 순위","rk.ladder":"랭킹","rk.matches":"경기","rk.scouted":"우리 기록",
+ "rk.all":"전체","rk.mine":"우리","rk.done":"종료","rk.upcoming":"예정","rk.myCont":"같은 대륙",
+ "rk.champion":"1위","rk.podium":"시상대","rk.playoff":"플레이오프 진출권","rk.contender":"경쟁권","rk.rising":"상승세",
+ "rk.yourRank":"우리 순위","rk.toPlayoff":"진출까지","rk.you":"우리",
+ "rk.rs":"랭킹 점수","rk.high":"최고 점수","rk.played":"경기 수","rk.record":"승-패-무",
+ "rk.updated":"갱신","rk.loading":"불러오는 중…","rk.offline":"연결 없음","rk.refresh":"새로고침",
+ "rk.notYet":"아직 공식 결과가 없습니다","rk.notYetH":"인천에서 경기가 시작되면 자동으로 채워집니다. 데이터는 results.first.global에서 바로 가져옵니다.",
+ "rk.preview":"샘플 데이터로 보기","rk.noneHere":"이 필터에는 결과가 없습니다",
+ "rk.needOnline":"순위는 연결이 필요합니다","rk.suppression":"진압 유닛 점수 (적/청)","rk.climbMult":"등반 배수 (적/청)",
+ "rk.coop":"Coopertition","rk.field":"필드","rk.time":"예정 시각","rk.noDetail":"이 경기의 세부 점수는 미공개",
+ "rk.fromOfficial":"공식 데이터: results.first.global",
+ "m.phase":"단계","m.phaseH":"연습 경기는 평균에 넣지 않습니다",
+ "m.practice":"연습","m.quals":"예선","m.playoffs":"플레이오프","n.phaseAll":"전체 단계"}
+};
+Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
+})();
+
+</script>
+<script>
+'use strict';
+/* FGC 2026 Scouting — live ladder / match history / analytics, fed by results.first.global */
+
+const OFF = { data: null, movement: {}, spark: {}, fetched: '', error: '', demo: false, timer: 0 };
+let rMode = 'ladder';        // ladder | matches | teams
+let rCont = 'all';           // all | af | am | as | eu | oc | mine
+let rMatchFilter = 'all';    // all | mine | played | next
+
+/* ---------- helpers ---------- */
+const CONT_NAMES = window.CONTINENTS || {};
+/* 官方用 3 碼國碼 (TPE/JPN)，我們用 slug；靠國名與 ISO-2 兜起來 */
+const BY_NAME = {}, BY_CC = {};
+NATIONS.forEach(n => {
+  BY_NAME[(n.name || '').toLowerCase()] = n;
+  if (n.cc) BY_CC[n.cc.toLowerCase()] = n;
+});
+function nationOf(row) {
+  const t = (row && row.team) || {};
+  const cc2 = (t.countryCode || '').toLowerCase();
+  if (cc2.length === 2 && BY_CC[cc2]) return BY_CC[cc2];
+  const nm = (t.country || t.shortName || t.name || '').toLowerCase();
+  if (BY_NAME[nm]) return BY_NAME[nm];
+  for (const n of NATIONS) {                       // 最後手段：寬鬆比對
+    const a = (n.name || '').toLowerCase();
+    if (nm && (a.includes(nm) || nm.includes(a))) return n;
+  }
+  return null;
+}
+function rowSlug(row) { const n = nationOf(row); return n ? n.slug : ''; }
+function rowLabel(row) {
+  const n = nationOf(row), t = (row && row.team) || {};
+  const name = n ? nName(n.slug) : (t.country || t.shortName || t.name || row.teamKey || '—');
+  return { flag: n ? nFlag(n.slug) : '🏳️', name, sub: n ? nSub(n.slug) : '', cont: n ? n.cont : '' };
+}
+/* 遊戲式段位：前 24 名可以進季後賽，那條線最有意義 */
+function tier(rank) {
+  if (rank === 1) return { k: 'champ', label: t('rk.champion'), icon: '👑' };
+  if (rank <= 3) return { k: 'podium', label: t('rk.podium'), icon: '🏅' };
+  if (rank <= 24) return { k: 'playoff', label: t('rk.playoff'), icon: '🔥' };
+  if (rank <= 60) return { k: 'contend', label: t('rk.contender'), icon: '⚔️' };
+  return { k: 'rising', label: t('rk.rising'), icon: '🌱' };
+}
+function sparkSVG(vals) {
+  if (!vals || vals.length < 2) return '';
+  const w = 56, h = 18;
+  /* 每一隊用自己的名次區間正規化，不然前段班的線會全部擠在頂端 */
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi === lo) { lo = Math.max(1, lo - 1); hi = lo + 2; }
+  const pts = vals.map((v, i) => {
+    const x = (i / (vals.length - 1)) * w;
+    const y = ((v - lo) / (hi - lo)) * (h - 4) + 2;        // 名次數字小 = 畫在上面
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const up = vals[0] > vals[vals.length - 1];              // 名次變小 = 進步
+  return `<svg class="trend ${up ? 'up' : 'dn'}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${pts}"/></svg>`;
+}
+function moveTag(d) {
+  if (!d) return '';
+  return d > 0 ? `<span class="mv up">▲${d}</span>` : `<span class="mv dn">▼${-d}</span>`;
+}
+
+/* ---------- 取得官方資料 ---------- */
+async function ranksFetch(quiet) {
+  if (AUTH.offline) { OFF.error = t('rk.needOnline'); renderRanks(); return; }
+  try {
+    const d = await api('/api/official');
+    OFF.data = d.data || {};
+    OFF.movement = d.movement || {};
+    OFF.spark = d.spark || {};
+    OFF.fetched = d.fetched || '';
+    OFF.error = d.error || '';
+    OFF.demo = false;
+  } catch (e) { OFF.error = e.message; }
+  renderRanks();
+  if (!quiet) haptic(8);
+}
+/* 賽前想先看介面長怎樣：造一份明顯標示 SAMPLE 的假資料 */
+function ranksDemo() {
+  const pick = NATIONS.filter(n => n.cc).slice(0, 48);
+  const rankings = pick.map((n, i) => ({
+    rank: i + 1, teamKey: n.cc.toUpperCase(),
+    rankingScore: +(190 - i * 2.4 + (i % 5) * 3).toFixed(1),
+    highestScore: Math.round(240 - i * 2.2 + (i % 7) * 6),
+    played: 6, wins: Math.max(0, 6 - Math.floor(i / 8)), ties: i % 4 === 0 ? 1 : 0,
+    losses: Math.min(6, Math.floor(i / 8)),
+    team: { country: n.name, countryCode: n.cc.toUpperCase(), shortName: n.name, name: n.name },
+  }));
+  const matches = [];
+  for (let i = 0; i < 14; i++) {
+    const r = [0, 1, 2].map(k => pick[(i * 3 + k) % pick.length]);
+    const b = [0, 1, 2].map(k => pick[(i * 3 + k + 9) % pick.length]);
+    matches.push({
+      id: 'demo' + i, name: 'Qualification ' + (i + 1), field: (i % 2) + 1,
+      played: i < 9, tournamentKey: 'qual',
+      scheduledTime: new Date(Date.now() + (i - 9) * 7 * 60000).toISOString(),
+      participants: r.map(n => ({ teamKey: n.cc.toUpperCase(), station: 'RED' }))
+        .concat(b.map(n => ({ teamKey: n.cc.toUpperCase(), station: 'BLUE' }))),
+      redScore: 120 + ((i * 13) % 90), blueScore: 110 + ((i * 29) % 95),
+      redClimbMultiplier: 0.4, blueClimbMultiplier: 0.3,
+      redSuppressionUnitPoints: 74 + (i % 20), blueSuppressionUnitPoints: 68 + (i % 25),
+      wildfireInExtinguisher: 30 + (i % 15), coopertition: [0, 10, 25, 40][i % 4],
+    });
+  }
+  OFF.data = { rankings, matches, round_robin: [], finals: [], awards: [] };
+  OFF.movement = Object.fromEntries(rankings.slice(0, 12).map((r, i) => [r.teamKey, [2, -1, 3, 0, -2, 1][i % 6]]));
+  OFF.spark = Object.fromEntries(rankings.slice(0, 40).map(r =>
+    [r.teamKey, Array.from({ length: 8 }, (_, i) => Math.max(1, r.rank + Math.round(Math.sin(i) * 4)))]));
+  OFF.fetched = new Date().toISOString();
+  OFF.demo = true; OFF.error = '';
+  renderRanks();
+}
+
+/* ---------- 畫面 ---------- */
+function ranksLoad() {
+  if (!OFF.data && !OFF.error) ranksFetch(true);
+  else renderRanks();
+  clearInterval(OFF.timer);
+  OFF.timer = setInterval(() => {                      // 只有停在這一頁而且是官方資料才自動刷新
+    if (!$('tab-teams').hidden && !document.hidden && !OFF.demo) ranksFetch(true);
+  }, 60000);
+}
+function renderRanks() {
+  const host = $('rkBody'); if (!host) return;
+  $('rkStatus').innerHTML = OFF.demo
+    ? `<span class="live demo">SAMPLE</span>`
+    : OFF.error ? `<span class="live bad">${esc(t('rk.offline'))}</span>`
+      : OFF.fetched ? `<span class="live ok"></span>${esc(t('rk.updated'))} ${esc(String(OFF.fetched).slice(11, 16))}`
+        : `<span class="live wait"></span>${esc(t('rk.loading'))}`;
+  if (rMode === 'ladder') host.innerHTML = ladderHTML();
+  else if (rMode === 'matches') host.innerHTML = matchesHTML();
+  else host.innerHTML = '';
+  $('tList').hidden = rMode !== 'teams';
+  $('tSortCard').hidden = rMode !== 'teams';
+  $('rkFilters').hidden = rMode === 'teams';
+  $('rkCont').hidden = rMode === 'teams';
+  $('rkMatchFilter').hidden = rMode !== 'matches';
+  if (rMode === 'teams') renderTeams();
+  wireRanks();
+}
+function contOf(slug) { const n = NMAP[slug]; return n ? n.cont : ''; }
+function filterRows(rows) {
+  if (rCont === 'all') return rows;
+  const mine = contOf(AUTH.team);
+  return rows.filter(r => {
+    const n = nationOf(r); if (!n) return false;
+    return rCont === 'mine' ? n.cont === mine : n.cont === rCont;
+  });
+}
+function ladderHTML() {
+  const rows = (OFF.data && OFF.data.rankings) || [];
+  if (!rows.length) return emptyHTML();
+  const mineRow = rows.find(r => rowSlug(r) === AUTH.team);
+  const shown = filterRows(rows);
+  let h = '';
+  if (mineRow) {
+    const L = rowLabel(mineRow), ti = tier(mineRow.rank);
+    h += `<div class="card you ${ti.k}">
+      <div class="youtop"><span class="fl">${L.flag}</span>
+        <div><span class="lb">${esc(t('rk.yourRank'))}</span><b>${esc(L.name)}</b></div>
+        <div class="bigrank">#${mineRow.rank}${moveTag(OFF.movement[mineRow.teamKey])}</div></div>
+      <div class="tierbar ${ti.k}"><span>${ti.icon} ${esc(ti.label)}</span>
+        ${mineRow.rank <= 24 ? '' : `<span class="togo">${esc(t('rk.toPlayoff'))} ${mineRow.rank - 24}</span>`}</div>
+      <div class="row stats">
+        <div><div class="note">${esc(t('rk.rs'))}</div><div class="stat">${mineRow.rankingScore ?? '—'}</div></div>
+        <div><div class="note">${esc(t('rk.high'))}</div><div class="stat">${mineRow.highestScore ?? '—'}</div></div>
+        <div><div class="note">${esc(t('rk.played'))}</div><div class="stat">${mineRow.played ?? 0}</div></div>
+        <div><div class="note">${esc(t('rk.record'))}</div><div class="stat" style="font-size:20px">${mineRow.wins ?? 0}-${mineRow.losses ?? 0}-${mineRow.ties ?? 0}</div></div>
+      </div>
+      ${sparkSVG(OFF.spark[mineRow.teamKey])}
+    </div>`;
+  }
+  h += '<div class="list ladder">';
+  h += shown.length ? shown.map(r => {
+    const L = rowLabel(r), ti = tier(r.rank), me = rowSlug(r) === AUTH.team;
+    return `<div class="it lad ${ti.k}${me ? ' me' : ''}" data-team="${esc(rowSlug(r))}">
+      <div class="rk">${r.rank}</div>
+      <div class="fl">${L.flag}</div>
+      <div class="d"><div class="lname"><b>${esc(L.name)}</b>${me ? `<span class="tag ok">${esc(t('rk.you'))}</span>` : ''}${moveTag(OFF.movement[r.teamKey])}</div>
+        <div class="lstats"><b>${r.rankingScore ?? '—'}</b><span>${esc(t('rk.high'))} ${r.highestScore ?? '—'}</span><span>${r.played ?? 0} ${esc(t('n.matches'))}</span></div></div>
+      ${sparkSVG(OFF.spark[r.teamKey])}
+      </div>`;
+  }).join('') : `<div class="empty">${esc(t('rk.noneHere'))}</div>`;
+  h += '</div>';
+  return h;
+}
+function matchesHTML() {
+  const all = (OFF.data && OFF.data.matches) || [];
+  if (!all.length) return emptyHTML();
+  const myKeys = new Set();
+  ((OFF.data && OFF.data.rankings) || []).forEach(r => { if (rowSlug(r) === AUTH.team) myKeys.add(r.teamKey); });
+  let rows = all.slice();
+  if (rMatchFilter === 'mine') rows = rows.filter(m => (m.participants || []).some(p => myKeys.has(p.teamKey)));
+  else if (rMatchFilter === 'played') rows = rows.filter(m => m.played);
+  else if (rMatchFilter === 'next') rows = rows.filter(m => !m.played);
+  rows = rows.slice(-60).reverse();
+  if (!rows.length) return `<div class="list"><div class="empty">${esc(t('rk.noneHere'))}</div></div>`;
+  const side = (m, s) => (m.participants || []).filter(p => (p.station || '').toUpperCase().startsWith(s))
+    .map(p => { const n = BY_CC[(p.teamKey || '').slice(0, 2).toLowerCase()]; return n ? nFlag(n.slug) : '🏳️'; }).join(' ');
+  return '<div class="list">' + rows.map(m => {
+    const rs = m.redScore ?? m.red_score, bs = m.blueScore ?? m.blue_score;
+    const redWin = m.played && rs > bs, blueWin = m.played && bs > rs;
+    const mine = (m.participants || []).some(p => myKeys.has(p.teamKey));
+    return `<div class="it mt${mine ? ' me' : ''}" data-mid="${esc(m.id || '')}">
+      <div class="d">
+        <div class="mhead"><b>${esc(m.name || ('Match ' + (m.id || '')))}</b>
+          ${m.field ? `<span class="tag">F${m.field}</span>` : ''}
+          ${m.played ? '' : `<span class="tag ok">${esc(m.scheduledTime ? String(m.scheduledTime).slice(11, 16) : t('rk.upcoming'))}</span>`}</div>
+        <div class="vs">
+          <span class="al R ${redWin ? 'win' : ''}">${side(m, 'R')}<b>${m.played ? (rs ?? '—') : ''}</b></span>
+          <span class="vsx">vs</span>
+          <span class="al B ${blueWin ? 'win' : ''}"><b>${m.played ? (bs ?? '—') : ''}</b>${side(m, 'B')}</span>
+        </div>
+      </div></div>`;
+  }).join('') + '</div>';
+}
+function emptyHTML() {
+  return `<div class="card"><div class="empty" style="padding:30px 14px">
+    <div style="font-size:34px;margin-bottom:8px">🏁</div>
+    <b>${esc(t('rk.notYet'))}</b><br>
+    <span class="note">${esc(t('rk.notYetH'))}</span>
+    <div class="bar" style="justify-content:center;margin-top:14px">
+      <button class="btn" id="rkDemo">${esc(t('rk.preview'))}</button>
+      <button class="btn" id="rkRefresh">${esc(t('rk.refresh'))}</button>
+    </div></div></div>`;
+}
+function wireRanks() {
+  const d = $('rkDemo'); if (d) d.onclick = ranksDemo;
+  const rf = $('rkRefresh'); if (rf) rf.onclick = () => ranksFetch();
+  document.querySelectorAll('#rkBody .it.lad').forEach(el => el.onclick = () => {
+    if (el.dataset.team) openNation(el.dataset.team);
+  });
+  document.querySelectorAll('#rkBody .it.mt').forEach(el => el.onclick = () => matchSheet(el.dataset.mid));
+}
+/* 單場比賽的官方計分細節 */
+const BRACE = { 0: 'None', 0.05: 'Contact', 0.1: 'Zone 1', 0.2: 'Zone 2', 0.3: 'Zone 3' };
+function matchSheet(id) {
+  const m = ((OFF.data && OFF.data.matches) || []).find(x => String(x.id) === String(id));
+  if (!m) return;
+  const line = (k, v) => v === undefined || v === null || v === '' ? '' : `<b>${esc(k)}</b><span>${esc(String(v))}</span>`;
+  const kv = [
+    line(t('rk.suppression'), m.redSuppressionUnitPoints !== undefined
+      ? `${m.redSuppressionUnitPoints} / ${m.blueSuppressionUnitPoints}` : undefined),
+    line(t('rk.climbMult'), m.redClimbMultiplier !== undefined
+      ? `×${(1 + (m.redClimbMultiplier || 0)).toFixed(2)} / ×${(1 + (m.blueClimbMultiplier || 0)).toFixed(2)}` : undefined),
+    line(t('c.ext'), m.wildfireInExtinguisher),
+    line(t('rk.coop'), m.coopertition),
+    line(t('rk.field'), m.field),
+    line(t('rk.time'), m.scheduledTime ? String(m.scheduledTime).replace('T', ' ').slice(0, 16) : ''),
+  ].filter(Boolean).join('');
+  openSheet(`<div class="hd"><b style="font-size:17px">${esc(m.name || 'Match')}</b>
+      <button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>
+    <div class="menu"><div class="kv">${kv || `<span class="note">${esc(t('rk.noDetail'))}</span>`}</div>
+      <p class="note" style="margin-top:12px">${esc(t('rk.fromOfficial'))}</p></div>`);
+}
+
+/* ---------- 控制列 ---------- */
+function initRanks() {
+  segInit($('rkMode'), 'ladder', v => { rMode = v || 'ladder'; renderRanks(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  const cont = $('rkCont');
+  cont.innerHTML = [['all', t('rk.all')], ['mine', t('rk.myCont')]]
+    .concat(Object.keys(CONT_NAMES).filter(k => k !== 'xx').map(k => [k, CONT_NAMES[k]]))
+    .map(([k, label]) => `<button data-v="${k}">${esc(label)}</button>`).join('');
+  segInit(cont, 'all', v => { rCont = v || 'all'; renderRanks(); });
+  segInit($('rkMatchFilter'), 'all', v => { rMatchFilter = v || 'all'; renderRanks(); });
+  $('rkStatus').onclick = () => ranksFetch();
+}
+
+</script>
+<script>
 'use strict';
 /* FGC 2026 Scouting — app logic
    Sections: i18n · data · auth · widgets · country picker · match · pit · nations · robot · calc · data tab · ux · sync · init */
@@ -2430,7 +2937,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -2476,7 +2983,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); mLoad(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -2533,7 +3040,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   ['match','pit','teams','robot','calc','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
   const m=b.dataset.tab==='match'; $('mFab').hidden=!m; $('main').classList.toggle('fab-on',m);
   if(b.dataset.tab==='data') refreshData();
-  if(b.dataset.tab==='teams') renderTeams();
+  if(b.dataset.tab==='teams') ranksLoad();
   if(b.dataset.tab==='calc') calc();
   if(b.dataset.tab==='robot') robotLoad();
   window.scrollTo(0,0);
@@ -2642,10 +3149,12 @@ function slotObj(L,other){ return {id:(EDIT[L]&&EDIT[L].id)||('m'+Date.now()+L+M
   p1:other||'', p2:AUTH.team,
   sup:parseInt($(L+'Sup').value,10)||0, port:parseInt($(L+'Port').value,10)||0,
   climb:segVal(L+'Climb'), carry:parseInt(segVal(L+'Carry')||'0',10), carried:segVal(L+'Carried')==='1', climbAt:segVal(L+'ClimbAt'),
-  state:segVal(L+'State')||'ok', card:segVal(L+'Card2'), rate:segVal(L+'Rate'), notes:$(L+'Notes').value, scout:DB.cfg.scout, ts:now()}; }
+  state:segVal(L+'State')||'ok', card:segVal(L+'Card2'), rate:segVal(L+'Rate'), notes:$(L+'Notes').value,
+  phase:segVal('mPhase')||'qual', scout:DB.cfg.scout, ts:now()}; }
 function alGlow(){ const a=segVal('mAl'); $('mHead').classList.toggle('alR',a==='R'); $('mHead').classList.toggle('alB',a==='B'); }
 function mLoad(){ $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-  segInit($('mAl'),segVal('mAl'),alGlow); SLOTS.forEach(slotReset); alGlow(); }
+  segInit($('mAl'),segVal('mAl'),alGlow); segInit($('mPhase'),segVal('mPhase')||'qual',()=>{});
+  SLOTS.forEach(slotReset); alGlow(); }
 function commit(){
   const picked=SLOTS.filter(L=>$(L+'Country').dataset.v);
   if(!picked.length){ flash($('ACountry')); toast(t('m.errNoTeam'),'err'); return; }
@@ -2667,14 +3176,14 @@ function renderMList(){
   const rows=live().slice().sort((a,b)=>(b.match-a.match)||String(a.team).localeCompare(String(b.team))).slice(0,40);
   $('mList').innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${r.id}">
       <div class="n ${r.al}">M${r.match}</div><div class="fl">${nFlag(r.team)}</div>
-      <div class="d"><b>${esc(nName(r.team))}</b><br><span class="tag">🏀 ${r.sup}</span><span class="tag">PORT ${r.port}</span>${r.climb&&r.climb!=='0'?`<span class="tag ${CLIMB_TAG[r.climb]}">${esc(CLIMB_LABEL[r.climb])}</span>`:''}${r.carry?`<span class="tag">${esc(t('m.carried'))} ${r.carry}</span>`:''}${r.carried?`<span class="tag">${esc(t('m.wasCarried'))}</span>`:''}${r.state&&r.state!=='ok'?`<span class="tag bad">${esc(STATE_LBL[r.state]||r.state)}</span>`:''}${r.card?`<span class="tag bad">${esc(t('m.card'))} ${r.card}</span>`:''}${r.rate?`<span class="tag">${esc(t('n.drv'))} ${r.rate}</span>`:''}</div>
+      <div class="d"><b>${esc(nName(r.team))}</b>${r.phase&&r.phase!=='qual'?`<span class="tag ${r.phase==='play'?'z3':''}">${esc(t(r.phase==='prac'?'m.practice':'m.playoffs'))}</span>`:''}<br><span class="tag">🏀 ${r.sup}</span><span class="tag">PORT ${r.port}</span>${r.climb&&r.climb!=='0'?`<span class="tag ${CLIMB_TAG[r.climb]}">${esc(CLIMB_LABEL[r.climb])}</span>`:''}${r.carry?`<span class="tag">${esc(t('m.carried'))} ${r.carry}</span>`:''}${r.carried?`<span class="tag">${esc(t('m.wasCarried'))}</span>`:''}${r.state&&r.state!=='ok'?`<span class="tag bad">${esc(STATE_LBL[r.state]||r.state)}</span>`:''}${r.card?`<span class="tag bad">${esc(t('m.card'))} ${r.card}</span>`:''}${r.rate?`<span class="tag">${esc(t('n.drv'))} ${r.rate}</span>`:''}</div>
       <div class="x" data-del="${r.id}">✕</div></div>`).join('')
     :`<div class="empty">${esc(t('m.noRecords'))}</div>`;
   $('mList').querySelectorAll('.it').forEach(el=>el.onclick=e=>{
     if(e.target.dataset.del){ if(confirm(t('m.delete'))){ const d=DB.match.find(x=>x.id===e.target.dataset.del); if(d){ d.del=true; d.ts=now(); } saveNow(); renderMList(); push(true); } return; }
     const r=DB.match.find(x=>x.id===el.dataset.id); if(!r) return;
     const mate=live().find(x=>x.id!==r.id&&x.match===r.match&&x.al===r.al);
-    $('mMatch').value=r.match; segInit($('mAl'),r.al,alGlow); alGlow();
+    $('mMatch').value=r.match; segInit($('mAl'),r.al,alGlow); segInit($('mPhase'),r.phase||'qual',()=>{}); alGlow();
     slotLoad('A',r); slotLoad('B',mate||null);
     window.scrollTo({top:0,behavior:'smooth'}); toast(t('m.editing')+' M'+r.match); }); }
 
@@ -2732,9 +3241,11 @@ function renderSelf(){ const el=$('pSelf'); const s=PROFILES[curTeam]; if(!curTe
   $('pUseSelf').onclick=()=>{ const r=rec(); ['cap','type','empty','sup','port','climb','climbSec','carry','carried','pos','roles','hp','drive','lang'].forEach(k=>{ if(s[k]!==undefined) r[k]=s[k]; }); r.ts=now(); save(); loadPit(); toast(t('p.copied'),'ok'); }; }
 
 /* ---------- NATIONS ---------- */
+let tPhase='all';
+function phaseOK(r){ return tPhase==='all' || (r.phase||'qual')===tPhase; }
 function summary(){ const by={};
   const mk=()=>({n:0,sup:0,port:0,best:'',climbN:0,z3:0,carry:0,dead:0,rate:0,rn:0,cards:0});
-  live().forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
+  live().filter(phaseOK).forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
@@ -2754,6 +3265,7 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
     :`<div class="empty">${esc(t('n.noData'))}</div>`;
   $('tList').querySelectorAll('.it').forEach(el=>el.onclick=()=>openNation(el.dataset.t)); }
 segInit($('tSort'),'sup',renderTeams);
+segInit($('tPhase'),'all',v=>{ tPhase=v||'all'; renderTeams(); });
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 
 /* ---------- NATION PAGE (lobby): photos · radar · power · our numbers ---------- */
@@ -2847,7 +3359,7 @@ async function loadProfiles(){ if(AUTH.offline||!AUTH.token||!DB) return;
     const mine=PROFILES[AUTH.team];
     if(mine&&!DB.robot){ DB.robot=Object.assign(blankPit(),{desc:'',published:false},mine); saveNow(); if(!$('tab-robot').hidden) robotLoad(); }
     else if(mine&&DB.robot){ DB.robot.photos=mine.photos||DB.robot.photos||[]; if(!$('tab-robot').hidden) renderPhotos(); }
-    if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
+    if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
   catch(e){} }
 setInterval(loadProfiles,60000);
 
@@ -2910,7 +3422,7 @@ function applyServer(s){ let ch=false; const sc=s.cfg||{}; SYNC.applying=true; t
   (s.match||[]).forEach(m=>{ if(!m.id) return; if(idx[m.id]===undefined){ idx[m.id]=DB.match.length; DB.match.push(m); ch=true; } else if((m.ts||'')>(DB.match[idx[m.id]].ts||'')){ DB.match[idx[m.id]]=m; ch=true; } });
   if(!ch) return; saveNow(); renderMList();
   const typing=/^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||'');
-  if(!typing){ if(!$('tab-data').hidden) refreshData(); if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); }
+  if(!typing){ if(!$('tab-data').hidden) refreshData(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); }
   } finally { SYNC.applying=false; } }
 function stamp(){ return ' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
 async function push(force){ if(!SYNC.on||SYNC.busy||!DB) return;

@@ -40,7 +40,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -86,7 +86,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); mLoad(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -143,7 +143,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   ['match','pit','teams','robot','calc','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
   const m=b.dataset.tab==='match'; $('mFab').hidden=!m; $('main').classList.toggle('fab-on',m);
   if(b.dataset.tab==='data') refreshData();
-  if(b.dataset.tab==='teams') renderTeams();
+  if(b.dataset.tab==='teams') ranksLoad();
   if(b.dataset.tab==='calc') calc();
   if(b.dataset.tab==='robot') robotLoad();
   window.scrollTo(0,0);
@@ -252,10 +252,12 @@ function slotObj(L,other){ return {id:(EDIT[L]&&EDIT[L].id)||('m'+Date.now()+L+M
   p1:other||'', p2:AUTH.team,
   sup:parseInt($(L+'Sup').value,10)||0, port:parseInt($(L+'Port').value,10)||0,
   climb:segVal(L+'Climb'), carry:parseInt(segVal(L+'Carry')||'0',10), carried:segVal(L+'Carried')==='1', climbAt:segVal(L+'ClimbAt'),
-  state:segVal(L+'State')||'ok', card:segVal(L+'Card2'), rate:segVal(L+'Rate'), notes:$(L+'Notes').value, scout:DB.cfg.scout, ts:now()}; }
+  state:segVal(L+'State')||'ok', card:segVal(L+'Card2'), rate:segVal(L+'Rate'), notes:$(L+'Notes').value,
+  phase:segVal('mPhase')||'qual', scout:DB.cfg.scout, ts:now()}; }
 function alGlow(){ const a=segVal('mAl'); $('mHead').classList.toggle('alR',a==='R'); $('mHead').classList.toggle('alB',a==='B'); }
 function mLoad(){ $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-  segInit($('mAl'),segVal('mAl'),alGlow); SLOTS.forEach(slotReset); alGlow(); }
+  segInit($('mAl'),segVal('mAl'),alGlow); segInit($('mPhase'),segVal('mPhase')||'qual',()=>{});
+  SLOTS.forEach(slotReset); alGlow(); }
 function commit(){
   const picked=SLOTS.filter(L=>$(L+'Country').dataset.v);
   if(!picked.length){ flash($('ACountry')); toast(t('m.errNoTeam'),'err'); return; }
@@ -277,14 +279,14 @@ function renderMList(){
   const rows=live().slice().sort((a,b)=>(b.match-a.match)||String(a.team).localeCompare(String(b.team))).slice(0,40);
   $('mList').innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${r.id}">
       <div class="n ${r.al}">M${r.match}</div><div class="fl">${nFlag(r.team)}</div>
-      <div class="d"><b>${esc(nName(r.team))}</b><br><span class="tag">🏀 ${r.sup}</span><span class="tag">PORT ${r.port}</span>${r.climb&&r.climb!=='0'?`<span class="tag ${CLIMB_TAG[r.climb]}">${esc(CLIMB_LABEL[r.climb])}</span>`:''}${r.carry?`<span class="tag">${esc(t('m.carried'))} ${r.carry}</span>`:''}${r.carried?`<span class="tag">${esc(t('m.wasCarried'))}</span>`:''}${r.state&&r.state!=='ok'?`<span class="tag bad">${esc(STATE_LBL[r.state]||r.state)}</span>`:''}${r.card?`<span class="tag bad">${esc(t('m.card'))} ${r.card}</span>`:''}${r.rate?`<span class="tag">${esc(t('n.drv'))} ${r.rate}</span>`:''}</div>
+      <div class="d"><b>${esc(nName(r.team))}</b>${r.phase&&r.phase!=='qual'?`<span class="tag ${r.phase==='play'?'z3':''}">${esc(t(r.phase==='prac'?'m.practice':'m.playoffs'))}</span>`:''}<br><span class="tag">🏀 ${r.sup}</span><span class="tag">PORT ${r.port}</span>${r.climb&&r.climb!=='0'?`<span class="tag ${CLIMB_TAG[r.climb]}">${esc(CLIMB_LABEL[r.climb])}</span>`:''}${r.carry?`<span class="tag">${esc(t('m.carried'))} ${r.carry}</span>`:''}${r.carried?`<span class="tag">${esc(t('m.wasCarried'))}</span>`:''}${r.state&&r.state!=='ok'?`<span class="tag bad">${esc(STATE_LBL[r.state]||r.state)}</span>`:''}${r.card?`<span class="tag bad">${esc(t('m.card'))} ${r.card}</span>`:''}${r.rate?`<span class="tag">${esc(t('n.drv'))} ${r.rate}</span>`:''}</div>
       <div class="x" data-del="${r.id}">✕</div></div>`).join('')
     :`<div class="empty">${esc(t('m.noRecords'))}</div>`;
   $('mList').querySelectorAll('.it').forEach(el=>el.onclick=e=>{
     if(e.target.dataset.del){ if(confirm(t('m.delete'))){ const d=DB.match.find(x=>x.id===e.target.dataset.del); if(d){ d.del=true; d.ts=now(); } saveNow(); renderMList(); push(true); } return; }
     const r=DB.match.find(x=>x.id===el.dataset.id); if(!r) return;
     const mate=live().find(x=>x.id!==r.id&&x.match===r.match&&x.al===r.al);
-    $('mMatch').value=r.match; segInit($('mAl'),r.al,alGlow); alGlow();
+    $('mMatch').value=r.match; segInit($('mAl'),r.al,alGlow); segInit($('mPhase'),r.phase||'qual',()=>{}); alGlow();
     slotLoad('A',r); slotLoad('B',mate||null);
     window.scrollTo({top:0,behavior:'smooth'}); toast(t('m.editing')+' M'+r.match); }); }
 
@@ -342,9 +344,11 @@ function renderSelf(){ const el=$('pSelf'); const s=PROFILES[curTeam]; if(!curTe
   $('pUseSelf').onclick=()=>{ const r=rec(); ['cap','type','empty','sup','port','climb','climbSec','carry','carried','pos','roles','hp','drive','lang'].forEach(k=>{ if(s[k]!==undefined) r[k]=s[k]; }); r.ts=now(); save(); loadPit(); toast(t('p.copied'),'ok'); }; }
 
 /* ---------- NATIONS ---------- */
+let tPhase='all';
+function phaseOK(r){ return tPhase==='all' || (r.phase||'qual')===tPhase; }
 function summary(){ const by={};
   const mk=()=>({n:0,sup:0,port:0,best:'',climbN:0,z3:0,carry:0,dead:0,rate:0,rn:0,cards:0});
-  live().forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
+  live().filter(phaseOK).forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
@@ -364,6 +368,7 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
     :`<div class="empty">${esc(t('n.noData'))}</div>`;
   $('tList').querySelectorAll('.it').forEach(el=>el.onclick=()=>openNation(el.dataset.t)); }
 segInit($('tSort'),'sup',renderTeams);
+segInit($('tPhase'),'all',v=>{ tPhase=v||'all'; renderTeams(); });
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 
 /* ---------- NATION PAGE (lobby): photos · radar · power · our numbers ---------- */
@@ -457,7 +462,7 @@ async function loadProfiles(){ if(AUTH.offline||!AUTH.token||!DB) return;
     const mine=PROFILES[AUTH.team];
     if(mine&&!DB.robot){ DB.robot=Object.assign(blankPit(),{desc:'',published:false},mine); saveNow(); if(!$('tab-robot').hidden) robotLoad(); }
     else if(mine&&DB.robot){ DB.robot.photos=mine.photos||DB.robot.photos||[]; if(!$('tab-robot').hidden) renderPhotos(); }
-    if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
+    if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
   catch(e){} }
 setInterval(loadProfiles,60000);
 
@@ -520,7 +525,7 @@ function applyServer(s){ let ch=false; const sc=s.cfg||{}; SYNC.applying=true; t
   (s.match||[]).forEach(m=>{ if(!m.id) return; if(idx[m.id]===undefined){ idx[m.id]=DB.match.length; DB.match.push(m); ch=true; } else if((m.ts||'')>(DB.match[idx[m.id]].ts||'')){ DB.match[idx[m.id]]=m; ch=true; } });
   if(!ch) return; saveNow(); renderMList();
   const typing=/^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||'');
-  if(!typing){ if(!$('tab-data').hidden) refreshData(); if(!$('tab-teams').hidden) renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); }
+  if(!typing){ if(!$('tab-data').hidden) refreshData(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); }
   } finally { SYNC.applying=false; } }
 function stamp(){ return ' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
 async function push(force){ if(!SYNC.on||SYNC.busy||!DB) return;

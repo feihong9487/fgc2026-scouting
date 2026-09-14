@@ -471,3 +471,72 @@ html.no-fx *,html.no-fx *::before,html.no-fx *::after{
   animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 html.no-fx #bg i,html.no-fx .sp{animation:none!important}
 html.no-fx .sp{display:none}
+
+/* ═════════ 排位賽排行榜 ═════════ */
+.rkhead h2{flex-wrap:nowrap}
+.rkstatus{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+.rkstatus .live{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 1.6s ease-in-out infinite;flex:none}
+.rkstatus .live.wait{background:var(--muted);box-shadow:none;animation:pulse 1.6s ease-in-out infinite}
+.rkstatus .live.bad{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
+.rkstatus .live.demo{width:auto;height:auto;border-radius:20px;padding:2px 8px;background:var(--warn);color:#1a1400;font-size:10px;font-weight:900;letter-spacing:.08em;animation:none;box-shadow:none}
+.chips.conts{gap:6px}
+.chips.conts button{min-height:38px;padding:6px 13px;font-size:13px}
+#rkFilters[hidden]{display:none}
+
+/* 自己那一隊的大卡片 */
+.card.you{border-width:2px;position:relative;overflow:hidden}
+.card.you.champ{border-color:#f5c542;box-shadow:var(--sh-1),0 0 0 4px rgba(245,197,66,.16)}
+.card.you.podium{border-color:#c9d1d9;box-shadow:var(--sh-1),0 0 0 4px rgba(201,209,217,.14)}
+.card.you.playoff{border-color:var(--ember);box-shadow:var(--sh-1),0 0 0 4px var(--ember-soft)}
+.card.you.contend{border-color:var(--z2)}
+.card.you.rising{border-color:var(--line-2)}
+.youtop{display:flex;align-items:center;gap:12px}
+.youtop .fl{font-size:34px;line-height:1}
+.youtop .lb{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.youtop b{font-size:18px;letter-spacing:-.02em}
+.bigrank{margin-left:auto;font-size:34px;font-weight:900;letter-spacing:-.04em;display:flex;align-items:baseline;gap:6px;
+  background:linear-gradient(135deg,var(--ember),var(--ember-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tierbar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 12px;border-radius:12px;font-weight:800;font-size:13px;
+  background:var(--line);color:var(--ink)}
+.tierbar.champ{background:linear-gradient(90deg,rgba(245,197,66,.3),transparent);color:#f5c542}
+.tierbar.podium{background:linear-gradient(90deg,rgba(201,209,217,.25),transparent)}
+.tierbar.playoff{background:linear-gradient(90deg,var(--ember-soft),transparent);color:var(--ember)}
+.tierbar .togo{margin-left:auto;font-weight:700;font-size:11.5px;color:var(--muted)}
+
+/* 排行榜列 */
+.list.ladder .it.lad{gap:10px}
+.it.lad .rk{min-width:38px;text-align:center;font-weight:900;font-size:17px;letter-spacing:-.02em;color:var(--muted);flex:none}
+.it.lad.champ .rk{color:#f5c542}.it.lad.podium .rk{color:#c9d1d9}.it.lad.playoff .rk{color:var(--ember)}
+.it.lad.me{background:var(--ember-soft)}
+.it.lad.playoff{border-left:3px solid color-mix(in srgb,var(--ember) 55%,transparent)}
+.it.lad.champ{border-left:3px solid #f5c542}
+.mv{display:inline-block;font-size:11px;font-weight:900;margin-left:6px;padding:1px 6px;border-radius:6px}
+.mv.up{color:var(--ok);background:var(--ok-soft)}
+.mv.dn{color:var(--red);background:var(--red-soft)}
+/* 名次走勢圖（注意：.spark 已經被存檔火花用掉了，這裡叫 .trend）*/
+svg.trend{width:52px;height:20px;flex:none;overflow:visible;align-self:center;margin-left:auto}
+svg.trend polyline{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.trend.up polyline{stroke:var(--ok)}
+svg.trend.dn polyline{stroke:var(--red)}
+.card.you svg.trend{width:100%;height:34px;margin:12px 0 0;display:block}
+
+/* 比賽列 */
+.it.mt{align-items:stretch}
+.it.mt.me{background:var(--ember-soft)}
+.mhead{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.vs{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:20px}
+.vs .al{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:10px;flex:1}
+.vs .al b{font-size:17px;font-weight:900;letter-spacing:-.02em}
+.vs .al.R{background:var(--red-soft)}
+.vs .al.B{background:var(--blue-soft);justify-content:flex-end}
+.vs .al.win{outline:2px solid currentColor;outline-offset:-2px}
+.vs .al.R.win{color:var(--red)}.vs .al.B.win{color:var(--blue)}
+.vsx{font-size:11px;font-weight:800;color:var(--muted);flex:none}
+#rkCont[hidden],#rkMatchFilter[hidden]{display:none}
+.it.lad .d{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.it.lad .lstats{display:flex;align-items:baseline;gap:8px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it.lad .lstats b{font-size:15px;font-weight:900;color:var(--ember);letter-spacing:-.02em}
+.it.lad .lstats span+span::before,.it.lad .lstats b+span::before{content:'·';margin-right:8px;opacity:.55}
+.it.lad .lname{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.it.lad .lname b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.it.lad .lname .mv{margin-left:0}
