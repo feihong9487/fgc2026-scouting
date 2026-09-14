@@ -50,9 +50,9 @@ explicitly publish is shared.
 
 ## Using it without running anything
 
-Just open <https://fgc-scout.duckdns.org>, pick your country, and sign in with
-the default password `password`. That instance is run by Team Chinese Taipei and
-is free for every team.
+Just open <https://fgc-scout.duckdns.org> and pick your country. The first time
+your team signs in you need a claim code, which Team Chinese Taipei sends to
+your team directly. That instance is free for every team.
 
 Prefer something you can carry on a USB stick? `FGC2026_Scouting.html` is a
 single self-contained file (≈700 KB, all 20 languages and all flags inlined).
@@ -76,16 +76,33 @@ US$5/month VPS.
 
 ### How accounts work
 
-Every nation in `web/nations.js` is an account. The default password is
-`password`; the first person to sign in is asked to set a real one for the team
-(they can skip it). Passwords are PBKDF2-SHA256 with a per-team salt. There is
-no email, no personal data, and no third-party service involved.
+Every nation in `web/nations.js` is an account, and one account is shared by
+everyone on that team. Passwords are PBKDF2-SHA256 with a per-team salt. There
+is no email, no personal data, and no third-party service involved.
 
-Forgot a password? The organiser runs:
+A nation that nobody has claimed yet cannot be signed into at all. Claiming it
+takes a single-use code that only the organiser can issue, and the team sets
+its own password in the same step, so there is never a shared default password
+in play. Earlier versions did have one, which let anyone take over a nation
+that had not signed in yet and lock the real team out.
+
+Organiser commands:
 
 ```bash
-python3 server.py --reset-password <country-slug>
+python3 server.py --gen-claims             # issue a code per unclaimed nation
+python3 server.py --show-claim <slug>      # read one back
+python3 server.py --reset-password <slug>  # void an account, issue a fresh code
+python3 server.py --revoke-all             # void every account, reissue (after a leak)
+python3 server.py --audit 40               # recent logins, claims, password changes
 ```
+
+Send a code to that team and no one else. The list is as sensitive as a
+password file: it lives in `data/claims.json`, which is git-ignored, and it
+should never be posted to a group chat.
+
+Every login, failed login, claim and password change is recorded in
+`data/audit.log` with time, nation, IP and user agent. Teams also see their
+previous sign-in time and IP in the Data tab.
 
 ## Layout
 
@@ -112,7 +129,8 @@ All endpoints take `X-Token` from `/api/login` except where noted.
 
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/api/login` | `{team, password}` → `{token, mustChange}` |
+| `POST` | `/api/login` | `{team, password}` → `{token, mustChange}`; `409 needClaim` if unclaimed |
+| `POST` | `/api/claim` | `{team, code, password}` → `{token}`, first sign-in only |
 | `POST` | `/api/password` | change the team password |
 | `GET` | `/api/state` | whole dataset for your team |
 | `POST` | `/api/sync` | send changes, receive merged state (or `{nochange}`) |
