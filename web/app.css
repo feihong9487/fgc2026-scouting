@@ -556,3 +556,8 @@ svg.trend.dn polyline{stroke:var(--red)}
 #scWho button img.flag{height:12px;width:auto;border-radius:2px;vertical-align:-1px}
 .warn b{display:block;margin-bottom:5px}
 #aCode{letter-spacing:.12em;font-weight:800;text-transform:uppercase;font-family:ui-monospace,Menlo,monospace}
+/* 「你記過的」清單：正在編輯的那一列標起來 */
+#mineList .it{cursor:pointer}
+#mineList .it.me{background:var(--ember-soft);border-color:color-mix(in srgb,var(--ember) 40%,var(--line))}
+#mineList .it .x{flex:none;align-self:center}
+#scMine h2 .pill{margin-left:auto}

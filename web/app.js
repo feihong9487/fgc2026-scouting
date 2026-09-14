@@ -89,7 +89,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -331,15 +331,16 @@ function pitPhaseOf(key){ return String(key).split('#')[1]||'qual'; }
 /* 找這一國最合適的一份：先要指定賽段，沒有退回正賽，再沒有就挑最新的 */
 function pitFor(slug,ph){
   if(!DB) return null;
-  const want=DB.pit[pitKey(slug,ph||pitPhase)]; if(want&&want.ts) return want;
-  const q=DB.pit[slug]; if(q&&q.ts) return q;
+  const want=DB.pit[pitKey(slug,ph||pitPhase)]; if(want&&want.ts&&!want.del) return want;
+  const q=DB.pit[slug]; if(q&&q.ts&&!q.del) return q;
   let best=null;
-  Object.entries(DB.pit).forEach(([k,v])=>{ if(pitSlugOf(k)===slug&&v&&v.ts&&(!best||v.ts>best.ts)) best=v; });
+  Object.entries(DB.pit).forEach(([k,v])=>{ if(pitSlugOf(k)===slug&&v&&v.ts&&!v.del&&(!best||v.ts>best.ts)) best=v; });
   return best;
 }
 function rec(){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
-  if(!DB.pit[k]) DB.pit[k]=blankPit(); return DB.pit[k]; }
-function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); }
+  if(!DB.pit[k]||DB.pit[k].del) DB.pit[k]=blankPit();   // 刪掉之後再填等於重新開一份
+  return DB.pit[k]; }
+function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); renderMine(); }
 function showSaved(ts){
   const el=$('pSaved'); if(!el) return;
   el.textContent = ts ? t('sc.autosaved')+' '+String(ts).replace('T',' ').slice(11,16) : t('sc.nothingYet');
@@ -374,7 +375,7 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
-$('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); haptic(12); });
+$('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine(); haptic(12); });
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
 function plan(){ const p=DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:'',phase:'qual'}); if(!p.phase) p.phase='qual'; return p; }
@@ -390,7 +391,7 @@ function scPick(slot){
   openPicker(sl=>{
     const pl=plan(); pl[slot.toLowerCase()]=sl; planSave();
     setCbtn($('sc'+slot),sl,t('m.whichCountry'));
-    curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); mPlanBar(); haptic(12);
+    curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); mPlanBar(); renderMine(); haptic(12);
   });
 }
 function scLoad(){
@@ -399,7 +400,7 @@ function scLoad(){
   segInit($('scPhase'),pitPhase,v=>{
     pitPhase=v||'qual'; plan().phase=pitPhase; planSave();
     if(curTeam) loadPit();      // 換賽段等於換一份紀錄
-    scWhoRender();
+    scWhoRender(); renderMine();
   });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
@@ -467,7 +468,7 @@ function summary(allPhases){ const by={};
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
-  Object.keys(DB.pit).forEach(k=>{ const sl=pitSlugOf(k); if(!by[sl]) by[sl]=mk(); });
+  Object.keys(DB.pit).forEach(k=>{ const v=DB.pit[k]; if(!v||v.del) return; const sl=pitSlugOf(k); if(!by[sl]) by[sl]=mk(); });
   Object.keys(PROFILES).forEach(k=>{ if(PROFILES[k].published&&k!==AUTH.team&&!by[k]) by[k]=mk(); });
   return by; }
 function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')||'sup';
@@ -484,6 +485,53 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
   $('tList').querySelectorAll('.it').forEach(el=>el.onclick=()=>openNation(el.dataset.t)); }
 segInit($('tSort'),'sup',renderTeams);
 segInit($('tPhase'),'all',v=>{ tPhase=v||'all'; renderTeams(); });
+/* 自己記過的每一份（一國一個賽段一份），可以點回去改，也可以刪 */
+function pitRows(){
+  if(!DB) return [];
+  return Object.entries(DB.pit)
+    .filter(([k,v])=>v&&v.ts&&!v.del)
+    .map(([k,v])=>({key:k,slug:pitSlugOf(k),phase:pitPhaseOf(k),r:v}))
+    .sort((a,b)=>String(b.r.ts).localeCompare(String(a.r.ts)));
+}
+function renderMine(){
+  const list=$('mineList'); if(!list) return;
+  const rows=pitRows();
+  const cnt=$('mineCount'); if(cnt) cnt.textContent=rows.length;
+  if(!rows.length){ list.innerHTML=`<div class="empty">${esc(t('sc.mineNone'))}</div>`; return; }
+  list.innerHTML=rows.map(x=>{
+    const here=(x.slug===curTeam&&x.phase===pitPhase);
+    const bits=pitBits(x.r).slice(0,3).join(' \u00b7 ');
+    return `<div class="it${here?' me':''}" data-k="${esc(x.key)}">
+      <div class="fl">${nFlag(x.slug)}</div>
+      <div class="d"><b>${esc(nName(x.slug))}</b><span class="tag ${x.phase==='play'?'z3':x.phase==='prac'?'gray':''}">${esc(PHASE_LABEL[x.phase]||x.phase)}</span>
+        <div class="note" style="margin-top:3px">${esc(bits)} \u00b7 ${esc(String(x.r.ts).replace('T',' ').slice(5,16))}</div></div>
+      <div class="x" data-del="${esc(x.key)}">\u2715</div></div>`;
+  }).join('');
+  list.querySelectorAll('.it').forEach(el=>el.onclick=e=>{
+    const k=e.target.dataset.del;
+    if(k){ delPit(k); return; }
+    openPitRecord(el.dataset.k);
+  });
+}
+function openPitRecord(key){
+  const slug=pitSlugOf(key), ph=pitPhaseOf(key);
+  pitPhase=ph; plan().phase=ph; planSave();
+  segInit($('scPhase'),ph,v=>{ pitPhase=v||'qual'; plan().phase=pitPhase; planSave(); if(curTeam) loadPit(); scWhoRender(); renderMine(); });
+  curTeam=slug; setCbtn($('pCountry'),slug); loadPit(); renderMine();
+  toast(t('m.editing')+' \u00b7 '+nName(slug)+' \u00b7 '+(PHASE_LABEL[ph]||ph));
+  haptic(12);
+  $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function delPit(key){
+  const cur=DB.pit[key]; if(!cur||cur.del) return;
+  if(!confirm(t('sc.delConfirm')+'\n\n'+nName(pitSlugOf(key))+' \u00b7 '+(PHASE_LABEL[pitPhaseOf(key)]||pitPhaseOf(key)))) return;
+  /* 墓碑而不是直接刪 key，不然下次同步伺服器會把它送回來 */
+  DB.pit[key]={del:true,ts:now()};
+  saveNow();
+  if(pitSlugOf(key)===curTeam&&pitPhaseOf(key)===pitPhase) loadPit();
+  renderMine(); refreshData(); toast(t('sc.deleted'),'ok'); haptic(18);
+  push(true);
+}
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 $('pSave').onclick=async()=>{
   if(!curTeam){ toast(t('sc.pickFirst')); return; }
@@ -624,8 +672,8 @@ function showLastLogin(){
   el.hidden=false;
   el.textContent=t('auth.prevLogin')+' '+String(p.t).replace('T',' ').slice(0,16)+(p.ip?'  ('+p.ip+')':'');
 }
-function refreshData(){ if(!DB) return; showLastLogin(); $('statPit').textContent=Object.keys(DB.pit).length; $('statMatch').textContent=live().length;
-  const s=new Set(Object.keys(DB.pit).map(pitSlugOf)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
+function refreshData(){ if(!DB) return; showLastLogin(); $('statPit').textContent=pitRows().length; $('statMatch').textContent=live().length;
+  const s=new Set(pitRows().map(x=>x.slug)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
   $('cfgScout').value=DB.cfg.scout; segInit($('cfgTheme'),DB.cfg.theme,v=>{ DB.cfg.theme=v||'auto'; applyTheme(); touchCfg(); });
   segInit($('cfgFx'),fxMode(),v=>{ DB.cfg.fx=v||'auto'; try{ localStorage.setItem('fgc.fx',DB.cfg.fx); }catch(e){} applyFX(); touchCfg(); }); }
 $('cfgScout').oninput=e=>{ DB.cfg.scout=e.target.value; touchCfg(); };
@@ -634,7 +682,7 @@ function show(text,name,type){ $('out').value=text; const a=$('dlOut'); try{ a.h
 $('expMatch').onclick=()=>{ const rows=[['Scout','Match','Team','Alliance','Partner 1','Partner 2','Suppression balls','Port balls','Climb','Partners carried','Was carried','Climb start (s left)','Status','Card','Driver','Notes','Time']];
   live().sort((a,b)=>a.match-b.match||nName(a.team).localeCompare(nName(b.team))).forEach(r=>rows.push([r.scout||DB.cfg.scout,r.match,nName(r.team),r.al==='R'?'Red':'Blue',nName(r.p1),nName(r.p2),r.sup,r.port,CLIMB_LABEL[r.climb]||'',r.carry||0,r.carried?'Yes':'',r.climbAt,r.state,r.card,r.rate,r.notes,r.ts])); show(csv(rows),'fgc_match.csv'); };
 $('expPit').onclick=()=>{ const rows=[['Scout','Team','Phase','Capacity','Shooter type','Empty full load s','Suppression','Port','Best climb','Climb s','Can carry','Can be carried','Field position','Roles','HP skill','Drivetrain','Languages','Breakdowns','Notes','Time']];
-  Object.entries(DB.pit).forEach(([k,p])=>rows.push([p.scout||'',nName(pitSlugOf(k)),PHASE_LABEL[pitPhaseOf(k)]||pitPhaseOf(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
+  pitRows().forEach(({key:k,r:p})=>rows.push([p.scout||'',nName(pitSlugOf(k)),PHASE_LABEL[pitPhaseOf(k)]||pitPhaseOf(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
 $('expSum').onclick=()=>{ const by=summary(); const f=(x,n)=>n?(x/n).toFixed(1):'';
   const rows=[['Team','Matches','Avg suppression','Avg port','Best climb','Climb %','Z3 count','Partners carried','Breakdowns','Avg driver','Pit capacity','Shooter type','Empty s','Pit shoot','Pit climb','Field position','Roles','Languages']];
   Object.keys(by).sort((a,b)=>(by[b].n?by[b].sup/by[b].n:-1)-(by[a].n?by[a].sup/by[a].n:-1)).forEach(k=>{ const b=by[k],p=pitFor(k)||{};
@@ -668,6 +716,7 @@ function setSync(k,c,extra){ SYNC.last={k,c:c||'',extra:extra||''}; const e=$('s
 function applyServer(s){ let ch=false; const sc=s.cfg||{}; SYNC.applying=true; try{
   if(sc.ts&&sc.ts>(DB.cfg.ts||'')){ const keep={scout:DB.cfg.scout,theme:DB.cfg.theme,recent:DB.cfg.recent}; DB.cfg=Object.assign(norm({cfg:sc}).cfg,keep); ch=true; }
   Object.entries(s.pit||{}).forEach(([k,v])=>{ const c=DB.pit[k]; if(!c||(v.ts||'')>(c.ts||'')){ DB.pit[k]=v; ch=true; } });
+  if(ch&&typeof renderMine==='function') setTimeout(renderMine,0);
   const idx={}; DB.match.forEach((m,i)=>{ if(m.id) idx[m.id]=i; });
   (s.match||[]).forEach(m=>{ if(!m.id) return; if(idx[m.id]===undefined){ idx[m.id]=DB.match.length; DB.match.push(m); ch=true; } else if((m.ts||'')>(DB.match[idx[m.id]].ts||'')){ DB.match[idx[m.id]]=m; ch=true; } });
   if(!ch) return; saveNow(); renderMList();
@@ -781,7 +830,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v24';
+const APP_VER='v25';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
