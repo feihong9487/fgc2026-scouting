@@ -56,7 +56,12 @@ OFFICIAL = {"fetched": "", "error": "", "build": "", "data": {}, "history": []}
 OFFICIAL_POLL = 120          # 秒；--official-poll 可調，0 = 關閉
 HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時）
 
-DEFAULT_PASSWORD = "password"
+CLAIMS = os.path.join(DATA_DIR, "claims.json")   # 每個國家的認領碼，只有主辦方能發
+CLAIM = {}
+AUDIT_LOG = os.path.join(DATA_DIR, "audit.log")  # 所有登入/改密碼事件，出事時可以追
+CLAIM_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # 拿掉容易看錯的 I O 0 1
+
+DEFAULT_PASSWORD = "password"   # 只有舊帳號還吃這個；新帳號一律走認領碼
 SESSION_DAYS = 45
 PBKDF2_ITER = 120_000
 
@@ -211,11 +216,56 @@ def _hash(pw, salt):
     return hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), bytes.fromhex(salt), PBKDF2_ITER).hex()
 
 
+def audit(event, slug, ip, ua="", note=""):
+    """每一次登入、認領、改密碼都寫一行，出事時才查得到是誰。"""
+    try:
+        rec = {"t": datetime.now().isoformat(timespec="seconds"), "event": event,
+               "team": slug or "", "ip": ip or "", "ua": (ua or "")[:120], "note": note}
+        with open(AUDIT_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        pass        # 稽核失敗不能害到正常請求
+
+
+def new_claim_code():
+    return "-".join("".join(secrets.choice(CLAIM_ALPHA) for _ in range(4)) for _ in range(2))
+
+
+def issue_claim(slug):
+    """發一張新的認領碼給某國並回傳。呼叫前必須持有 LOCK。"""
+    code = new_claim_code()
+    CLAIM[slug] = {"code": code, "used": False, "issued": datetime.now().isoformat(timespec="seconds"),
+                   "usedAt": "", "ip": ""}
+    _write_json(CLAIMS, CLAIM)
+    return code
+
+
+def check_claim(slug, code):
+    """認領碼對不對。呼叫前必須持有 LOCK。"""
+    c = CLAIM.get(slug)
+    if not c or c.get("used"):
+        return False
+    given = re.sub(r"[^A-Za-z0-9]", "", str(code or "")).upper()
+    want = re.sub(r"[^A-Za-z0-9]", "", c.get("code", "")).upper()
+    return bool(want) and hmac.compare_digest(given, want)
+
+
+def burn_claim(slug, ip):
+    c = CLAIM.get(slug)
+    if c:
+        c["used"] = True
+        c["usedAt"] = datetime.now().isoformat(timespec="seconds")
+        c["ip"] = ip or ""
+        _write_json(CLAIMS, CLAIM)
+
+
 def check_password(slug, pw):
     """回傳 (ok, must_change)。呼叫前必須持有 LOCK。"""
     a = ACC.get(slug)
     if a is None:
-        return hmac.compare_digest(pw, DEFAULT_PASSWORD), True
+        # 還沒被認領的國家不能用密碼登入。以前這裡放行預設密碼，等於門是開的：
+        # 任何人都能挑一個國家進去再把密碼改掉，把真正的隊伍鎖在外面。
+        return False, True
     ok = hmac.compare_digest(_hash(pw, a["salt"]), a["hash"])
     return ok, not a.get("changed", False)
 
@@ -225,6 +275,16 @@ def set_password(slug, pw):
     salt = secrets.token_hex(16)
     ACC[slug] = {"salt": salt, "hash": _hash(pw, salt), "changed": True,
                  "ts": datetime.now().isoformat(timespec="seconds")}
+    _write_json(ACCOUNTS, ACC)
+
+
+def note_login(slug, ip):
+    """呼叫前必須持有 LOCK。"""
+    a = ACC.get(slug)
+    if not a:
+        return
+    a["prevLogin"] = a.get("lastLogin", {})
+    a["lastLogin"] = {"t": datetime.now().isoformat(timespec="seconds"), "ip": ip or ""}
     _write_json(ACCOUNTS, ACC)
 
 
@@ -461,8 +521,11 @@ class H(BaseHTTPRequestHandler):
             if not slug:
                 return
             with LOCK:
-                must = not ACC.get(slug, {}).get("changed", False)
-            return self._json(200, {"team": slug, "mustChange": must})
+                a = ACC.get(slug, {})
+                must = not a.get("changed", False)
+                last = dict(a.get("lastLogin") or {})
+                prev = dict(a.get("prevLogin") or {})
+            return self._json(200, {"team": slug, "mustChange": must, "lastLogin": last, "prevLogin": prev})
         if p == "/api/state":
             slug = self._team()
             if not slug:
@@ -528,13 +591,55 @@ class H(BaseHTTPRequestHandler):
             pw = str(d.get("password") or "")
             if not re.fullmatch(r"[a-z0-9-]{2,64}", slug) or (NATION_SLUGS and slug not in NATION_SLUGS):
                 return self._json(400, {"error": "不是有效的隊伍 / Unknown team"})
+            ua = self.headers.get("User-Agent", "")
             with LOCK:
+                claimed = slug in ACC
+                if not claimed:
+                    audit("login-unclaimed", slug, ip, ua)
+                    return self._json(409, {"error": "這個國家還沒有人認領，需要認領碼 / "
+                                                     "This nation has not been claimed yet — a claim code is required",
+                                            "needClaim": True})
                 ok, must = check_password(slug, pw)
                 if not ok:
                     FAILS.setdefault(ip, []).append(time.time())
+                    audit("login-fail", slug, ip, ua)
                     return self._json(403, {"error": "密碼錯誤 / Wrong password"})
+                prev = dict(ACC.get(slug, {}).get("lastLogin") or {})
+                note_login(slug, ip)
                 tok = new_session(slug)
-            return self._json(200, {"token": tok, "team": slug, "mustChange": must})
+                audit("login-ok", slug, ip, ua)
+            return self._json(200, {"token": tok, "team": slug, "mustChange": must, "prevLogin": prev})
+
+        if p == "/api/claim":
+            ip = self._ip()
+            if too_many_fails(ip):
+                return self._json(429, {"error": "嘗試太多次，5 分鐘後再試 / Too many attempts"})
+            d = self._body()
+            if d is None:
+                return
+            slug = str(d.get("team") or "").strip().lower()
+            code = str(d.get("code") or "")
+            pw = str(d.get("password") or "")
+            ua = self.headers.get("User-Agent", "")
+            if not re.fullmatch(r"[a-z0-9-]{2,64}", slug) or (NATION_SLUGS and slug not in NATION_SLUGS):
+                return self._json(400, {"error": "不是有效的隊伍 / Unknown team"})
+            if len(pw) < 4:
+                return self._json(400, {"error": "密碼至少 4 個字 / Password must be at least 4 characters"})
+            with LOCK:
+                if slug in ACC:
+                    audit("claim-taken", slug, ip, ua)
+                    return self._json(409, {"error": "這個國家已經被認領了，請直接登入 / "
+                                                     "Already claimed — sign in with your team password"})
+                if not check_claim(slug, code):
+                    FAILS.setdefault(ip, []).append(time.time())
+                    audit("claim-fail", slug, ip, ua)
+                    return self._json(403, {"error": "認領碼不正確 / Wrong claim code"})
+                set_password(slug, pw)
+                burn_claim(slug, ip)
+                note_login(slug, ip)
+                tok = new_session(slug)
+                audit("claim-ok", slug, ip, ua)
+            return self._json(200, {"token": tok, "team": slug, "mustChange": False})
 
         if p == "/api/logout":
             tok = self.headers.get("X-Token", "")
@@ -559,6 +664,7 @@ class H(BaseHTTPRequestHandler):
             with LOCK:
                 ok, _ = check_password(slug, cur)
                 if not ok:
+                    audit("pw-change-fail", slug, self._ip(), self.headers.get("User-Agent", ""))
                     return self._json(403, {"error": "目前密碼錯誤 / Current password is wrong"})
                 set_password(slug, new)
             return self._json(200, {"ok": True})
@@ -671,7 +777,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--host", default="0.0.0.0", help="0.0.0.0 允許區網連入；127.0.0.1 只允許本機/隧道")
-    ap.add_argument("--reset-password", metavar="SLUG", help="把該隊密碼重設回預設並結束")
+    ap.add_argument("--reset-password", metavar="SLUG",
+                    help="把該隊帳號作廢並發一張新的認領碼（舊的密碼重設已經不安全，不再支援）")
+    ap.add_argument("--gen-claims", action="store_true",
+                    help="替所有還沒認領的國家產生認領碼，印出清單後結束（清單請私下發，不要貼群組）")
+    ap.add_argument("--show-claim", metavar="SLUG", help="印出某一國目前的認領碼")
+    ap.add_argument("--audit", nargs="?", const=40, type=int, metavar="N",
+                    help="印出最近 N 筆登入/認領/改密碼紀錄")
+    ap.add_argument("--revoke-all", action="store_true",
+                    help="把所有帳號作廢並重發認領碼（資料保留）。外洩後重新開帳用")
     ap.add_argument("--official-poll", type=int, default=120,
                     help="幾秒抓一次 results.first.global 的官方比分（預設 120）")
     ap.add_argument("--no-official", action="store_true", help="完全不抓官方比分")
@@ -682,18 +796,84 @@ def main():
     ACC = _read_json(ACCOUNTS, {}) or {}
     SESS = _read_json(SESSIONS, {}) or {}
     PROF = _read_json(PROFILES, {}) or {}
+    global CLAIM
+    CLAIM = _read_json(CLAIMS, {}) or {}
     global OFFICIAL, OFFICIAL_POLL
     OFFICIAL = _read_json(OFFICIAL_FILE, OFFICIAL) or OFFICIAL
     OFFICIAL_POLL = 0 if a.no_official else a.official_poll
+
+    def _drop_sessions(slug):
+        for t in [t for t, v in SESS.items() if v.get("team") == slug]:
+            SESS.pop(t)
+        _write_json(SESSIONS, SESS)
 
     if a.reset_password:
         slug = a.reset_password.strip().lower()
         ACC.pop(slug, None)
         _write_json(ACCOUNTS, ACC)
-        for t in [t for t, s in SESS.items() if s.get("team") == slug]:
-            SESS.pop(t)
+        _drop_sessions(slug)
+        code = issue_claim(slug)
+        audit("reissue", slug, "cli")
+        print(f"[ok] {slug} 的帳號已作廢，該隊所有裝置已登出。資料沒有動。")
+        print(f"     新的認領碼：{code}")
+        print(f"     請私訊給該隊本人，不要貼在群組。他們用這組碼登入並自己設密碼。")
+        return
+
+    if a.gen_claims:
+        pool = sorted(NATION_SLUGS) if NATION_SLUGS else sorted(set(list(ACC) + list(CLAIM)))
+        made = []
+        for slug in pool:
+            if slug in ACC:
+                continue                       # 已經有人認領了，不重發
+            c = CLAIM.get(slug)
+            if c and not c.get("used"):
+                continue                       # 已經有一張沒用掉的
+            made.append((slug, issue_claim(slug)))
+        print(f"[ok] 新發了 {len(made)} 張認領碼。已認領的國家不會重發。")
+        print("     這份清單等同密碼，請私下一對一發給各隊，不要貼群組、不要進 git。")
+        for slug, code in made:
+            print(f"  {slug:<24} {code}")
+        print(f"\n     完整清單存在 {CLAIMS}")
+        return
+
+    if a.show_claim:
+        slug = a.show_claim.strip().lower()
+        c = CLAIM.get(slug)
+        if slug in ACC:
+            print(f"[info] {slug} 已經被認領了（{ACC[slug].get('ts','')}）。要重發請用 --reset-password {slug}")
+        elif not c:
+            print(f"[info] {slug} 還沒有認領碼，跑 --gen-claims 產生")
+        elif c.get("used"):
+            print(f"[info] {slug} 的認領碼已經被用掉了（{c.get('usedAt','')} from {c.get('ip','')}）")
+        else:
+            print(f"{slug} 的認領碼：{c['code']}")
+        return
+
+    if a.audit is not None:
+        if not os.path.isfile(AUDIT_LOG):
+            print("[info] 還沒有任何稽核紀錄")
+            return
+        lines = open(AUDIT_LOG, encoding="utf-8").read().splitlines()[-a.audit:]
+        print(f"最近 {len(lines)} 筆：")
+        for ln in lines:
+            try:
+                r = json.loads(ln)
+            except Exception:
+                continue
+            print("  %-19s %-16s %-14s %-15s %s" % (r.get("t", ""), r.get("event", ""),
+                                                    r.get("team", ""), r.get("ip", ""), r.get("ua", "")[:44]))
+        return
+
+    if a.revoke_all:
+        n = len(ACC)
+        ACC.clear()
+        _write_json(ACCOUNTS, ACC)
+        SESS.clear()
         _write_json(SESSIONS, SESS)
-        print(f"[ok] {slug} 的密碼已重設為 \"{DEFAULT_PASSWORD}\"，並登出該隊所有裝置")
+        made = [(slug, issue_claim(slug)) for slug in (sorted(NATION_SLUGS) if NATION_SLUGS else [])]
+        audit("revoke-all", "", "cli", note=f"{n} accounts")
+        print(f"[ok] {n} 個帳號全部作廢，所有裝置登出。各隊的 scouting 資料都沒有動。")
+        print(f"     重新發了 {len(made)} 張認領碼，用 --show-claim <slug> 查單一國家。")
         return
 
     if not os.path.isfile(os.path.join(WEB, "index.html")):
@@ -721,7 +901,9 @@ def main():
     print(f"  資料目錄  {DATA_DIR}")
     print(f"  每日備份  {BACKUP_DIR}")
     print(f"  官方比分  {'每 %d 秒抓一次 results.first.global' % OFFICIAL_POLL if OFFICIAL_POLL else '關閉'}")
-    print(f"  重設密碼  python server.py --reset-password <slug>")
+    print(f"  認領碼    python server.py --gen-claims / --show-claim <slug>")
+    print(f"  重發帳號  python server.py --reset-password <slug>")
+    print(f"  稽核紀錄  python server.py --audit 40")
     print("=" * 60)
     print("  Ctrl+C 停止")
     print()

@@ -555,6 +555,22 @@ svg.trend.dn polyline{stroke:var(--red)}
 .it.lad .lname{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px}
 .it.lad .lname b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .it.lad .lname .mv{margin-left:0}
+
+/* ── 每個分頁開頭的功能簡介：告訴使用者這一欄是幹嘛的 ── */
+.intro{display:flex;gap:12px;align-items:flex-start;margin:0 0 14px;padding:13px 15px;border-radius:16px;
+  background:var(--ember-soft);border:1px solid color-mix(in srgb,var(--ember) 22%,transparent)}
+.intro>div{min-width:0}
+.intro .ii{font-size:19px;line-height:1.25;flex:none}
+.intro b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin-bottom:3px}
+.intro p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.intro .zh{display:block;font-size:11.5px;line-height:1.55;color:var(--muted);opacity:.75;margin-top:5px}
+/* 賽前情報卡：我們自己打過的場次對這一隊的統計 */
+.card.scnow .lstats-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.card.scnow h2{margin-bottom:10px}
+#scWho button .fl{font-size:15px;margin-right:5px}
+#scWho button img.flag{height:12px;width:auto;border-radius:2px;vertical-align:-1px}
+.warn b{display:block;margin-bottom:5px}
+#aCode{letter-spacing:.12em;font-weight:800;text-transform:uppercase;font-family:ui-monospace,Menlo,monospace}
 </style>
 </head>
 <body>
@@ -585,8 +601,27 @@ svg.trend.dn polyline{stroke:var(--red)}
       <div class="f"><label><span data-i18n="auth.pw">Team password</span></label>
         <div class="pw"><input type="password" id="aPw" placeholder="password" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
       <button class="btn pri wide" id="aGo" data-i18n="auth.signin">Sign in</button>
-      <p class="note" data-i18n="auth.defaultNote">Default password is “password” — you'll set your own on first sign-in. Each team's data is separate.</p>
+      <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. First time here? The organizer gives your team a claim code.</p>
       <p class="err" id="aErr" hidden></p>
+    </div>
+
+    <div id="authClaim" class="auth-view" hidden>
+      <div class="who" id="aWhoC"></div>
+      <div class="warn" style="margin:4px 0 14px">
+        <b data-i18n="auth.claimT">This nation has not been claimed yet</b>
+        <span data-i18n="auth.claimH">Ask the organizer for your team’s claim code. It is sent to your team only, and works once.</span>
+      </div>
+      <div class="f"><label><span data-i18n="auth.claimCode">Claim code</span></label>
+        <input type="text" id="aCode" placeholder="ABCD-2345" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false"></div>
+      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
+        <input type="password" id="aCNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
+      <div class="f"><input type="password" id="aCNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
+      <div class="warn nudge" style="margin:2px 0 12px">
+        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
+      </div>
+      <button class="btn pri wide" id="aClaimGo" data-i18n="auth.claimGo">Claim and start</button>
+      <p class="err" id="aErrC" hidden></p>
+      <div class="row" style="margin-top:8px"><button class="btn" id="aCBack" data-i18n="auth.back">Back</button></div>
     </div>
 
     <div id="authSet" class="auth-view" hidden>
@@ -594,10 +629,13 @@ svg.trend.dn polyline{stroke:var(--red)}
       <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
         <input type="password" id="aNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
       <div class="f"><input type="password" id="aNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
+      <div class="warn nudge" style="margin:2px 0 12px">
+        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
+      </div>
       <button class="btn pri wide" id="aSet" data-i18n="auth.saveStart">Save &amp; start scouting</button>
       <p class="note" data-i18n="auth.shareNote">Share it only with your own team. Forgot it? Ask the organizer to reset it.</p>
       <p class="err" id="aErr2" hidden></p>
-      <div class="row" style="margin-top:8px"><button class="btn" id="aSkip" data-i18n="auth.skip">Skip for now (keep “password”)</button><button class="btn" id="aBack" data-i18n="auth.back">Back</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn" id="aSkip" data-i18n="auth.skip">Skip for now</button><button class="btn" id="aBack" data-i18n="auth.back">Back</button></div>
     </div>
 
     <div id="authOffline" class="auth-view" hidden>
@@ -621,6 +659,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── MATCH ───────── -->
 <section id="tab-match">
+  <div class="intro"><span class="ii">🎯</span><div><b data-i18n="ab.match.t">…</b><p data-i18n="ab.match">…</p><span class="zh" data-hint="ab.match"></span></div></div>
   <div class="card" id="mHead">
     <div class="whoami" id="mWho"></div>
     <div class="row" style="margin-top:12px">
@@ -635,6 +674,7 @@ svg.trend.dn polyline{stroke:var(--red)}
         <button data-v="qual" data-i18n="m.quals">Quals</button>
         <button data-v="play" data-c="z3" data-i18n="m.playoffs">Playoffs</button>
       </div></div>
+    <div class="bar" id="mPlanBar" hidden style="margin-top:12px"><button class="btn" id="mUsePlan"></button></div>
     <p class="note" style="margin:12px 0 0" data-i18n="m.twoSlotsNote">Each match you have two partner countries — fill in one card for each. Your own robot is not scouted here.</p>
   </div>
 
@@ -653,11 +693,23 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── PIT ───────── -->
 <section id="tab-pit" hidden>
+  <div class="intro"><span class="ii">🔍</span><div><b data-i18n="ab.scout.t">…</b><p data-i18n="ab.scout">…</p><span class="zh" data-hint="ab.scout"></span></div></div>
+  <div class="card" id="scHead">
+    <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
+    <div class="f"><label><span data-i18n="m.match">Match</span> <span class="zh" data-hint="m.match"></span></label>
+      <div class="step" data-k="scMatch" style="max-width:240px"><button data-d="-1">−</button><input type="number" id="scMatch" inputmode="numeric" value="1"><button data-d="1">+</button></div></div>
+    <div class="f"><label><span data-i18n="m.slotA">Teammate A</span></label>
+      <button class="cbtn" id="scA" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
+    <div class="f"><label><span data-i18n="m.slotB">Teammate B</span></label>
+      <button class="cbtn" id="scB" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
+    <div class="seg n2" id="scWho" hidden style="margin-top:4px"></div>
+  </div>
   <div class="card">
-    <div class="f"><label><span data-i18n="p.team">Team</span> <span class="zh" data-hint="p.team"></span></label>
+    <div class="f" style="margin:0"><label><span data-i18n="sc.other">Or scout any other nation</span> <span class="zh" data-hint="sc.other"></span></label>
       <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
   </div>
   <div id="pitBody" hidden>
+    <div class="card scnow" id="scNow" hidden></div>
     <div class="card self" id="pSelf" hidden></div>
     <div class="card">
       <h2><span class="ic">🏀</span><span data-i18n="p.shooting">Shooting</span><span class="zh" data-hint="p.shooting"></span></h2>
@@ -724,6 +776,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── RANKS (official live ladder + match history + our scouting) ───────── -->
 <section id="tab-teams" hidden>
+  <div class="intro"><span class="ii">🏆</span><div><b data-i18n="ab.ranks.t">…</b><p data-i18n="ab.ranks">…</p><span class="zh" data-hint="ab.ranks"></span></div></div>
   <div class="card rkhead">
     <h2><span class="ic">🏆</span><span data-i18n="rk.title">Rankings</span><span class="rkstatus" id="rkStatus"></span></h2>
     <div class="seg n3" id="rkMode">
@@ -767,6 +820,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── OUR ROBOT (shared with every team) ───────── -->
 <section id="tab-robot" hidden>
+  <div class="intro"><span class="ii">📢</span><div><b data-i18n="ab.robot.t">…</b><p data-i18n="ab.robot">…</p><span class="zh" data-hint="ab.robot"></span></div></div>
   <div class="card">
     <h2><span class="ic">📢</span><span data-i18n="r.title">Our robot</span> <span class="pill" data-i18n="r.shared">shared</span><span class="zh" data-hint="r.title"></span></h2>
     <p class="note" data-i18n="r.intro">Fill this in once and publish — every signed-in team can read it in their Pit tab, and you can read theirs. Honest numbers help partners plan the huddle.</p>
@@ -839,6 +893,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── SCORE ───────── -->
 <section id="tab-calc" hidden>
+  <div class="intro"><span class="ii">🧮</span><div><b data-i18n="ab.score.t">…</b><p data-i18n="ab.score">…</p><span class="zh" data-hint="ab.score"></span></div></div>
   <div class="card">
     <div class="note" style="margin-bottom:6px"><span data-i18n="c.title">REGIONAL ALLIANCE score</span> <span class="zh" data-hint="c.title"></span></div>
     <div class="score" id="cTotal">0</div>
@@ -865,6 +920,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <!-- ───────── DATA ───────── -->
 <section id="tab-data" hidden>
+  <div class="intro"><span class="ii">📊</span><div><b data-i18n="ab.data.t">…</b><p data-i18n="ab.data">…</p><span class="zh" data-hint="ab.data"></span></div></div>
   <div class="card">
     <h2><span class="ic">📊</span><span data-i18n="d.stats">Stats</span><span class="zh" data-hint="d.stats"></span></h2>
     <div class="row">
@@ -903,6 +959,7 @@ svg.trend.dn polyline{stroke:var(--red)}
     <p class="note" data-i18n="i.androidS">Chrome menu ⋮ → Add to Home screen / Install app.</p>
     <div class="bar"><a class="btn pri" href="install" data-i18n="i.title">Install on your phone</a></div>
     <p class="note" style="margin-top:10px">Version <b id="appVer">—</b> · <a href="#" id="verCheck">check for updates</a></p>
+    <p class="note" id="lastLogin" hidden style="margin-top:6px"></p>
   </div>
   <div class="warn" data-i18n="d.syncNote">Your team's data syncs between all your devices once signed in (badge top-right). Offline entries are kept locally and merged later. Export a JSON backup at the end of each day.</div>
 </section>
@@ -911,7 +968,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 <nav role="tablist" id="nav" hidden>
   <button role="tab" data-tab="match" aria-selected="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg><span data-i18n="nav.match">Match</span><span class="zh" data-hint="nav.match"></span></button>
-  <button role="tab" data-tab="pit" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18a2.1 2.1 0 0 1-3-3l6.7-6.7a4 4 0 0 0-5-5l2.6 2.6-1.4 1.4-2.6-2.6"/><path d="M4 20l3-3"/></svg><span data-i18n="nav.pit">Pit</span><span class="zh" data-hint="nav.pit"></span></button>
+  <button role="tab" data-tab="pit" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18a2.1 2.1 0 0 1-3-3l6.7-6.7a4 4 0 0 0-5-5l2.6 2.6-1.4 1.4-2.6-2.6"/><path d="M4 20l3-3"/></svg><span data-i18n="sc.nav">Scout</span><span class="zh" data-hint="sc.nav"></span></button>
   <button role="tab" data-tab="teams" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span data-i18n="rk.nav">Ranks</span><span class="zh" data-hint="rk.nav"></span></button>
   <button role="tab" data-tab="robot" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6M8 20v2M16 20v2"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="14" r="1.2"/></svg><span data-i18n="nav.robot">Robot</span><span class="zh" data-hint="nav.robot"></span></button>
   <button role="tab" data-tab="calc" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg><span data-i18n="nav.score">Score</span><span class="zh" data-hint="nav.score"></span></button>
@@ -2496,7 +2553,7 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 // Languages beyond these fall back to English automatically.
 (function(){
 const I = window.I18N, ADD = {
-en:{"s.upToDate":"You have the latest version","s.updating":"Updating to the new version…","rk.ours":"Our scouting","rk.nav":"Ranks","rk.title":"Rankings","rk.ladder":"Ladder","rk.matches":"Matches","rk.scouted":"Scouted",
+en:{"auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.claimT":"This nation has not been claimed yet","auth.claimH":"Ask the organizer for your team's claim code. It is sent to your team only, and works once.","auth.claimCode":"Claim code","auth.claimGo":"Claim and start","auth.needCode":"Enter the claim code the organizer sent you","auth.pwShort":"Password must be at least 4 characters","auth.pwNoMatch":"The two passwords do not match","auth.sharedWarn":"Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.","auth.prevLogin":"Previous sign-in:","auth.back":"Back","sc.nav":"Scout","sc.title":"This match","sc.other":"Or scout any other nation","sc.weSaw":"What we recorded about them","sc.usePlan":"Load","sc.planLoaded":"Loaded into this match","ab.match.t":"After the match","ab.match":"Record what your two partners actually did: balls scored, where they climbed, whether they broke down. These numbers become each nation's averages.","ab.scout.t":"Before the match","ab.scout":"When the schedule comes out, set the match number and your two partners, then go to their pits and ask what their robot can do. Saved per nation, so you only ask once.","ab.ranks.t":"Standings and history","ab.ranks":"Official live rankings, every match played, and the nations you have scouted. Filter by continent or show only your own.","ab.robot.t":"Your own robot","ab.robot":"Describe your robot once and publish it. Other nations can read it before they are allied with you, and you can read theirs.","ab.score.t":"Score calculator","ab.score":"Try out what an alliance would score. Useful in the 3-minute huddle when deciding whether to climb or keep shooting.","ab.data.t":"Stats, settings, export","ab.data":"How much you have scouted, language and display options, CSV export, and backup or restore.","s.upToDate":"You have the latest version","s.updating":"Updating to the new version…","rk.ours":"Our scouting","rk.nav":"Ranks","rk.title":"Rankings","rk.ladder":"Ladder","rk.matches":"Matches","rk.scouted":"Scouted",
  "rk.all":"All","rk.mine":"Mine","rk.done":"Played","rk.upcoming":"Upcoming","rk.myCont":"My continent",
  "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"PLAYOFF ZONE","rk.contender":"CONTENDER","rk.rising":"RISING",
  "rk.yourRank":"Your rank","rk.toPlayoff":"places off the playoff cut:","rk.you":"YOU",
@@ -2510,7 +2567,7 @@ en:{"s.upToDate":"You have the latest version","s.updating":"Updating to the new
  "m.phase":"Phase","m.phaseH":"practice results are kept out of the averages",
  "m.practice":"Practice","m.quals":"Quals","m.playoffs":"Playoffs","n.phaseAll":"All phases"},
 
-"zh-Hant":{"s.upToDate":"已經是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我們自己記的","rk.nav":"排位","rk.title":"即時排名","rk.ladder":"排行榜","rk.matches":"賽程","rk.scouted":"我們的觀察",
+"zh-Hant":{"auth.skip":"先跳過","auth.defaultNote":"每個國家有自己的帳號跟自己的資料。第一次使用？跟主辦方要你們隊的認領碼。","auth.claimT":"這個國家還沒有人認領","auth.claimH":"跟主辦方要你們隊的認領碼。那組碼只會私下發給你們，而且只能用一次。","auth.claimCode":"認領碼","auth.claimGo":"認領並開始","auth.needCode":"請輸入主辦方發給你們的認領碼","auth.pwShort":"密碼至少要四個字","auth.pwNoMatch":"兩次輸入的密碼不一樣","auth.sharedWarn":"你們全隊、每一支手機跟平板都是用這一組密碼登入。先跟隊友講好、寫下來，再按下一步。","auth.prevLogin":"上一次登入：","auth.back":"返回","sc.nav":"打聽","sc.title":"這一場","sc.other":"或是查其他國家","sc.weSaw":"我們記過他們的表現","sc.usePlan":"帶入","sc.planLoaded":"已經帶進這一場","ab.match.t":"打完之後","ab.match":"記兩個盟友這一場實際做了什麼：投進幾顆、爬到哪一區、有沒有壞掉。這些數字會變成各國的平均值。","ab.scout.t":"開打之前","ab.scout":"賽程出來後，填這場的場次跟兩個盟友，然後下去維修區問他們機器能做什麼。資料照國家存，同一國問過一次就夠。","ab.ranks.t":"排名跟戰績","ab.ranks":"官方即時排名、每一場打過的比賽、還有我們自己記過的隊伍。可以只看自己，也可以照五大洲分開看。","ab.robot.t":"我們自己的機器","ab.robot":"把自己機器填一次然後公開。其他國家在跟你們同隊之前就能先看，你們也看得到他們的。","ab.score.t":"算分機","ab.score":"試算一個聯盟大概拿幾分。三分鐘戰術時間要決定去爬升還是繼續投球的時候很好用。","ab.data.t":"統計、設定、匯出","ab.data":"看你們記了多少、換語言跟顯示設定、匯出 CSV、備份跟還原。","s.upToDate":"已經是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我們自己記的","rk.nav":"排位","rk.title":"即時排名","rk.ladder":"排行榜","rk.matches":"賽程","rk.scouted":"我們的觀察",
  "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即將開打","rk.myCont":"我這洲",
  "rk.champion":"冠軍","rk.podium":"前三","rk.playoff":"晉級區","rk.contender":"競爭中","rk.rising":"上升中",
  "rk.yourRank":"你們的名次","rk.toPlayoff":"距離晉級還差","rk.you":"你們",
@@ -2524,7 +2581,7 @@ en:{"s.upToDate":"You have the latest version","s.updating":"Updating to the new
  "m.phase":"賽段","m.phaseH":"模擬賽不會算進平均",
  "m.practice":"模擬賽","m.quals":"正賽","m.playoffs":"季後賽","n.phaseAll":"全部賽段"},
 
-"zh-Hans":{"s.upToDate":"已经是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我们自己记的","rk.nav":"排位","rk.title":"实时排名","rk.ladder":"排行榜","rk.matches":"赛程","rk.scouted":"我们的观察",
+"zh-Hans":{"auth.skip":"先跳过","auth.defaultNote":"每个国家有自己的账号跟自己的资料。第一次使用？跟主办方要你们队的认领码。","auth.claimT":"这个国家还没有人认领","auth.claimH":"跟主办方要你们队的认领码。那组码只会私下发给你们，而且只能用一次。","auth.claimCode":"认领码","auth.claimGo":"认领并开始","auth.needCode":"请输入主办方发给你们的认领码","auth.pwShort":"密码至少要四个字","auth.pwNoMatch":"两次输入的密码不一样","auth.sharedWarn":"你们全队、每一支手机跟平板都是用这一组密码登录。先跟队友讲好、写下来，再按下一步。","auth.prevLogin":"上一次登录：","auth.back":"返回","sc.nav":"打听","sc.title":"这一场","sc.other":"或者查其他国家","sc.weSaw":"我们记过他们的表现","sc.usePlan":"带入","sc.planLoaded":"已经带进这一场","ab.match.t":"打完之后","ab.match":"记两个盟友这一场实际做了什么：投进几颗、爬到哪一区、有没有坏掉。这些数字会变成各国的平均值。","ab.scout.t":"开打之前","ab.scout":"赛程出来后，填这场的场次跟两个盟友，然后下去维修区问他们机器能做什么。资料按国家存，同一国问过一次就够。","ab.ranks.t":"排名跟战绩","ab.ranks":"官方实时排名、每一场打过的比赛、还有我们自己记过的队伍。可以只看自己，也可以按五大洲分开看。","ab.robot.t":"我们自己的机器","ab.robot":"把自己机器填一次然后公开。其他国家在跟你们同队之前就能先看，你们也看得到他们的。","ab.score.t":"算分器","ab.score":"试算一个联盟大概拿几分。三分钟战术时间要决定去爬升还是继续投球的时候很好用。","ab.data.t":"统计、设置、导出","ab.data":"看你们记了多少、换语言跟显示设置、导出 CSV、备份跟还原。","s.upToDate":"已经是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我们自己记的","rk.nav":"排位","rk.title":"实时排名","rk.ladder":"排行榜","rk.matches":"赛程","rk.scouted":"我们的观察",
  "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即将开打","rk.myCont":"我这洲",
  "rk.champion":"冠军","rk.podium":"前三","rk.playoff":"晋级区","rk.contender":"竞争中","rk.rising":"上升中",
  "rk.yourRank":"你们的名次","rk.toPlayoff":"距离晋级还差","rk.you":"你们",
@@ -2538,7 +2595,7 @@ en:{"s.upToDate":"You have the latest version","s.updating":"Updating to the new
  "m.phase":"赛段","m.phaseH":"模拟赛不会算进平均",
  "m.practice":"模拟赛","m.quals":"正赛","m.playoffs":"季后赛","n.phaseAll":"全部赛段"},
 
-es:{"s.upToDate":"Ya tienes la última versión","s.updating":"Actualizando a la nueva versión…","rk.ours":"Nuestros datos","rk.nav":"Clasif.","rk.title":"Clasificación","rk.ladder":"Tabla","rk.matches":"Partidos","rk.scouted":"Nuestros datos",
+es:{"auth.skip":"Omitir por ahora","auth.defaultNote":"Cada pais tiene su propia cuenta y sus propios datos. Primera vez? Pide al organizador el codigo de tu equipo.","auth.claimT":"Este pais aun no ha sido reclamado","auth.claimH":"Pide al organizador el codigo de reclamacion de tu equipo. Se envia solo a tu equipo y sirve una vez.","auth.claimCode":"Codigo de reclamacion","auth.claimGo":"Reclamar y empezar","auth.needCode":"Introduce el codigo que te envio el organizador","auth.pwShort":"La contrasena debe tener al menos 4 caracteres","auth.pwNoMatch":"Las dos contrasenas no coinciden","auth.sharedWarn":"Todo tu equipo entra con esta misma contrasena, en todos los moviles y tablets. Acordadla juntos y anotadla antes de continuar.","auth.prevLogin":"Inicio de sesion anterior:","auth.back":"Atras","sc.nav":"Explorar","sc.title":"Este partido","sc.other":"O explora cualquier otro pais","sc.weSaw":"Lo que registramos de ellos","sc.usePlan":"Cargar","sc.planLoaded":"Cargado en este partido","ab.match.t":"Despues del partido","ab.match":"Registra lo que hicieron tus dos companeros: balones anotados, hasta donde treparon, si se averiaron. Estos numeros forman los promedios de cada pais.","ab.scout.t":"Antes del partido","ab.scout":"Cuando salga el calendario, pon el numero de partido y tus dos companeros, luego ve a sus pits y pregunta que puede hacer su robot. Se guarda por pais, asi solo preguntas una vez.","ab.ranks.t":"Clasificacion e historial","ab.ranks":"Clasificacion oficial en vivo, todos los partidos jugados y los paises que has explorado. Filtra por continente o muestra solo el tuyo.","ab.robot.t":"Vuestro robot","ab.robot":"Describe tu robot una vez y publicalo. Otros paises podran leerlo antes de aliarse contigo, y tu podras leer los suyos.","ab.score.t":"Calculadora de puntos","ab.score":"Prueba cuanto puntuaria una alianza. Util en los 3 minutos de reunion para decidir si trepar o seguir disparando.","ab.data.t":"Datos, ajustes, exportar","ab.data":"Cuanto has explorado, idioma y opciones de pantalla, exportar CSV, y copia de seguridad o restauracion.","s.upToDate":"Ya tienes la última versión","s.updating":"Actualizando a la nueva versión…","rk.ours":"Nuestros datos","rk.nav":"Clasif.","rk.title":"Clasificación","rk.ladder":"Tabla","rk.matches":"Partidos","rk.scouted":"Nuestros datos",
  "rk.all":"Todos","rk.mine":"Míos","rk.done":"Jugados","rk.upcoming":"Próximos","rk.myCont":"Mi continente",
  "rk.champion":"CAMPEÓN","rk.podium":"PODIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"ASPIRANTE","rk.rising":"EN ASCENSO",
  "rk.yourRank":"Tu puesto","rk.toPlayoff":"puestos del corte de playoff:","rk.you":"TÚ",
@@ -2552,7 +2609,7 @@ es:{"s.upToDate":"Ya tienes la última versión","s.updating":"Actualizando a la
  "m.phase":"Fase","m.phaseH":"la práctica no cuenta en los promedios",
  "m.practice":"Práctica","m.quals":"Clasif.","m.playoffs":"Playoffs","n.phaseAll":"Todas las fases"},
 
-fr:{"s.upToDate":"Vous avez la dernière version","s.updating":"Mise à jour vers la nouvelle version…","rk.ours":"Nos relevés","rk.nav":"Classement","rk.title":"Classement","rk.ladder":"Classement","rk.matches":"Matchs","rk.scouted":"Nos relevés",
+fr:{"auth.skip":"Passer pour l’instant","auth.defaultNote":"Chaque pays a son compte et ses donnees. Premiere fois ? Demandez a l'organisateur le code de votre equipe.","auth.claimT":"Ce pays n'a pas encore ete revendique","auth.claimH":"Demandez au organisateur le code de votre equipe. Il n'est envoye qu'a votre equipe et ne sert qu'une fois.","auth.claimCode":"Code de revendication","auth.claimGo":"Revendiquer et commencer","auth.needCode":"Saisissez le code envoye par l'organisateur","auth.pwShort":"Le mot de passe doit faire au moins 4 caracteres","auth.pwNoMatch":"Les deux mots de passe ne correspondent pas","auth.sharedWarn":"Toute votre equipe se connecte avec ce meme mot de passe, sur chaque telephone et tablette. Mettez-vous d'accord et notez-le avant de continuer.","auth.prevLogin":"Connexion precedente :","auth.back":"Retour","sc.nav":"Reperage","sc.title":"Ce match","sc.other":"Ou reperer un autre pays","sc.weSaw":"Ce que nous avons note sur eux","sc.usePlan":"Charger","sc.planLoaded":"Charge dans ce match","ab.match.t":"Apres le match","ab.match":"Notez ce que vos deux partenaires ont vraiment fait : balles marquees, hauteur d'escalade, pannes. Ces chiffres deviennent les moyennes de chaque pays.","ab.scout.t":"Avant le match","ab.scout":"Quand le calendrier sort, indiquez le numero du match et vos deux partenaires, puis allez a leur stand demander ce que fait leur robot. Enregistre par pays : une seule fois suffit.","ab.ranks.t":"Classement et historique","ab.ranks":"Classement officiel en direct, tous les matchs joues, et les pays que vous avez reperes. Filtrez par continent ou affichez seulement le votre.","ab.robot.t":"Votre robot","ab.robot":"Decrivez votre robot une fois et publiez-le. Les autres pays le liront avant d'etre allies avec vous, et vous lirez les leurs.","ab.score.t":"Calculateur de score","ab.score":"Testez ce que marquerait une alliance. Utile pendant les 3 minutes de concertation pour choisir entre grimper et continuer a tirer.","ab.data.t":"Stats, reglages, export","ab.data":"Ce que vous avez releve, langue et affichage, export CSV, sauvegarde et restauration.","s.upToDate":"Vous avez la dernière version","s.updating":"Mise à jour vers la nouvelle version…","rk.ours":"Nos relevés","rk.nav":"Classement","rk.title":"Classement","rk.ladder":"Classement","rk.matches":"Matchs","rk.scouted":"Nos relevés",
  "rk.all":"Tous","rk.mine":"Les miens","rk.done":"Joués","rk.upcoming":"À venir","rk.myCont":"Mon continent",
  "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"ZONE PLAYOFF","rk.contender":"PRÉTENDANT","rk.rising":"EN PROGRÈS",
  "rk.yourRank":"Votre rang","rk.toPlayoff":"places du seuil playoff :","rk.you":"VOUS",
@@ -2566,7 +2623,7 @@ fr:{"s.upToDate":"Vous avez la dernière version","s.updating":"Mise à jour ver
  "m.phase":"Phase","m.phaseH":"les essais ne comptent pas dans les moyennes",
  "m.practice":"Essais","m.quals":"Qualifs","m.playoffs":"Playoffs","n.phaseAll":"Toutes les phases"},
 
-pt:{"s.upToDate":"Você já tem a versão mais recente","s.updating":"Atualizando para a nova versão…","rk.ours":"Nossos dados","rk.nav":"Ranking","rk.title":"Classificação","rk.ladder":"Ranking","rk.matches":"Partidas","rk.scouted":"Nossos dados",
+pt:{"auth.skip":"Pular por agora","auth.defaultNote":"Cada pais tem sua conta e seus dados. Primeira vez? Peca ao organizador o codigo da sua equipe.","auth.claimT":"Este pais ainda nao foi reivindicado","auth.claimH":"Peca ao organizador o codigo da sua equipe. Ele e enviado so para voces e funciona uma vez.","auth.claimCode":"Codigo de reivindicacao","auth.claimGo":"Reivindicar e comecar","auth.needCode":"Digite o codigo que o organizador enviou","auth.pwShort":"A senha precisa ter pelo menos 4 caracteres","auth.pwNoMatch":"As duas senhas nao sao iguais","auth.sharedWarn":"Toda a equipe entra com esta mesma senha, em todos os celulares e tablets. Combinem juntos e anotem antes de continuar.","auth.prevLogin":"Entrada anterior:","auth.back":"Voltar","sc.nav":"Explorar","sc.title":"Esta partida","sc.other":"Ou explore qualquer outro pais","sc.weSaw":"O que registramos sobre eles","sc.usePlan":"Carregar","sc.planLoaded":"Carregado nesta partida","ab.match.t":"Depois da partida","ab.match":"Registre o que seus dois parceiros realmente fizeram: bolas marcadas, ate onde escalaram, se quebraram. Esses numeros viram as medias de cada pais.","ab.scout.t":"Antes da partida","ab.scout":"Quando sair a tabela, defina o numero da partida e seus dois parceiros, depois va aos boxes deles perguntar o que o robo faz. Salvo por pais, entao voce so pergunta uma vez.","ab.ranks.t":"Classificacao e historico","ab.ranks":"Classificacao oficial ao vivo, todas as partidas jogadas e os paises que voce ja explorou. Filtre por continente ou veja so o seu.","ab.robot.t":"O robo de voces","ab.robot":"Descreva seu robo uma vez e publique. Outros paises leem antes de se aliarem a voces, e voces leem os deles.","ab.score.t":"Calculadora de pontos","ab.score":"Teste quanto uma alianca marcaria. Util nos 3 minutos de conversa para decidir entre escalar ou continuar atirando.","ab.data.t":"Dados, ajustes, exportar","ab.data":"Quanto voce registrou, idioma e opcoes de tela, exportar CSV, backup e restauracao.","s.upToDate":"Você já tem a versão mais recente","s.updating":"Atualizando para a nova versão…","rk.ours":"Nossos dados","rk.nav":"Ranking","rk.title":"Classificação","rk.ladder":"Ranking","rk.matches":"Partidas","rk.scouted":"Nossos dados",
  "rk.all":"Todas","rk.mine":"Minhas","rk.done":"Jogadas","rk.upcoming":"A seguir","rk.myCont":"Meu continente",
  "rk.champion":"CAMPEÃO","rk.podium":"PÓDIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"CANDIDATO","rk.rising":"EM ALTA",
  "rk.yourRank":"Sua posição","rk.toPlayoff":"posições do corte do playoff:","rk.you":"VOCÊS",
@@ -2580,7 +2637,7 @@ pt:{"s.upToDate":"Você já tem a versão mais recente","s.updating":"Atualizand
  "m.phase":"Fase","m.phaseH":"o treino não entra nas médias",
  "m.practice":"Treino","m.quals":"Classif.","m.playoffs":"Playoffs","n.phaseAll":"Todas as fases"},
 
-ar:{"s.upToDate":"لديك أحدث إصدار","s.updating":"جارٍ التحديث إلى الإصدار الجديد…","rk.ours":"بياناتنا","rk.nav":"الترتيب","rk.title":"الترتيب المباشر","rk.ladder":"الترتيب","rk.matches":"المباريات","rk.scouted":"رصدنا",
+ar:{"auth.skip":"تخطّي الآن","auth.defaultNote":"لكل دولة حسابها وبياناتها. أول مرة؟ اطلب من المنظم رمز استلام فريقك.","auth.claimT":"لم يتم استلام هذه الدولة بعد","auth.claimH":"اطلب من المنظم رمز استلام فريقك. يُرسل لفريقك وحده ويعمل مرة واحدة.","auth.claimCode":"رمز الاستلام","auth.claimGo":"استلم وابدأ","auth.needCode":"أدخل رمز الاستلام الذي أرسله المنظم","auth.pwShort":"كلمة المرور لا تقل عن 4 أحرف","auth.pwNoMatch":"كلمتا المرور غير متطابقتين","auth.sharedWarn":"كل أفراد فريقك يدخلون بهذه الكلمة نفسها على كل الأجهزة. اتفقوا عليها ودوّنوها قبل المتابعة.","auth.prevLogin":"آخر دخول سابق:","auth.back":"رجوع","sc.nav":"استكشاف","sc.title":"هذه المباراة","sc.other":"أو استكشف أي دولة أخرى","sc.weSaw":"ما سجلناه عنهم","sc.usePlan":"تحميل","sc.planLoaded":"تم التحميل في هذه المباراة","ab.match.t":"بعد المباراة","ab.match":"سجّل ما فعله شريكاك فعلياً: الكرات المسجلة، وإلى أي منطقة تسلقا، وهل تعطل الروبوت. هذه الأرقام تكوّن متوسط كل دولة.","ab.scout.t":"قبل المباراة","ab.scout":"عند صدور الجدول، حدد رقم المباراة وشريكيك، ثم اذهب إلى ورشتيهما واسأل عن قدرات الروبوت. تُحفظ البيانات لكل دولة، فتسأل مرة واحدة فقط.","ab.ranks.t":"الترتيب والسجل","ab.ranks":"الترتيب الرسمي المباشر، وكل المباريات التي لُعبت، والدول التي استكشفتها. صفِّ حسب القارة أو اعرض دولتك فقط.","ab.robot.t":"الروبوت الخاص بكم","ab.robot":"صف روبوتك مرة واحدة وانشره. تقرأه الدول الأخرى قبل التحالف معكم، وتقرأون وصفهم أيضاً.","ab.score.t":"حاسبة النقاط","ab.score":"جرّب كم يسجل التحالف. مفيد في دقائق التشاور الثلاث لتقرر التسلق أو مواصلة الرمي.","ab.data.t":"إحصاءات وإعدادات وتصدير","ab.data":"كم سجّلت، واللغة وخيارات العرض، وتصدير CSV، والنسخ الاحتياطي والاستعادة.","s.upToDate":"لديك أحدث إصدار","s.updating":"جارٍ التحديث إلى الإصدار الجديد…","rk.ours":"بياناتنا","rk.nav":"الترتيب","rk.title":"الترتيب المباشر","rk.ladder":"الترتيب","rk.matches":"المباريات","rk.scouted":"رصدنا",
  "rk.all":"الكل","rk.mine":"مبارياتنا","rk.done":"انتهت","rk.upcoming":"قادمة","rk.myCont":"قارتي",
  "rk.champion":"البطل","rk.podium":"المنصة","rk.playoff":"منطقة التأهل","rk.contender":"منافس","rk.rising":"صاعد",
  "rk.yourRank":"ترتيبكم","rk.toPlayoff":"مركزاً عن حد التأهل:","rk.you":"أنتم",
@@ -2594,7 +2651,7 @@ ar:{"s.upToDate":"لديك أحدث إصدار","s.updating":"جارٍ التح�
  "m.phase":"المرحلة","m.phaseH":"التدريب لا يدخل في المعدلات",
  "m.practice":"تدريب","m.quals":"التصفيات","m.playoffs":"الأدوار الإقصائية","n.phaseAll":"كل المراحل"},
 
-ja:{"s.upToDate":"最新バージョンです","s.updating":"新しいバージョンに更新しています…","rk.ours":"自チームの記録","rk.nav":"順位","rk.title":"ライブ順位","rk.ladder":"ランキング","rk.matches":"試合","rk.scouted":"自分たちの記録",
+ja:{"auth.skip":"あとで設定する","auth.defaultNote":"国ごとにアカウントとデータが分かれています。初めての方は主催者に登録コードを請求してください。","auth.claimT":"この国はまだ登録されていません","auth.claimH":"主催者にチームの登録コードを請求してください。コードは自チームにだけ送られ、一度だけ使えます。","auth.claimCode":"登録コード","auth.claimGo":"登録して開始","auth.needCode":"主催者から送られた登録コードを入力してください","auth.pwShort":"パスワードは4文字以上必要です","auth.pwNoMatch":"2つのパスワードが一致しません","auth.sharedWarn":"チーム全員が、使うすべての端末でこの同じパスワードを使います。先に全員で決めて控えてから進んでください。","auth.prevLogin":"前回のログイン:","auth.back":"戻る","sc.nav":"偵察","sc.title":"この試合","sc.other":"他の国を調べる","sc.weSaw":"自分たちが記録した成績","sc.usePlan":"読み込む","sc.planLoaded":"この試合に読み込みました","ab.match.t":"試合のあと","ab.match":"味方2チームが実際に何をしたかを記録します。得点したボール数、登った高さ、故障の有無。この数字が各国の平均値になります。","ab.scout.t":"試合の前","ab.scout":"スケジュールが出たら試合番号と味方2チームを設定し、ピットへ行ってロボットの能力を聞きます。国ごとに保存されるので、聞くのは一度だけで済みます。","ab.ranks.t":"順位と戦績","ab.ranks":"公式のリアルタイム順位、これまでの全試合、そして自分たちが偵察した国。大陸で絞り込んだり、自国だけ表示できます。","ab.robot.t":"自チームのロボット","ab.robot":"自分のロボットを一度書いて公開します。他国は同盟を組む前に読めますし、こちらも相手のを読めます。","ab.score.t":"得点計算機","ab.score":"同盟の得点を試算します。3分間の作戦会議で、登るか投げ続けるかを決めるときに便利です。","ab.data.t":"統計・設定・書き出し","ab.data":"どれだけ偵察したか、言語と表示の設定、CSV書き出し、バックアップと復元。","s.upToDate":"最新バージョンです","s.updating":"新しいバージョンに更新しています…","rk.ours":"自チームの記録","rk.nav":"順位","rk.title":"ライブ順位","rk.ladder":"ランキング","rk.matches":"試合","rk.scouted":"自分たちの記録",
  "rk.all":"すべて","rk.mine":"自チーム","rk.done":"終了","rk.upcoming":"これから","rk.myCont":"同じ大陸",
  "rk.champion":"首位","rk.podium":"表彰台","rk.playoff":"決勝進出圏","rk.contender":"接戦圏","rk.rising":"上昇中",
  "rk.yourRank":"自チームの順位","rk.toPlayoff":"決勝進出まであと","rk.you":"自チーム",
@@ -2608,7 +2665,7 @@ ja:{"s.upToDate":"最新バージョンです","s.updating":"新しいバージ�
  "m.phase":"フェーズ","m.phaseH":"練習試合は平均に含めません",
  "m.practice":"練習","m.quals":"予選","m.playoffs":"決勝","n.phaseAll":"すべて"},
 
-ko:{"s.upToDate":"최신 버전입니다","s.updating":"새 버전으로 업데이트 중…","rk.ours":"우리 기록","rk.nav":"순위","rk.title":"실시간 순위","rk.ladder":"랭킹","rk.matches":"경기","rk.scouted":"우리 기록",
+ko:{"auth.skip":"나중에 설정","auth.defaultNote":"나라마다 계정과 데이터가 따로 입니다. 처음이신가요? 주최측에 팀 등록 코드를 요청하세요.","auth.claimT":"이 나라는 아직 등록되지 않았습니다","auth.claimH":"주최측에 팀 등록 코드를 요청하세요. 해당 팀에게만 전달되며 한 번만 쓸 수 있습니다.","auth.claimCode":"등록 코드","auth.claimGo":"등록하고 시작","auth.needCode":"주최측이 보낸 등록 코드를 입력하세요","auth.pwShort":"비밀번호는 4자 이상이어야 합니다","auth.pwNoMatch":"두 비밀번호가 서로 다릅니다","auth.sharedWarn":"팀 전체가 모든 휴대폰과 태블릿에서 이 비밀번호 하나로 로그인합니다. 함께 정하고 적어둔 다음 진행하세요.","auth.prevLogin":"직전 로그인:","auth.back":"뒤로","sc.nav":"정찰","sc.title":"이번 경기","sc.other":"다른 나라 살펴보기","sc.weSaw":"우리가 기록한 성적","sc.usePlan":"불러오기","sc.planLoaded":"이번 경기에 불러왔습니다","ab.match.t":"경기가 끝난 뒤","ab.match":"동맹 두 팀이 실제로 무엇을 했는지 기록합니다. 넣은 공, 올라간 구역, 고장 여부. 이 숫자가 각 나라의 평균이 됩니다.","ab.scout.t":"경기 전에","ab.scout":"일정이 나오면 경기 번호와 동맹 두 팀을 지정하고, 핏으로 가서 로봇이 무엇을 할 수 있는지 물어보세요. 나라별로 저장되니 한 번만 물으면 됩니다.","ab.ranks.t":"순위와 전적","ab.ranks":"공식 실시간 순위, 지금까지 치른 모든 경기, 그리고 우리가 정찰한 나라들. 대륙별로 걸러 보거나 우리 팀만 볼 수 있습니다.","ab.robot.t":"우리 로봇","ab.robot":"우리 로봇을 한 번 적고 공개하세요. 다른 나라가 동맹이 되기 전에 읽을 수 있고, 우리도 그들 것을 읽습니다.","ab.score.t":"점수 계산기","ab.score":"동맹이 몇 점을 낼지 계산해 봅니다. 3분 작전 시간에 올라갈지 계속 쏴지 정할 때 유용합니다.","ab.data.t":"통계, 설정, 내보내기","ab.data":"얼마나 정찰했는지, 언어와 화면 설정, CSV 내보내기, 백업과 복원.","s.upToDate":"최신 버전입니다","s.updating":"새 버전으로 업데이트 중…","rk.ours":"우리 기록","rk.nav":"순위","rk.title":"실시간 순위","rk.ladder":"랭킹","rk.matches":"경기","rk.scouted":"우리 기록",
  "rk.all":"전체","rk.mine":"우리","rk.done":"종료","rk.upcoming":"예정","rk.myCont":"같은 대륙",
  "rk.champion":"1위","rk.podium":"시상대","rk.playoff":"플레이오프 진출권","rk.contender":"경쟁권","rk.rising":"상승세",
  "rk.yourRank":"우리 순위","rk.toPlayoff":"진출까지","rk.you":"우리",
@@ -2621,17 +2678,17 @@ ko:{"s.upToDate":"최신 버전입니다","s.updating":"새 버전으로 업데�
  "rk.fromOfficial":"공식 데이터: results.first.global",
  "m.phase":"단계","m.phaseH":"연습 경기는 평균에 넣지 않습니다",
  "m.practice":"연습","m.quals":"예선","m.playoffs":"플레이오프","n.phaseAll":"전체 단계"},
-"hi":{"s.upToDate":"आपके पास नवीनतम संस्करण है","s.updating":"नए संस्करण में अपडेट हो रहा है…"},
-"bn":{"s.upToDate":"আপনার কাছে সর্বশেষ সংস্করণ আছে","s.updating":"নতুন সংস্করণে আপডেট হচ্ছে…"},
-"ru":{"s.upToDate":"У вас последняя версия","s.updating":"Обновление до новой версии…"},
-"ur":{"s.upToDate":"آپ کے پاس تازہ ترین ورژن ہے","s.updating":"نئے ورژن میں اپ ڈیٹ ہو رہا ہے…"},
-"id":{"s.upToDate":"Anda sudah memakai versi terbaru","s.updating":"Memperbarui ke versi baru…"},
-"de":{"s.upToDate":"Du hast die neueste Version","s.updating":"Neue Version wird geladen…"},
-"tr":{"s.upToDate":"En son sürümü kullanıyorsunuz","s.updating":"Yeni sürüme güncelleniyor…"},
-"vi":{"s.upToDate":"Bạn đang dùng phiên bản mới nhất","s.updating":"Đang cập nhật lên phiên bản mới…"},
-"sw":{"s.upToDate":"Una toleo jipya zaidi","s.updating":"Inasasisha hadi toleo jipya…"},
-"fa":{"s.upToDate":"شما آخرین نسخه را دارید","s.updating":"در حال به‌روزرسانی به نسخه جدید…"},
-"it":{"s.upToDate":"Hai la versione più recente","s.updating":"Aggiornamento alla nuova versione…"}
+"hi":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"आपके पास नवीनतम संस्करण है","s.updating":"नए संस्करण में अपडेट हो रहा है…"},
+"bn":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"আপনার কাছে সর্বশেষ সংস্করণ আছে","s.updating":"নতুন সংস্করণে আপডেট হচ্ছে…"},
+"ru":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"У вас последняя версия","s.updating":"Обновление до новой версии…"},
+"ur":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"آپ کے پاس تازہ ترین ورژن ہے","s.updating":"نئے ورژن میں اپ ڈیٹ ہو رہا ہے…"},
+"id":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"Anda sudah memakai versi terbaru","s.updating":"Memperbarui ke versi baru…"},
+"de":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"Du hast die neueste Version","s.updating":"Neue Version wird geladen…"},
+"tr":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"En son sürümü kullanıyorsunuz","s.updating":"Yeni sürüme güncelleniyor…"},
+"vi":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"Bạn đang dùng phiên bản mới nhất","s.updating":"Đang cập nhật lên phiên bản mới…"},
+"sw":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"Una toleo jipya zaidi","s.updating":"Inasasisha hadi toleo jipya…"},
+"fa":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"شما آخرین نسخه را دارید","s.updating":"در حال به‌روزرسانی به نسخه جدید…"},
+"it":{"auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.skip":"Skip for now","s.upToDate":"Hai la versione più recente","s.updating":"Aggiornamento alla nuova versione…"}
 };
 Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 })();
@@ -2967,6 +3024,7 @@ function nFlag(s){ const n=NMAP[s]; if(!n) return s?'🏳️':'🌍'; return (HT
 function nFlagTxt(s){ return NMAP[s]?NMAP[s].flag:(s?'🏳️':'🌍'); }
 function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cfg.theme||'auto'; d.cfg.event=d.cfg.event||'FGC 2026 Igniting Innovation';
   d.cfg.recent=Array.isArray(d.cfg.recent)?d.cfg.recent:[]; d.cfg.fx=d.cfg.fx||'auto'; d.cfg.custom=(d.cfg.custom&&typeof d.cfg.custom==='object')?d.cfg.custom:{};
+  d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:''};
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -2980,11 +3038,11 @@ async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Token':AUTH.token},body:body?JSON.stringify(body):undefined});
   let d={}; try{ d=await r.json(); }catch(e){}
   if(r.status===401){ signedOut(); throw new Error(t('s.again')); }
-  if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+  if(!r.ok){ const e=new Error(d.error||('HTTP '+r.status)); e.status=r.status; e.needClaim=!!d.needClaim; throw e; }
   return d;
 }
 function showAuth(view){ $('auth').hidden=false; $('main').hidden=true; $('nav').hidden=true; $('mFab').hidden=true; document.querySelector('header').hidden=true;
-  ['authLogin','authSet','authOffline'].forEach(id=>$(id).hidden=(id!==view));
+  ['authLogin','authSet','authClaim','authOffline'].forEach(id=>$(id).hidden=(id!==view));
   if(view==='authSet') $('aWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><b>${esc(nName(AUTH.team))}</b> <span class="zh">${esc(nSub(AUTH.team))}</span>`; }
 function showErr(el,msg){ el.textContent=msg; el.hidden=!msg; }
 function signedOut(){ AUTH.token=''; SYNC.on=false; try{ localStorage.removeItem('fgc.auth'); }catch(e){} setSync('s.signedOut'); showAuth('authLogin'); }
@@ -2995,23 +3053,49 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
 $('aTeamOff').onclick=()=>openPicker(sl=>setCbtn($('aTeamOff'),sl,t('auth.selectCountry')),{custom:false});
 $('aEye').onclick=()=>{ const i=$('aPw'); i.type=i.type==='password'?'text':'password'; };
 $('aPw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('aGo').click(); });
+function afterLogin(d){
+  AUTH.token=d.token; AUTH.team=d.team;
+  try{ localStorage.setItem('fgc.auth',JSON.stringify({token:d.token,team:d.team})); }catch(e){}
+  LAST_LOGIN=d.prevLogin||null;
+  $('aPw').value=''; haptic(18);
+  if(d.mustChange&&!skipped(d.team)) showAuth('authSet'); else boot(d.team);
+}
+let LAST_LOGIN=null, CLAIMING='';
 $('aGo').onclick=async()=>{
   const tm=$('aTeam').dataset.v, pw=$('aPw').value;
   if(!tm){ flash($('aTeam')); showErr($('aErr'),t('auth.errCountry')); return; }
   showErr($('aErr'),''); $('aGo').disabled=true;
-  try{ const d=await api('/api/login',{team:tm,password:pw});
-    AUTH.token=d.token; AUTH.team=d.team; try{ localStorage.setItem('fgc.auth',JSON.stringify({token:d.token,team:d.team})); }catch(e){}
-    $('aPw').value=''; haptic(18);
-    if(d.mustChange&&!skipped(d.team)) showAuth('authSet'); else boot(d.team);
-  }catch(e){ showErr($('aErr'),e.message); flash($('aPw')); }
+  try{ afterLogin(await api('/api/login',{team:tm,password:pw})); }
+  catch(e){
+    /* 這個國家還沒有人認領 → 需要主辦方發的認領碼，不能用共用密碼進來 */
+    if(e.needClaim){ CLAIMING=tm; showClaim(tm); }
+    else { showErr($('aErr'),e.message); flash($('aPw')); }
+  }
   finally{ $('aGo').disabled=false; }
+};
+function showClaim(tm){
+  $('aWhoC').innerHTML=`<span class="fl">${nFlag(tm)}</span><b>${esc(nName(tm))}</b> <span class="zh">${esc(nSub(tm))}</span>`;
+  $('aCode').value=''; $('aCNew').value=''; $('aCNew2').value=''; showErr($('aErrC'),'');
+  showAuth('authClaim');
+}
+$('aCBack').onclick=()=>{ CLAIMING=''; showAuth('authLogin'); };
+$('aClaimGo').onclick=async()=>{
+  const code=$('aCode').value.trim(), n=$('aCNew').value, n2=$('aCNew2').value;
+  showErr($('aErrC'),'');
+  if(!code){ flash($('aCode')); showErr($('aErrC'),t('auth.needCode')); return; }
+  if(n.length<4){ flash($('aCNew')); showErr($('aErrC'),t('auth.pwShort')); return; }
+  if(n!==n2){ flash($('aCNew2')); showErr($('aErrC'),t('auth.pwNoMatch')); return; }
+  $('aClaimGo').disabled=true;
+  try{ afterLogin(await api('/api/claim',{team:CLAIMING,code,password:n})); }
+  catch(e){ showErr($('aErrC'),e.message); flash($('aCode')); }
+  finally{ $('aClaimGo').disabled=false; }
 };
 $('aSet').onclick=async()=>{
   const n=$('aNew').value, n2=$('aNew2').value;
@@ -3229,11 +3313,70 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
   chipsInit($('pPos'),r.pos,v=>{ touch('pos',v); syncMap(); }); syncMap();
   chipsInit($('pRoles'),r.roles,v=>touch('roles',v)); chipsInit($('pLang'),r.lang,v=>touch('lang',v)); chipsInit($('pCoord'),r.coord,v=>touch('coord',v));
   tgInit($('pCarry'),r.carry,v=>touch('carry',v)); tgInit($('pCarried'),r.carried,v=>touch('carried',v));
-  $('pCap').value=r.cap||0; $('pEmpty').value=r.empty||0; $('pClimbSec').value=r.climbSec||0; $('pBreak').value=r.breaks||0; $('pNotes').value=r.notes||''; }
+  $('pCap').value=r.cap||0; $('pEmpty').value=r.empty||0; $('pClimbSec').value=r.climbSec||0; $('pBreak').value=r.breaks||0; $('pNotes').value=r.notes||'';
+  scNowRender(); }
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
 $('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); haptic(12); });
+
+/* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
+function plan(){ return DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:''}); }
+function planSave(){ DB.cfg.ts=now(); save(); }
+function scWhoRender(){
+  const pl=plan(), el=$('scWho'), both=[['A',pl.a],['B',pl.b]].filter(x=>x[1]);
+  el.hidden = both.length<2;
+  if(el.hidden){ el.innerHTML=''; return; }
+  el.innerHTML=both.map(([k,sl])=>`<button data-v="${esc(sl)}"><span class="fl">${nFlag(sl)}</span> ${esc(nName(sl))}</button>`).join('');
+  segInit(el, curTeam||pl.a, v=>{ if(!v) return; curTeam=v; setCbtn($('pCountry'),''); loadPit(); haptic(12); });
+}
+function scPick(slot){
+  openPicker(sl=>{
+    const pl=plan(); pl[slot.toLowerCase()]=sl; planSave();
+    setCbtn($('sc'+slot),sl,t('m.whichCountry'));
+    curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); mPlanBar(); haptic(12);
+  });
+}
+function scLoad(){
+  const pl=plan();
+  $('scMatch').value=pl.match||1;
+  setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
+  scWhoRender(); mPlanBar();
+}
+$('scA').onclick=()=>scPick('A'); $('scB').onclick=()=>scPick('B');
+$('scMatch').oninput=e=>{ plan().match=parseInt(e.target.value,10)||0; planSave(); mPlanBar(); };
+/* 我們自己打過的場次對這一隊的統計，賽前先看一眼 */
+function scNowRender(){
+  const el=$('scNow'); if(!el) return;
+  const b=curTeam?summary(true)[curTeam]:null;
+  if(!curTeam||!b||!b.n){ el.hidden=true; el.innerHTML=''; return; }
+  const f=(x)=>b.n?(x/b.n).toFixed(1):'—';
+  const bits=[
+    `<span class="tag">${b.n} ${esc(t('n.matches'))}</span>`,
+    `<span class="tag">🏀 ${f(b.sup)}</span>`,
+    `<span class="tag">PORT ${f(b.port)}</span>`,
+    b.best&&b.best!=='0'?`<span class="tag ${CLIMB_TAG[b.best]}">${esc(CLIMB_LABEL[b.best])}</span>`:`<span class="tag">${esc(t('n.noClimb'))}</span>`,
+    `<span class="tag">${esc(t('n.climbs'))} ${Math.round(100*b.climbN/b.n)}%</span>`,
+    b.dead?`<span class="tag bad">${esc(t('m.dead'))} ${b.dead}</span>`:''
+  ].filter(Boolean).join('');
+  el.hidden=false;
+  el.innerHTML=`<h2><span class="ic">📊</span>${esc(t('sc.weSaw'))}</h2><div class="lstats-wrap">${bits}</div>`;
+}
+
+/* Match 分頁：一鍵把賽前計畫帶進來 */
+function mPlanBar(){
+  const bar=$('mPlanBar'), btn=$('mUsePlan'); if(!bar||!btn) return;
+  const pl=plan(); const ok=!!(pl.a||pl.b);
+  bar.hidden=!ok; if(!ok) return;
+  const names=[pl.a,pl.b].filter(Boolean).map(nName).join(' · ');
+  btn.textContent=`${t('sc.usePlan')} M${pl.match||'?'} · ${names}`;
+  btn.onclick=()=>{
+    if(pl.match) $('mMatch').value=pl.match;
+    if(pl.a){ setCbtn($('ACountry'),pl.a,t('m.whichCountry')); $('ABody').hidden=false; }
+    if(pl.b){ setCbtn($('BCountry'),pl.b,t('m.whichCountry')); $('BBody').hidden=false; }
+    haptic(12); toast(t('sc.planLoaded'),'ok');
+  };
+}
 function pitBits(p){ const bits=[]; if(!p) return bits;
   if(p.cap) bits.push(`${t('n.holds')} ${p.cap}`); if(p.type) bits.push(TYPE_LABEL[p.type]||p.type); if(p.empty) bits.push(`${t('n.empties')} ${p.empty}s`);
   bits.push(`${t('n.dShoot')} ${TRI[p.sup]||'?'}`,`PORT ${TRI[p.port]||'?'}`,`${t('n.dClimb')} ${CLIMB_LABEL[p.climb]||'?'}${p.climbSec?' '+p.climbSec+'s':''}`);
@@ -3255,9 +3398,9 @@ function renderSelf(){ const el=$('pSelf'); const s=PROFILES[curTeam]; if(!curTe
 /* ---------- NATIONS ---------- */
 let tPhase='all';
 function phaseOK(r){ return tPhase==='all' || (r.phase||'qual')===tPhase; }
-function summary(){ const by={};
+function summary(allPhases){ const by={};
   const mk=()=>({n:0,sup:0,port:0,best:'',climbN:0,z3:0,carry:0,dead:0,rate:0,rn:0,cards:0});
-  live().filter(phaseOK).forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
+  live().filter(r=>allPhases||phaseOK(r)).forEach(r=>{ const k=r.team; if(!k) return; const b=by[k]||(by[k]=mk());
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
@@ -3386,7 +3529,14 @@ function calc(){ const sup=parseInt($('cSup').value,10)||0, ext=parseInt($('cExt
 ['cSup','cExt'].forEach(id=>$(id).oninput=calc);
 
 /* ---------- DATA TAB ---------- */
-function refreshData(){ if(!DB) return; $('statPit').textContent=Object.keys(DB.pit).length; $('statMatch').textContent=live().length;
+function showLastLogin(){
+  const el=$('lastLogin'); if(!el) return;
+  const p=LAST_LOGIN;
+  if(!p||!p.t){ el.hidden=true; return; }
+  el.hidden=false;
+  el.textContent=t('auth.prevLogin')+' '+String(p.t).replace('T',' ').slice(0,16)+(p.ip?'  ('+p.ip+')':'');
+}
+function refreshData(){ if(!DB) return; showLastLogin(); $('statPit').textContent=Object.keys(DB.pit).length; $('statMatch').textContent=live().length;
   const s=new Set(Object.keys(DB.pit)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
   $('cfgScout').value=DB.cfg.scout; segInit($('cfgTheme'),DB.cfg.theme,v=>{ DB.cfg.theme=v||'auto'; applyTheme(); touchCfg(); });
   segInit($('cfgFx'),fxMode(),v=>{ DB.cfg.fx=v||'auto'; try{ localStorage.setItem('fgc.fx',DB.cfg.fx); }catch(e){} applyFX(); touchCfg(); }); }
@@ -3543,7 +3693,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v20';
+const APP_VER='v21';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

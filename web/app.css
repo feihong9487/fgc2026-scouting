@@ -540,3 +540,19 @@ svg.trend.dn polyline{stroke:var(--red)}
 .it.lad .lname{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px}
 .it.lad .lname b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .it.lad .lname .mv{margin-left:0}
+
+/* ── 每個分頁開頭的功能簡介：告訴使用者這一欄是幹嘛的 ── */
+.intro{display:flex;gap:12px;align-items:flex-start;margin:0 0 14px;padding:13px 15px;border-radius:16px;
+  background:var(--ember-soft);border:1px solid color-mix(in srgb,var(--ember) 22%,transparent)}
+.intro>div{min-width:0}
+.intro .ii{font-size:19px;line-height:1.25;flex:none}
+.intro b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin-bottom:3px}
+.intro p{margin:0;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.intro .zh{display:block;font-size:11.5px;line-height:1.55;color:var(--muted);opacity:.75;margin-top:5px}
+/* 賽前情報卡：我們自己打過的場次對這一隊的統計 */
+.card.scnow .lstats-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.card.scnow h2{margin-bottom:10px}
+#scWho button .fl{font-size:15px;margin-right:5px}
+#scWho button img.flag{height:12px;width:auto;border-radius:2px;vertical-align:-1px}
+.warn b{display:block;margin-bottom:5px}
+#aCode{letter-spacing:.12em;font-weight:800;text-transform:uppercase;font-family:ui-monospace,Menlo,monospace}
