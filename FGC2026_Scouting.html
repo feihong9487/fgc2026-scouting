@@ -696,6 +696,12 @@ svg.trend.dn polyline{stroke:var(--red)}
   <div class="intro"><span class="ii">🔍</span><div><b data-i18n="ab.scout.t">…</b><p data-i18n="ab.scout">…</p><span class="zh" data-hint="ab.scout"></span></div></div>
   <div class="card" id="scHead">
     <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
+    <div class="f"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="sc.phase"></span></label>
+      <div class="seg n3" id="scPhase">
+        <button data-v="prac" data-c="gray" data-i18n="m.practice">Practice</button>
+        <button data-v="qual" data-i18n="m.quals">Quals</button>
+        <button data-v="play" data-c="z3" data-i18n="m.playoffs">Playoffs</button>
+      </div></div>
     <div class="f"><label><span data-i18n="m.match">Match</span> <span class="zh" data-hint="m.match"></span></label>
       <div class="step" data-k="scMatch" style="max-width:240px"><button data-d="-1">−</button><input type="number" id="scMatch" inputmode="numeric" value="1"><button data-d="1">+</button></div></div>
     <div class="f"><label><span data-i18n="m.slotA">Teammate A</span></label>
@@ -771,6 +777,16 @@ svg.trend.dn polyline{stroke:var(--red)}
         <button data-v="4"><span data-i18n="p.h4">Signal: raised hand = stuck, don't bump me</span> <span class="zh" data-hint="p.h4"></span></button>
       </div>
     </div>
+  <div class="card" id="scSaveCard">
+    <div class="bar"><button class="btn pri wide" id="pSave">✓ <span data-i18n="sc.save">Save this robot</span></button></div>
+    <p class="note" id="pSaved" style="margin:10px 0 0;text-align:center"></p>
+  </div>
+  </div>
+  <div class="card" id="scPub">
+    <h2><span class="ic">📢</span><span data-i18n="sc.pub">Robots teams have published</span></h2>
+    <p class="note" style="margin:-6px 0 12px" data-i18n="sc.pubH">What each nation says about its own robot. Tap one to open its page.</p>
+    <button class="cbtn" id="nLookup" data-v=""><span class="fl">🔎</span><span class="ph" data-i18n="n.pick">Pick a country…</span><span class="arr">›</span></button>
+    <div class="list" id="pubList" style="margin-top:12px"></div>
   </div>
 </section>
 
@@ -796,11 +812,6 @@ svg.trend.dn polyline{stroke:var(--red)}
   </div>
 
   <div id="rkBody"></div>
-
-  <div class="card" id="rkLookup">
-    <h2><span class="ic">🌍</span><span data-i18n="n.lookup">Look up a nation</span></h2>
-    <button class="cbtn" id="nLookup" data-v=""><span class="fl">🔎</span><span class="ph" data-i18n="n.pick">Pick a country…</span><span class="arr">›</span></button>
-  </div>
 
   <div class="card" id="tSortCard">
     <h2><span class="ic">🔧</span><span data-i18n="rk.ours">Our scouting</span><span class="zh" data-hint="rk.ours"></span></h2>
@@ -2553,7 +2564,7 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 // Languages beyond these fall back to English automatically.
 (function(){
 const I = window.I18N, ADD = {
-en:{"auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.claimT":"This nation has not been claimed yet","auth.claimH":"Ask the organizer for your team's claim code. It is sent to your team only, and works once.","auth.claimCode":"Claim code","auth.claimGo":"Claim and start","auth.needCode":"Enter the claim code the organizer sent you","auth.pwShort":"Password must be at least 4 characters","auth.pwNoMatch":"The two passwords do not match","auth.sharedWarn":"Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.","auth.prevLogin":"Previous sign-in:","auth.back":"Back","sc.nav":"Scout","sc.title":"This match","sc.other":"Or scout any other nation","sc.weSaw":"What we recorded about them","sc.usePlan":"Load","sc.planLoaded":"Loaded into this match","ab.match.t":"After the match","ab.match":"Record what your two partners actually did: balls scored, where they climbed, whether they broke down. These numbers become each nation's averages.","ab.scout.t":"Before the match","ab.scout":"When the schedule comes out, set the match number and your two partners, then go to their pits and ask what their robot can do. Saved per nation, so you only ask once.","ab.ranks.t":"Standings and history","ab.ranks":"Official live rankings, every match played, and the nations you have scouted. Filter by continent or show only your own.","ab.robot.t":"Your own robot","ab.robot":"Describe your robot once and publish it. Other nations can read it before they are allied with you, and you can read theirs.","ab.score.t":"Score calculator","ab.score":"Try out what an alliance would score. Useful in the 3-minute huddle when deciding whether to climb or keep shooting.","ab.data.t":"Stats, settings, export","ab.data":"How much you have scouted, language and display options, CSV export, and backup or restore.","s.upToDate":"You have the latest version","s.updating":"Updating to the new version…","rk.ours":"Our scouting","rk.nav":"Ranks","rk.title":"Rankings","rk.ladder":"Ladder","rk.matches":"Matches","rk.scouted":"Scouted",
+en:{"sc.save":"Save this robot","sc.saved":"Saved","sc.autosaved":"Saved automatically at","sc.nothingYet":"Nothing filled in yet","sc.pickFirst":"Pick a country first","sc.pub":"Robots teams have published","sc.pubH":"What each nation says about its own robot. Tap one to open its page.","sc.pubNone":"Nobody has published yet. Fill in the Robot tab and publish yours first.","sc.phase":"Phase","sc.phaseH":"Each phase keeps its own notes. A robot in the playoffs is not the one you saw on practice day.","auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own account and its own data. First time here? Ask the organizer for your team's claim code.","auth.claimT":"This nation has not been claimed yet","auth.claimH":"Ask the organizer for your team's claim code. It is sent to your team only, and works once.","auth.claimCode":"Claim code","auth.claimGo":"Claim and start","auth.needCode":"Enter the claim code the organizer sent you","auth.pwShort":"Password must be at least 4 characters","auth.pwNoMatch":"The two passwords do not match","auth.sharedWarn":"Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.","auth.prevLogin":"Previous sign-in:","auth.back":"Back","sc.nav":"Scout","sc.title":"This match","sc.other":"Or scout any other nation","sc.weSaw":"What we recorded about them","sc.usePlan":"Load","sc.planLoaded":"Loaded into this match","ab.match.t":"After the match","ab.match":"Record what your two partners actually did: balls scored, where they climbed, whether they broke down. These numbers become each nation's averages.","ab.scout.t":"Before the match","ab.scout":"When the schedule comes out, set the match number and your two partners, then go to their pits and ask what their robot can do. Saved per nation, so you only ask once.","ab.ranks.t":"Standings and history","ab.ranks":"Official live rankings, every match played, and the nations you have scouted. Filter by continent or show only your own.","ab.robot.t":"Your own robot","ab.robot":"Describe your robot once and publish it. Other nations can read it before they are allied with you, and you can read theirs.","ab.score.t":"Score calculator","ab.score":"Try out what an alliance would score. Useful in the 3-minute huddle when deciding whether to climb or keep shooting.","ab.data.t":"Stats, settings, export","ab.data":"How much you have scouted, language and display options, CSV export, and backup or restore.","s.upToDate":"You have the latest version","s.updating":"Updating to the new version…","rk.ours":"Our scouting","rk.nav":"Ranks","rk.title":"Rankings","rk.ladder":"Ladder","rk.matches":"Matches","rk.scouted":"Scouted",
  "rk.all":"All","rk.mine":"Mine","rk.done":"Played","rk.upcoming":"Upcoming","rk.myCont":"My continent",
  "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"PLAYOFF ZONE","rk.contender":"CONTENDER","rk.rising":"RISING",
  "rk.yourRank":"Your rank","rk.toPlayoff":"places off the playoff cut:","rk.you":"YOU",
@@ -2567,7 +2578,7 @@ en:{"auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own accou
  "m.phase":"Phase","m.phaseH":"practice results are kept out of the averages",
  "m.practice":"Practice","m.quals":"Quals","m.playoffs":"Playoffs","n.phaseAll":"All phases"},
 
-"zh-Hant":{"auth.skip":"先跳過","auth.defaultNote":"每個國家有自己的帳號跟自己的資料。第一次使用？跟主辦方要你們隊的認領碼。","auth.claimT":"這個國家還沒有人認領","auth.claimH":"跟主辦方要你們隊的認領碼。那組碼只會私下發給你們，而且只能用一次。","auth.claimCode":"認領碼","auth.claimGo":"認領並開始","auth.needCode":"請輸入主辦方發給你們的認領碼","auth.pwShort":"密碼至少要四個字","auth.pwNoMatch":"兩次輸入的密碼不一樣","auth.sharedWarn":"你們全隊、每一支手機跟平板都是用這一組密碼登入。先跟隊友講好、寫下來，再按下一步。","auth.prevLogin":"上一次登入：","auth.back":"返回","sc.nav":"打聽","sc.title":"這一場","sc.other":"或是查其他國家","sc.weSaw":"我們記過他們的表現","sc.usePlan":"帶入","sc.planLoaded":"已經帶進這一場","ab.match.t":"打完之後","ab.match":"記兩個盟友這一場實際做了什麼：投進幾顆、爬到哪一區、有沒有壞掉。這些數字會變成各國的平均值。","ab.scout.t":"開打之前","ab.scout":"賽程出來後，填這場的場次跟兩個盟友，然後下去維修區問他們機器能做什麼。資料照國家存，同一國問過一次就夠。","ab.ranks.t":"排名跟戰績","ab.ranks":"官方即時排名、每一場打過的比賽、還有我們自己記過的隊伍。可以只看自己，也可以照五大洲分開看。","ab.robot.t":"我們自己的機器","ab.robot":"把自己機器填一次然後公開。其他國家在跟你們同隊之前就能先看，你們也看得到他們的。","ab.score.t":"算分機","ab.score":"試算一個聯盟大概拿幾分。三分鐘戰術時間要決定去爬升還是繼續投球的時候很好用。","ab.data.t":"統計、設定、匯出","ab.data":"看你們記了多少、換語言跟顯示設定、匯出 CSV、備份跟還原。","s.upToDate":"已經是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我們自己記的","rk.nav":"排位","rk.title":"即時排名","rk.ladder":"排行榜","rk.matches":"賽程","rk.scouted":"我們的觀察",
+"zh-Hant":{"sc.save":"儲存這台機器","sc.saved":"已儲存","sc.autosaved":"已自動存檔於","sc.nothingYet":"還沒填任何東西","sc.pickFirst":"先選一個國家","sc.pub":"各隊公開的機器","sc.pubH":"各國自己寫的機器介紹。點一個打開他們的頁面。","sc.pubNone":"還沒有人公開。可以先去 Robot 分頁把自己的填一填然後公開。","sc.phase":"賽段","sc.phaseH":"每個賽段各存一份。季後賽的機器跟模擬賽那天不會是同一台。","auth.skip":"先跳過","auth.defaultNote":"每個國家有自己的帳號跟自己的資料。第一次使用？跟主辦方要你們隊的認領碼。","auth.claimT":"這個國家還沒有人認領","auth.claimH":"跟主辦方要你們隊的認領碼。那組碼只會私下發給你們，而且只能用一次。","auth.claimCode":"認領碼","auth.claimGo":"認領並開始","auth.needCode":"請輸入主辦方發給你們的認領碼","auth.pwShort":"密碼至少要四個字","auth.pwNoMatch":"兩次輸入的密碼不一樣","auth.sharedWarn":"你們全隊、每一支手機跟平板都是用這一組密碼登入。先跟隊友講好、寫下來，再按下一步。","auth.prevLogin":"上一次登入：","auth.back":"返回","sc.nav":"打聽","sc.title":"這一場","sc.other":"或是查其他國家","sc.weSaw":"我們記過他們的表現","sc.usePlan":"帶入","sc.planLoaded":"已經帶進這一場","ab.match.t":"打完之後","ab.match":"記兩個盟友這一場實際做了什麼：投進幾顆、爬到哪一區、有沒有壞掉。這些數字會變成各國的平均值。","ab.scout.t":"開打之前","ab.scout":"賽程出來後，填這場的場次跟兩個盟友，然後下去維修區問他們機器能做什麼。資料照國家存，同一國問過一次就夠。","ab.ranks.t":"排名跟戰績","ab.ranks":"官方即時排名、每一場打過的比賽、還有我們自己記過的隊伍。可以只看自己，也可以照五大洲分開看。","ab.robot.t":"我們自己的機器","ab.robot":"把自己機器填一次然後公開。其他國家在跟你們同隊之前就能先看，你們也看得到他們的。","ab.score.t":"算分機","ab.score":"試算一個聯盟大概拿幾分。三分鐘戰術時間要決定去爬升還是繼續投球的時候很好用。","ab.data.t":"統計、設定、匯出","ab.data":"看你們記了多少、換語言跟顯示設定、匯出 CSV、備份跟還原。","s.upToDate":"已經是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我們自己記的","rk.nav":"排位","rk.title":"即時排名","rk.ladder":"排行榜","rk.matches":"賽程","rk.scouted":"我們的觀察",
  "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即將開打","rk.myCont":"我這洲",
  "rk.champion":"冠軍","rk.podium":"前三","rk.playoff":"晉級區","rk.contender":"競爭中","rk.rising":"上升中",
  "rk.yourRank":"你們的名次","rk.toPlayoff":"距離晉級還差","rk.you":"你們",
@@ -2581,7 +2592,7 @@ en:{"auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own accou
  "m.phase":"賽段","m.phaseH":"模擬賽不會算進平均",
  "m.practice":"模擬賽","m.quals":"正賽","m.playoffs":"季後賽","n.phaseAll":"全部賽段"},
 
-"zh-Hans":{"auth.skip":"先跳过","auth.defaultNote":"每个国家有自己的账号跟自己的资料。第一次使用？跟主办方要你们队的认领码。","auth.claimT":"这个国家还没有人认领","auth.claimH":"跟主办方要你们队的认领码。那组码只会私下发给你们，而且只能用一次。","auth.claimCode":"认领码","auth.claimGo":"认领并开始","auth.needCode":"请输入主办方发给你们的认领码","auth.pwShort":"密码至少要四个字","auth.pwNoMatch":"两次输入的密码不一样","auth.sharedWarn":"你们全队、每一支手机跟平板都是用这一组密码登录。先跟队友讲好、写下来，再按下一步。","auth.prevLogin":"上一次登录：","auth.back":"返回","sc.nav":"打听","sc.title":"这一场","sc.other":"或者查其他国家","sc.weSaw":"我们记过他们的表现","sc.usePlan":"带入","sc.planLoaded":"已经带进这一场","ab.match.t":"打完之后","ab.match":"记两个盟友这一场实际做了什么：投进几颗、爬到哪一区、有没有坏掉。这些数字会变成各国的平均值。","ab.scout.t":"开打之前","ab.scout":"赛程出来后，填这场的场次跟两个盟友，然后下去维修区问他们机器能做什么。资料按国家存，同一国问过一次就够。","ab.ranks.t":"排名跟战绩","ab.ranks":"官方实时排名、每一场打过的比赛、还有我们自己记过的队伍。可以只看自己，也可以按五大洲分开看。","ab.robot.t":"我们自己的机器","ab.robot":"把自己机器填一次然后公开。其他国家在跟你们同队之前就能先看，你们也看得到他们的。","ab.score.t":"算分器","ab.score":"试算一个联盟大概拿几分。三分钟战术时间要决定去爬升还是继续投球的时候很好用。","ab.data.t":"统计、设置、导出","ab.data":"看你们记了多少、换语言跟显示设置、导出 CSV、备份跟还原。","s.upToDate":"已经是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我们自己记的","rk.nav":"排位","rk.title":"实时排名","rk.ladder":"排行榜","rk.matches":"赛程","rk.scouted":"我们的观察",
+"zh-Hans":{"sc.save":"保存这台机器","sc.saved":"已保存","sc.autosaved":"已自动保存于","sc.nothingYet":"还没填任何东西","sc.pickFirst":"先选一个国家","sc.pub":"各队公开的机器","sc.pubH":"各国自己写的机器介绍。点一个打开他们的页面。","sc.pubNone":"还没有人公开。可以先去 Robot 分页把自己的填一填然后公开。","sc.phase":"赛段","sc.phaseH":"每个赛段各存一份。季后赛的机器跟模拟赛那天不会是同一台。","auth.skip":"先跳过","auth.defaultNote":"每个国家有自己的账号跟自己的资料。第一次使用？跟主办方要你们队的认领码。","auth.claimT":"这个国家还没有人认领","auth.claimH":"跟主办方要你们队的认领码。那组码只会私下发给你们，而且只能用一次。","auth.claimCode":"认领码","auth.claimGo":"认领并开始","auth.needCode":"请输入主办方发给你们的认领码","auth.pwShort":"密码至少要四个字","auth.pwNoMatch":"两次输入的密码不一样","auth.sharedWarn":"你们全队、每一支手机跟平板都是用这一组密码登录。先跟队友讲好、写下来，再按下一步。","auth.prevLogin":"上一次登录：","auth.back":"返回","sc.nav":"打听","sc.title":"这一场","sc.other":"或者查其他国家","sc.weSaw":"我们记过他们的表现","sc.usePlan":"带入","sc.planLoaded":"已经带进这一场","ab.match.t":"打完之后","ab.match":"记两个盟友这一场实际做了什么：投进几颗、爬到哪一区、有没有坏掉。这些数字会变成各国的平均值。","ab.scout.t":"开打之前","ab.scout":"赛程出来后，填这场的场次跟两个盟友，然后下去维修区问他们机器能做什么。资料按国家存，同一国问过一次就够。","ab.ranks.t":"排名跟战绩","ab.ranks":"官方实时排名、每一场打过的比赛、还有我们自己记过的队伍。可以只看自己，也可以按五大洲分开看。","ab.robot.t":"我们自己的机器","ab.robot":"把自己机器填一次然后公开。其他国家在跟你们同队之前就能先看，你们也看得到他们的。","ab.score.t":"算分器","ab.score":"试算一个联盟大概拿几分。三分钟战术时间要决定去爬升还是继续投球的时候很好用。","ab.data.t":"统计、设置、导出","ab.data":"看你们记了多少、换语言跟显示设置、导出 CSV、备份跟还原。","s.upToDate":"已经是最新版了","s.updating":"正在更新到新版本…","rk.ours":"我们自己记的","rk.nav":"排位","rk.title":"实时排名","rk.ladder":"排行榜","rk.matches":"赛程","rk.scouted":"我们的观察",
  "rk.all":"全部","rk.mine":"我的","rk.done":"已打完","rk.upcoming":"即将开打","rk.myCont":"我这洲",
  "rk.champion":"冠军","rk.podium":"前三","rk.playoff":"晋级区","rk.contender":"竞争中","rk.rising":"上升中",
  "rk.yourRank":"你们的名次","rk.toPlayoff":"距离晋级还差","rk.you":"你们",
@@ -2595,7 +2606,7 @@ en:{"auth.skip":"Skip for now","auth.defaultNote":"Each nation has its own accou
  "m.phase":"赛段","m.phaseH":"模拟赛不会算进平均",
  "m.practice":"模拟赛","m.quals":"正赛","m.playoffs":"季后赛","n.phaseAll":"全部赛段"},
 
-es:{"auth.skip":"Omitir por ahora","auth.defaultNote":"Cada pais tiene su propia cuenta y sus propios datos. Primera vez? Pide al organizador el codigo de tu equipo.","auth.claimT":"Este pais aun no ha sido reclamado","auth.claimH":"Pide al organizador el codigo de reclamacion de tu equipo. Se envia solo a tu equipo y sirve una vez.","auth.claimCode":"Codigo de reclamacion","auth.claimGo":"Reclamar y empezar","auth.needCode":"Introduce el codigo que te envio el organizador","auth.pwShort":"La contrasena debe tener al menos 4 caracteres","auth.pwNoMatch":"Las dos contrasenas no coinciden","auth.sharedWarn":"Todo tu equipo entra con esta misma contrasena, en todos los moviles y tablets. Acordadla juntos y anotadla antes de continuar.","auth.prevLogin":"Inicio de sesion anterior:","auth.back":"Atras","sc.nav":"Explorar","sc.title":"Este partido","sc.other":"O explora cualquier otro pais","sc.weSaw":"Lo que registramos de ellos","sc.usePlan":"Cargar","sc.planLoaded":"Cargado en este partido","ab.match.t":"Despues del partido","ab.match":"Registra lo que hicieron tus dos companeros: balones anotados, hasta donde treparon, si se averiaron. Estos numeros forman los promedios de cada pais.","ab.scout.t":"Antes del partido","ab.scout":"Cuando salga el calendario, pon el numero de partido y tus dos companeros, luego ve a sus pits y pregunta que puede hacer su robot. Se guarda por pais, asi solo preguntas una vez.","ab.ranks.t":"Clasificacion e historial","ab.ranks":"Clasificacion oficial en vivo, todos los partidos jugados y los paises que has explorado. Filtra por continente o muestra solo el tuyo.","ab.robot.t":"Vuestro robot","ab.robot":"Describe tu robot una vez y publicalo. Otros paises podran leerlo antes de aliarse contigo, y tu podras leer los suyos.","ab.score.t":"Calculadora de puntos","ab.score":"Prueba cuanto puntuaria una alianza. Util en los 3 minutos de reunion para decidir si trepar o seguir disparando.","ab.data.t":"Datos, ajustes, exportar","ab.data":"Cuanto has explorado, idioma y opciones de pantalla, exportar CSV, y copia de seguridad o restauracion.","s.upToDate":"Ya tienes la última versión","s.updating":"Actualizando a la nueva versión…","rk.ours":"Nuestros datos","rk.nav":"Clasif.","rk.title":"Clasificación","rk.ladder":"Tabla","rk.matches":"Partidos","rk.scouted":"Nuestros datos",
+es:{"sc.save":"Guardar este robot","sc.saved":"Guardado","sc.autosaved":"Guardado automaticamente a las","sc.nothingYet":"Aun no has rellenado nada","sc.pickFirst":"Elige un pais primero","sc.pub":"Robots publicados por los equipos","sc.pubH":"Lo que cada pais dice de su robot. Toca uno para abrir su pagina.","sc.pubNone":"Nadie ha publicado todavia. Rellena la pestana Robot y publica el tuyo.","sc.phase":"Fase","sc.phaseH":"Cada fase guarda sus propias notas. El robot de los playoffs no es el que viste el dia de practica.","auth.skip":"Omitir por ahora","auth.defaultNote":"Cada pais tiene su propia cuenta y sus propios datos. Primera vez? Pide al organizador el codigo de tu equipo.","auth.claimT":"Este pais aun no ha sido reclamado","auth.claimH":"Pide al organizador el codigo de reclamacion de tu equipo. Se envia solo a tu equipo y sirve una vez.","auth.claimCode":"Codigo de reclamacion","auth.claimGo":"Reclamar y empezar","auth.needCode":"Introduce el codigo que te envio el organizador","auth.pwShort":"La contrasena debe tener al menos 4 caracteres","auth.pwNoMatch":"Las dos contrasenas no coinciden","auth.sharedWarn":"Todo tu equipo entra con esta misma contrasena, en todos los moviles y tablets. Acordadla juntos y anotadla antes de continuar.","auth.prevLogin":"Inicio de sesion anterior:","auth.back":"Atras","sc.nav":"Explorar","sc.title":"Este partido","sc.other":"O explora cualquier otro pais","sc.weSaw":"Lo que registramos de ellos","sc.usePlan":"Cargar","sc.planLoaded":"Cargado en este partido","ab.match.t":"Despues del partido","ab.match":"Registra lo que hicieron tus dos companeros: balones anotados, hasta donde treparon, si se averiaron. Estos numeros forman los promedios de cada pais.","ab.scout.t":"Antes del partido","ab.scout":"Cuando salga el calendario, pon el numero de partido y tus dos companeros, luego ve a sus pits y pregunta que puede hacer su robot. Se guarda por pais, asi solo preguntas una vez.","ab.ranks.t":"Clasificacion e historial","ab.ranks":"Clasificacion oficial en vivo, todos los partidos jugados y los paises que has explorado. Filtra por continente o muestra solo el tuyo.","ab.robot.t":"Vuestro robot","ab.robot":"Describe tu robot una vez y publicalo. Otros paises podran leerlo antes de aliarse contigo, y tu podras leer los suyos.","ab.score.t":"Calculadora de puntos","ab.score":"Prueba cuanto puntuaria una alianza. Util en los 3 minutos de reunion para decidir si trepar o seguir disparando.","ab.data.t":"Datos, ajustes, exportar","ab.data":"Cuanto has explorado, idioma y opciones de pantalla, exportar CSV, y copia de seguridad o restauracion.","s.upToDate":"Ya tienes la última versión","s.updating":"Actualizando a la nueva versión…","rk.ours":"Nuestros datos","rk.nav":"Clasif.","rk.title":"Clasificación","rk.ladder":"Tabla","rk.matches":"Partidos","rk.scouted":"Nuestros datos",
  "rk.all":"Todos","rk.mine":"Míos","rk.done":"Jugados","rk.upcoming":"Próximos","rk.myCont":"Mi continente",
  "rk.champion":"CAMPEÓN","rk.podium":"PODIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"ASPIRANTE","rk.rising":"EN ASCENSO",
  "rk.yourRank":"Tu puesto","rk.toPlayoff":"puestos del corte de playoff:","rk.you":"TÚ",
@@ -2609,7 +2620,7 @@ es:{"auth.skip":"Omitir por ahora","auth.defaultNote":"Cada pais tiene su propia
  "m.phase":"Fase","m.phaseH":"la práctica no cuenta en los promedios",
  "m.practice":"Práctica","m.quals":"Clasif.","m.playoffs":"Playoffs","n.phaseAll":"Todas las fases"},
 
-fr:{"auth.skip":"Passer pour l’instant","auth.defaultNote":"Chaque pays a son compte et ses donnees. Premiere fois ? Demandez a l'organisateur le code de votre equipe.","auth.claimT":"Ce pays n'a pas encore ete revendique","auth.claimH":"Demandez au organisateur le code de votre equipe. Il n'est envoye qu'a votre equipe et ne sert qu'une fois.","auth.claimCode":"Code de revendication","auth.claimGo":"Revendiquer et commencer","auth.needCode":"Saisissez le code envoye par l'organisateur","auth.pwShort":"Le mot de passe doit faire au moins 4 caracteres","auth.pwNoMatch":"Les deux mots de passe ne correspondent pas","auth.sharedWarn":"Toute votre equipe se connecte avec ce meme mot de passe, sur chaque telephone et tablette. Mettez-vous d'accord et notez-le avant de continuer.","auth.prevLogin":"Connexion precedente :","auth.back":"Retour","sc.nav":"Reperage","sc.title":"Ce match","sc.other":"Ou reperer un autre pays","sc.weSaw":"Ce que nous avons note sur eux","sc.usePlan":"Charger","sc.planLoaded":"Charge dans ce match","ab.match.t":"Apres le match","ab.match":"Notez ce que vos deux partenaires ont vraiment fait : balles marquees, hauteur d'escalade, pannes. Ces chiffres deviennent les moyennes de chaque pays.","ab.scout.t":"Avant le match","ab.scout":"Quand le calendrier sort, indiquez le numero du match et vos deux partenaires, puis allez a leur stand demander ce que fait leur robot. Enregistre par pays : une seule fois suffit.","ab.ranks.t":"Classement et historique","ab.ranks":"Classement officiel en direct, tous les matchs joues, et les pays que vous avez reperes. Filtrez par continent ou affichez seulement le votre.","ab.robot.t":"Votre robot","ab.robot":"Decrivez votre robot une fois et publiez-le. Les autres pays le liront avant d'etre allies avec vous, et vous lirez les leurs.","ab.score.t":"Calculateur de score","ab.score":"Testez ce que marquerait une alliance. Utile pendant les 3 minutes de concertation pour choisir entre grimper et continuer a tirer.","ab.data.t":"Stats, reglages, export","ab.data":"Ce que vous avez releve, langue et affichage, export CSV, sauvegarde et restauration.","s.upToDate":"Vous avez la dernière version","s.updating":"Mise à jour vers la nouvelle version…","rk.ours":"Nos relevés","rk.nav":"Classement","rk.title":"Classement","rk.ladder":"Classement","rk.matches":"Matchs","rk.scouted":"Nos relevés",
+fr:{"sc.save":"Enregistrer ce robot","sc.saved":"Enregistre","sc.autosaved":"Enregistre automatiquement a","sc.nothingYet":"Rien de rempli pour l'instant","sc.pickFirst":"Choisissez d'abord un pays","sc.pub":"Robots publies par les equipes","sc.pubH":"Ce que chaque pays dit de son robot. Touchez pour ouvrir sa page.","sc.pubNone":"Personne n'a encore publie. Remplissez l'onglet Robot et publiez le votre.","sc.phase":"Phase","sc.phaseH":"Chaque phase garde ses propres notes. Le robot des playoffs n'est pas celui du jour d'essais.","auth.skip":"Passer pour l’instant","auth.defaultNote":"Chaque pays a son compte et ses donnees. Premiere fois ? Demandez a l'organisateur le code de votre equipe.","auth.claimT":"Ce pays n'a pas encore ete revendique","auth.claimH":"Demandez au organisateur le code de votre equipe. Il n'est envoye qu'a votre equipe et ne sert qu'une fois.","auth.claimCode":"Code de revendication","auth.claimGo":"Revendiquer et commencer","auth.needCode":"Saisissez le code envoye par l'organisateur","auth.pwShort":"Le mot de passe doit faire au moins 4 caracteres","auth.pwNoMatch":"Les deux mots de passe ne correspondent pas","auth.sharedWarn":"Toute votre equipe se connecte avec ce meme mot de passe, sur chaque telephone et tablette. Mettez-vous d'accord et notez-le avant de continuer.","auth.prevLogin":"Connexion precedente :","auth.back":"Retour","sc.nav":"Reperage","sc.title":"Ce match","sc.other":"Ou reperer un autre pays","sc.weSaw":"Ce que nous avons note sur eux","sc.usePlan":"Charger","sc.planLoaded":"Charge dans ce match","ab.match.t":"Apres le match","ab.match":"Notez ce que vos deux partenaires ont vraiment fait : balles marquees, hauteur d'escalade, pannes. Ces chiffres deviennent les moyennes de chaque pays.","ab.scout.t":"Avant le match","ab.scout":"Quand le calendrier sort, indiquez le numero du match et vos deux partenaires, puis allez a leur stand demander ce que fait leur robot. Enregistre par pays : une seule fois suffit.","ab.ranks.t":"Classement et historique","ab.ranks":"Classement officiel en direct, tous les matchs joues, et les pays que vous avez reperes. Filtrez par continent ou affichez seulement le votre.","ab.robot.t":"Votre robot","ab.robot":"Decrivez votre robot une fois et publiez-le. Les autres pays le liront avant d'etre allies avec vous, et vous lirez les leurs.","ab.score.t":"Calculateur de score","ab.score":"Testez ce que marquerait une alliance. Utile pendant les 3 minutes de concertation pour choisir entre grimper et continuer a tirer.","ab.data.t":"Stats, reglages, export","ab.data":"Ce que vous avez releve, langue et affichage, export CSV, sauvegarde et restauration.","s.upToDate":"Vous avez la dernière version","s.updating":"Mise à jour vers la nouvelle version…","rk.ours":"Nos relevés","rk.nav":"Classement","rk.title":"Classement","rk.ladder":"Classement","rk.matches":"Matchs","rk.scouted":"Nos relevés",
  "rk.all":"Tous","rk.mine":"Les miens","rk.done":"Joués","rk.upcoming":"À venir","rk.myCont":"Mon continent",
  "rk.champion":"CHAMPION","rk.podium":"PODIUM","rk.playoff":"ZONE PLAYOFF","rk.contender":"PRÉTENDANT","rk.rising":"EN PROGRÈS",
  "rk.yourRank":"Votre rang","rk.toPlayoff":"places du seuil playoff :","rk.you":"VOUS",
@@ -2623,7 +2634,7 @@ fr:{"auth.skip":"Passer pour l’instant","auth.defaultNote":"Chaque pays a son 
  "m.phase":"Phase","m.phaseH":"les essais ne comptent pas dans les moyennes",
  "m.practice":"Essais","m.quals":"Qualifs","m.playoffs":"Playoffs","n.phaseAll":"Toutes les phases"},
 
-pt:{"auth.skip":"Pular por agora","auth.defaultNote":"Cada pais tem sua conta e seus dados. Primeira vez? Peca ao organizador o codigo da sua equipe.","auth.claimT":"Este pais ainda nao foi reivindicado","auth.claimH":"Peca ao organizador o codigo da sua equipe. Ele e enviado so para voces e funciona uma vez.","auth.claimCode":"Codigo de reivindicacao","auth.claimGo":"Reivindicar e comecar","auth.needCode":"Digite o codigo que o organizador enviou","auth.pwShort":"A senha precisa ter pelo menos 4 caracteres","auth.pwNoMatch":"As duas senhas nao sao iguais","auth.sharedWarn":"Toda a equipe entra com esta mesma senha, em todos os celulares e tablets. Combinem juntos e anotem antes de continuar.","auth.prevLogin":"Entrada anterior:","auth.back":"Voltar","sc.nav":"Explorar","sc.title":"Esta partida","sc.other":"Ou explore qualquer outro pais","sc.weSaw":"O que registramos sobre eles","sc.usePlan":"Carregar","sc.planLoaded":"Carregado nesta partida","ab.match.t":"Depois da partida","ab.match":"Registre o que seus dois parceiros realmente fizeram: bolas marcadas, ate onde escalaram, se quebraram. Esses numeros viram as medias de cada pais.","ab.scout.t":"Antes da partida","ab.scout":"Quando sair a tabela, defina o numero da partida e seus dois parceiros, depois va aos boxes deles perguntar o que o robo faz. Salvo por pais, entao voce so pergunta uma vez.","ab.ranks.t":"Classificacao e historico","ab.ranks":"Classificacao oficial ao vivo, todas as partidas jogadas e os paises que voce ja explorou. Filtre por continente ou veja so o seu.","ab.robot.t":"O robo de voces","ab.robot":"Descreva seu robo uma vez e publique. Outros paises leem antes de se aliarem a voces, e voces leem os deles.","ab.score.t":"Calculadora de pontos","ab.score":"Teste quanto uma alianca marcaria. Util nos 3 minutos de conversa para decidir entre escalar ou continuar atirando.","ab.data.t":"Dados, ajustes, exportar","ab.data":"Quanto voce registrou, idioma e opcoes de tela, exportar CSV, backup e restauracao.","s.upToDate":"Você já tem a versão mais recente","s.updating":"Atualizando para a nova versão…","rk.ours":"Nossos dados","rk.nav":"Ranking","rk.title":"Classificação","rk.ladder":"Ranking","rk.matches":"Partidas","rk.scouted":"Nossos dados",
+pt:{"sc.save":"Salvar este robo","sc.saved":"Salvo","sc.autosaved":"Salvo automaticamente as","sc.nothingYet":"Nada preenchido ainda","sc.pickFirst":"Escolha um pais primeiro","sc.pub":"Robos publicados pelas equipes","sc.pubH":"O que cada pais diz sobre o proprio robo. Toque para abrir a pagina.","sc.pubNone":"Ninguem publicou ainda. Preencha a aba Robot e publique o seu.","sc.phase":"Fase","sc.phaseH":"Cada fase guarda suas proprias notas. O robo dos playoffs nao e o que voce viu no treino.","auth.skip":"Pular por agora","auth.defaultNote":"Cada pais tem sua conta e seus dados. Primeira vez? Peca ao organizador o codigo da sua equipe.","auth.claimT":"Este pais ainda nao foi reivindicado","auth.claimH":"Peca ao organizador o codigo da sua equipe. Ele e enviado so para voces e funciona uma vez.","auth.claimCode":"Codigo de reivindicacao","auth.claimGo":"Reivindicar e comecar","auth.needCode":"Digite o codigo que o organizador enviou","auth.pwShort":"A senha precisa ter pelo menos 4 caracteres","auth.pwNoMatch":"As duas senhas nao sao iguais","auth.sharedWarn":"Toda a equipe entra com esta mesma senha, em todos os celulares e tablets. Combinem juntos e anotem antes de continuar.","auth.prevLogin":"Entrada anterior:","auth.back":"Voltar","sc.nav":"Explorar","sc.title":"Esta partida","sc.other":"Ou explore qualquer outro pais","sc.weSaw":"O que registramos sobre eles","sc.usePlan":"Carregar","sc.planLoaded":"Carregado nesta partida","ab.match.t":"Depois da partida","ab.match":"Registre o que seus dois parceiros realmente fizeram: bolas marcadas, ate onde escalaram, se quebraram. Esses numeros viram as medias de cada pais.","ab.scout.t":"Antes da partida","ab.scout":"Quando sair a tabela, defina o numero da partida e seus dois parceiros, depois va aos boxes deles perguntar o que o robo faz. Salvo por pais, entao voce so pergunta uma vez.","ab.ranks.t":"Classificacao e historico","ab.ranks":"Classificacao oficial ao vivo, todas as partidas jogadas e os paises que voce ja explorou. Filtre por continente ou veja so o seu.","ab.robot.t":"O robo de voces","ab.robot":"Descreva seu robo uma vez e publique. Outros paises leem antes de se aliarem a voces, e voces leem os deles.","ab.score.t":"Calculadora de pontos","ab.score":"Teste quanto uma alianca marcaria. Util nos 3 minutos de conversa para decidir entre escalar ou continuar atirando.","ab.data.t":"Dados, ajustes, exportar","ab.data":"Quanto voce registrou, idioma e opcoes de tela, exportar CSV, backup e restauracao.","s.upToDate":"Você já tem a versão mais recente","s.updating":"Atualizando para a nova versão…","rk.ours":"Nossos dados","rk.nav":"Ranking","rk.title":"Classificação","rk.ladder":"Ranking","rk.matches":"Partidas","rk.scouted":"Nossos dados",
  "rk.all":"Todas","rk.mine":"Minhas","rk.done":"Jogadas","rk.upcoming":"A seguir","rk.myCont":"Meu continente",
  "rk.champion":"CAMPEÃO","rk.podium":"PÓDIO","rk.playoff":"ZONA DE PLAYOFF","rk.contender":"CANDIDATO","rk.rising":"EM ALTA",
  "rk.yourRank":"Sua posição","rk.toPlayoff":"posições do corte do playoff:","rk.you":"VOCÊS",
@@ -2637,7 +2648,7 @@ pt:{"auth.skip":"Pular por agora","auth.defaultNote":"Cada pais tem sua conta e 
  "m.phase":"Fase","m.phaseH":"o treino não entra nas médias",
  "m.practice":"Treino","m.quals":"Classif.","m.playoffs":"Playoffs","n.phaseAll":"Todas as fases"},
 
-ar:{"auth.skip":"تخطّي الآن","auth.defaultNote":"لكل دولة حسابها وبياناتها. أول مرة؟ اطلب من المنظم رمز استلام فريقك.","auth.claimT":"لم يتم استلام هذه الدولة بعد","auth.claimH":"اطلب من المنظم رمز استلام فريقك. يُرسل لفريقك وحده ويعمل مرة واحدة.","auth.claimCode":"رمز الاستلام","auth.claimGo":"استلم وابدأ","auth.needCode":"أدخل رمز الاستلام الذي أرسله المنظم","auth.pwShort":"كلمة المرور لا تقل عن 4 أحرف","auth.pwNoMatch":"كلمتا المرور غير متطابقتين","auth.sharedWarn":"كل أفراد فريقك يدخلون بهذه الكلمة نفسها على كل الأجهزة. اتفقوا عليها ودوّنوها قبل المتابعة.","auth.prevLogin":"آخر دخول سابق:","auth.back":"رجوع","sc.nav":"استكشاف","sc.title":"هذه المباراة","sc.other":"أو استكشف أي دولة أخرى","sc.weSaw":"ما سجلناه عنهم","sc.usePlan":"تحميل","sc.planLoaded":"تم التحميل في هذه المباراة","ab.match.t":"بعد المباراة","ab.match":"سجّل ما فعله شريكاك فعلياً: الكرات المسجلة، وإلى أي منطقة تسلقا، وهل تعطل الروبوت. هذه الأرقام تكوّن متوسط كل دولة.","ab.scout.t":"قبل المباراة","ab.scout":"عند صدور الجدول، حدد رقم المباراة وشريكيك، ثم اذهب إلى ورشتيهما واسأل عن قدرات الروبوت. تُحفظ البيانات لكل دولة، فتسأل مرة واحدة فقط.","ab.ranks.t":"الترتيب والسجل","ab.ranks":"الترتيب الرسمي المباشر، وكل المباريات التي لُعبت، والدول التي استكشفتها. صفِّ حسب القارة أو اعرض دولتك فقط.","ab.robot.t":"الروبوت الخاص بكم","ab.robot":"صف روبوتك مرة واحدة وانشره. تقرأه الدول الأخرى قبل التحالف معكم، وتقرأون وصفهم أيضاً.","ab.score.t":"حاسبة النقاط","ab.score":"جرّب كم يسجل التحالف. مفيد في دقائق التشاور الثلاث لتقرر التسلق أو مواصلة الرمي.","ab.data.t":"إحصاءات وإعدادات وتصدير","ab.data":"كم سجّلت، واللغة وخيارات العرض، وتصدير CSV، والنسخ الاحتياطي والاستعادة.","s.upToDate":"لديك أحدث إصدار","s.updating":"جارٍ التحديث إلى الإصدار الجديد…","rk.ours":"بياناتنا","rk.nav":"الترتيب","rk.title":"الترتيب المباشر","rk.ladder":"الترتيب","rk.matches":"المباريات","rk.scouted":"رصدنا",
+ar:{"sc.save":"احفظ هذا الروبوت","sc.saved":"تم الحفظ","sc.autosaved":"حُفظ تلقائياً في","sc.nothingYet":"لم تملأ شيئاً بعد","sc.pickFirst":"اختر دولة أولاً","sc.pub":"روبوتات نشرتها الفرق","sc.pubH":"ما تقوله كل دولة عن روبوتها. اضغط على أحدها لفتح صفحته.","sc.pubNone":"لم ينشر أحد بعد. املأ تبويب Robot وانشر روبوتك.","sc.phase":"المرحلة","sc.phaseH":"لكل مرحلة ملاحظاتها. روبوت الأدوار الإقصائية ليس هو الذي رأيته يوم التدريب.","auth.skip":"تخطّي الآن","auth.defaultNote":"لكل دولة حسابها وبياناتها. أول مرة؟ اطلب من المنظم رمز استلام فريقك.","auth.claimT":"لم يتم استلام هذه الدولة بعد","auth.claimH":"اطلب من المنظم رمز استلام فريقك. يُرسل لفريقك وحده ويعمل مرة واحدة.","auth.claimCode":"رمز الاستلام","auth.claimGo":"استلم وابدأ","auth.needCode":"أدخل رمز الاستلام الذي أرسله المنظم","auth.pwShort":"كلمة المرور لا تقل عن 4 أحرف","auth.pwNoMatch":"كلمتا المرور غير متطابقتين","auth.sharedWarn":"كل أفراد فريقك يدخلون بهذه الكلمة نفسها على كل الأجهزة. اتفقوا عليها ودوّنوها قبل المتابعة.","auth.prevLogin":"آخر دخول سابق:","auth.back":"رجوع","sc.nav":"استكشاف","sc.title":"هذه المباراة","sc.other":"أو استكشف أي دولة أخرى","sc.weSaw":"ما سجلناه عنهم","sc.usePlan":"تحميل","sc.planLoaded":"تم التحميل في هذه المباراة","ab.match.t":"بعد المباراة","ab.match":"سجّل ما فعله شريكاك فعلياً: الكرات المسجلة، وإلى أي منطقة تسلقا، وهل تعطل الروبوت. هذه الأرقام تكوّن متوسط كل دولة.","ab.scout.t":"قبل المباراة","ab.scout":"عند صدور الجدول، حدد رقم المباراة وشريكيك، ثم اذهب إلى ورشتيهما واسأل عن قدرات الروبوت. تُحفظ البيانات لكل دولة، فتسأل مرة واحدة فقط.","ab.ranks.t":"الترتيب والسجل","ab.ranks":"الترتيب الرسمي المباشر، وكل المباريات التي لُعبت، والدول التي استكشفتها. صفِّ حسب القارة أو اعرض دولتك فقط.","ab.robot.t":"الروبوت الخاص بكم","ab.robot":"صف روبوتك مرة واحدة وانشره. تقرأه الدول الأخرى قبل التحالف معكم، وتقرأون وصفهم أيضاً.","ab.score.t":"حاسبة النقاط","ab.score":"جرّب كم يسجل التحالف. مفيد في دقائق التشاور الثلاث لتقرر التسلق أو مواصلة الرمي.","ab.data.t":"إحصاءات وإعدادات وتصدير","ab.data":"كم سجّلت، واللغة وخيارات العرض، وتصدير CSV، والنسخ الاحتياطي والاستعادة.","s.upToDate":"لديك أحدث إصدار","s.updating":"جارٍ التحديث إلى الإصدار الجديد…","rk.ours":"بياناتنا","rk.nav":"الترتيب","rk.title":"الترتيب المباشر","rk.ladder":"الترتيب","rk.matches":"المباريات","rk.scouted":"رصدنا",
  "rk.all":"الكل","rk.mine":"مبارياتنا","rk.done":"انتهت","rk.upcoming":"قادمة","rk.myCont":"قارتي",
  "rk.champion":"البطل","rk.podium":"المنصة","rk.playoff":"منطقة التأهل","rk.contender":"منافس","rk.rising":"صاعد",
  "rk.yourRank":"ترتيبكم","rk.toPlayoff":"مركزاً عن حد التأهل:","rk.you":"أنتم",
@@ -2651,7 +2662,7 @@ ar:{"auth.skip":"تخطّي الآن","auth.defaultNote":"لكل دولة حسا
  "m.phase":"المرحلة","m.phaseH":"التدريب لا يدخل في المعدلات",
  "m.practice":"تدريب","m.quals":"التصفيات","m.playoffs":"الأدوار الإقصائية","n.phaseAll":"كل المراحل"},
 
-ja:{"auth.skip":"あとで設定する","auth.defaultNote":"国ごとにアカウントとデータが分かれています。初めての方は主催者に登録コードを請求してください。","auth.claimT":"この国はまだ登録されていません","auth.claimH":"主催者にチームの登録コードを請求してください。コードは自チームにだけ送られ、一度だけ使えます。","auth.claimCode":"登録コード","auth.claimGo":"登録して開始","auth.needCode":"主催者から送られた登録コードを入力してください","auth.pwShort":"パスワードは4文字以上必要です","auth.pwNoMatch":"2つのパスワードが一致しません","auth.sharedWarn":"チーム全員が、使うすべての端末でこの同じパスワードを使います。先に全員で決めて控えてから進んでください。","auth.prevLogin":"前回のログイン:","auth.back":"戻る","sc.nav":"偵察","sc.title":"この試合","sc.other":"他の国を調べる","sc.weSaw":"自分たちが記録した成績","sc.usePlan":"読み込む","sc.planLoaded":"この試合に読み込みました","ab.match.t":"試合のあと","ab.match":"味方2チームが実際に何をしたかを記録します。得点したボール数、登った高さ、故障の有無。この数字が各国の平均値になります。","ab.scout.t":"試合の前","ab.scout":"スケジュールが出たら試合番号と味方2チームを設定し、ピットへ行ってロボットの能力を聞きます。国ごとに保存されるので、聞くのは一度だけで済みます。","ab.ranks.t":"順位と戦績","ab.ranks":"公式のリアルタイム順位、これまでの全試合、そして自分たちが偵察した国。大陸で絞り込んだり、自国だけ表示できます。","ab.robot.t":"自チームのロボット","ab.robot":"自分のロボットを一度書いて公開します。他国は同盟を組む前に読めますし、こちらも相手のを読めます。","ab.score.t":"得点計算機","ab.score":"同盟の得点を試算します。3分間の作戦会議で、登るか投げ続けるかを決めるときに便利です。","ab.data.t":"統計・設定・書き出し","ab.data":"どれだけ偵察したか、言語と表示の設定、CSV書き出し、バックアップと復元。","s.upToDate":"最新バージョンです","s.updating":"新しいバージョンに更新しています…","rk.ours":"自チームの記録","rk.nav":"順位","rk.title":"ライブ順位","rk.ladder":"ランキング","rk.matches":"試合","rk.scouted":"自分たちの記録",
+ja:{"sc.save":"このロボットを保存","sc.saved":"保存しました","sc.autosaved":"自動保存済み","sc.nothingYet":"まだ何も入力されていません","sc.pickFirst":"先に国を選んでください","sc.pub":"各チームが公開したロボット","sc.pubH":"各国が自分のロボットについて書いたものです。タップするとページが開きます。","sc.pubNone":"まだ誰も公開していません。Robot タブで自チームのものを公開してみてください。","sc.phase":"フェーズ","sc.phaseH":"フェーズごとに別の記録を持ちます。プレーオフのロボットは練習日のものとは違います。","auth.skip":"あとで設定する","auth.defaultNote":"国ごとにアカウントとデータが分かれています。初めての方は主催者に登録コードを請求してください。","auth.claimT":"この国はまだ登録されていません","auth.claimH":"主催者にチームの登録コードを請求してください。コードは自チームにだけ送られ、一度だけ使えます。","auth.claimCode":"登録コード","auth.claimGo":"登録して開始","auth.needCode":"主催者から送られた登録コードを入力してください","auth.pwShort":"パスワードは4文字以上必要です","auth.pwNoMatch":"2つのパスワードが一致しません","auth.sharedWarn":"チーム全員が、使うすべての端末でこの同じパスワードを使います。先に全員で決めて控えてから進んでください。","auth.prevLogin":"前回のログイン:","auth.back":"戻る","sc.nav":"偵察","sc.title":"この試合","sc.other":"他の国を調べる","sc.weSaw":"自分たちが記録した成績","sc.usePlan":"読み込む","sc.planLoaded":"この試合に読み込みました","ab.match.t":"試合のあと","ab.match":"味方2チームが実際に何をしたかを記録します。得点したボール数、登った高さ、故障の有無。この数字が各国の平均値になります。","ab.scout.t":"試合の前","ab.scout":"スケジュールが出たら試合番号と味方2チームを設定し、ピットへ行ってロボットの能力を聞きます。国ごとに保存されるので、聞くのは一度だけで済みます。","ab.ranks.t":"順位と戦績","ab.ranks":"公式のリアルタイム順位、これまでの全試合、そして自分たちが偵察した国。大陸で絞り込んだり、自国だけ表示できます。","ab.robot.t":"自チームのロボット","ab.robot":"自分のロボットを一度書いて公開します。他国は同盟を組む前に読めますし、こちらも相手のを読めます。","ab.score.t":"得点計算機","ab.score":"同盟の得点を試算します。3分間の作戦会議で、登るか投げ続けるかを決めるときに便利です。","ab.data.t":"統計・設定・書き出し","ab.data":"どれだけ偵察したか、言語と表示の設定、CSV書き出し、バックアップと復元。","s.upToDate":"最新バージョンです","s.updating":"新しいバージョンに更新しています…","rk.ours":"自チームの記録","rk.nav":"順位","rk.title":"ライブ順位","rk.ladder":"ランキング","rk.matches":"試合","rk.scouted":"自分たちの記録",
  "rk.all":"すべて","rk.mine":"自チーム","rk.done":"終了","rk.upcoming":"これから","rk.myCont":"同じ大陸",
  "rk.champion":"首位","rk.podium":"表彰台","rk.playoff":"決勝進出圏","rk.contender":"接戦圏","rk.rising":"上昇中",
  "rk.yourRank":"自チームの順位","rk.toPlayoff":"決勝進出まであと","rk.you":"自チーム",
@@ -2665,7 +2676,7 @@ ja:{"auth.skip":"あとで設定する","auth.defaultNote":"国ごとにアカ�
  "m.phase":"フェーズ","m.phaseH":"練習試合は平均に含めません",
  "m.practice":"練習","m.quals":"予選","m.playoffs":"決勝","n.phaseAll":"すべて"},
 
-ko:{"auth.skip":"나중에 설정","auth.defaultNote":"나라마다 계정과 데이터가 따로 입니다. 처음이신가요? 주최측에 팀 등록 코드를 요청하세요.","auth.claimT":"이 나라는 아직 등록되지 않았습니다","auth.claimH":"주최측에 팀 등록 코드를 요청하세요. 해당 팀에게만 전달되며 한 번만 쓸 수 있습니다.","auth.claimCode":"등록 코드","auth.claimGo":"등록하고 시작","auth.needCode":"주최측이 보낸 등록 코드를 입력하세요","auth.pwShort":"비밀번호는 4자 이상이어야 합니다","auth.pwNoMatch":"두 비밀번호가 서로 다릅니다","auth.sharedWarn":"팀 전체가 모든 휴대폰과 태블릿에서 이 비밀번호 하나로 로그인합니다. 함께 정하고 적어둔 다음 진행하세요.","auth.prevLogin":"직전 로그인:","auth.back":"뒤로","sc.nav":"정찰","sc.title":"이번 경기","sc.other":"다른 나라 살펴보기","sc.weSaw":"우리가 기록한 성적","sc.usePlan":"불러오기","sc.planLoaded":"이번 경기에 불러왔습니다","ab.match.t":"경기가 끝난 뒤","ab.match":"동맹 두 팀이 실제로 무엇을 했는지 기록합니다. 넣은 공, 올라간 구역, 고장 여부. 이 숫자가 각 나라의 평균이 됩니다.","ab.scout.t":"경기 전에","ab.scout":"일정이 나오면 경기 번호와 동맹 두 팀을 지정하고, 핏으로 가서 로봇이 무엇을 할 수 있는지 물어보세요. 나라별로 저장되니 한 번만 물으면 됩니다.","ab.ranks.t":"순위와 전적","ab.ranks":"공식 실시간 순위, 지금까지 치른 모든 경기, 그리고 우리가 정찰한 나라들. 대륙별로 걸러 보거나 우리 팀만 볼 수 있습니다.","ab.robot.t":"우리 로봇","ab.robot":"우리 로봇을 한 번 적고 공개하세요. 다른 나라가 동맹이 되기 전에 읽을 수 있고, 우리도 그들 것을 읽습니다.","ab.score.t":"점수 계산기","ab.score":"동맹이 몇 점을 낼지 계산해 봅니다. 3분 작전 시간에 올라갈지 계속 쏴지 정할 때 유용합니다.","ab.data.t":"통계, 설정, 내보내기","ab.data":"얼마나 정찰했는지, 언어와 화면 설정, CSV 내보내기, 백업과 복원.","s.upToDate":"최신 버전입니다","s.updating":"새 버전으로 업데이트 중…","rk.ours":"우리 기록","rk.nav":"순위","rk.title":"실시간 순위","rk.ladder":"랭킹","rk.matches":"경기","rk.scouted":"우리 기록",
+ko:{"sc.save":"이 로봇 저장","sc.saved":"저장됨","sc.autosaved":"자동 저장됨","sc.nothingYet":"아직 입력한 내용이 없습니다","sc.pickFirst":"먼저 나라를 고르세요","sc.pub":"팀들이 공개한 로봇","sc.pubH":"각 나라가 자기 로봇에 대해 쓴 글입니다. 누르면 페이지가 열립니다.","sc.pubNone":"아직 공개한 팀이 없습니다. Robot 탭에서 우리 로봇을 먼저 공개해 보세요.","sc.phase":"단계","sc.phaseH":"단계마다 기록을 따로 둘니다. 플레이오프의 로봇은 연습날 본 그 로봇이 아닙니다.","auth.skip":"나중에 설정","auth.defaultNote":"나라마다 계정과 데이터가 따로 입니다. 처음이신가요? 주최측에 팀 등록 코드를 요청하세요.","auth.claimT":"이 나라는 아직 등록되지 않았습니다","auth.claimH":"주최측에 팀 등록 코드를 요청하세요. 해당 팀에게만 전달되며 한 번만 쓸 수 있습니다.","auth.claimCode":"등록 코드","auth.claimGo":"등록하고 시작","auth.needCode":"주최측이 보낸 등록 코드를 입력하세요","auth.pwShort":"비밀번호는 4자 이상이어야 합니다","auth.pwNoMatch":"두 비밀번호가 서로 다릅니다","auth.sharedWarn":"팀 전체가 모든 휴대폰과 태블릿에서 이 비밀번호 하나로 로그인합니다. 함께 정하고 적어둔 다음 진행하세요.","auth.prevLogin":"직전 로그인:","auth.back":"뒤로","sc.nav":"정찰","sc.title":"이번 경기","sc.other":"다른 나라 살펴보기","sc.weSaw":"우리가 기록한 성적","sc.usePlan":"불러오기","sc.planLoaded":"이번 경기에 불러왔습니다","ab.match.t":"경기가 끝난 뒤","ab.match":"동맹 두 팀이 실제로 무엇을 했는지 기록합니다. 넣은 공, 올라간 구역, 고장 여부. 이 숫자가 각 나라의 평균이 됩니다.","ab.scout.t":"경기 전에","ab.scout":"일정이 나오면 경기 번호와 동맹 두 팀을 지정하고, 핏으로 가서 로봇이 무엇을 할 수 있는지 물어보세요. 나라별로 저장되니 한 번만 물으면 됩니다.","ab.ranks.t":"순위와 전적","ab.ranks":"공식 실시간 순위, 지금까지 치른 모든 경기, 그리고 우리가 정찰한 나라들. 대륙별로 걸러 보거나 우리 팀만 볼 수 있습니다.","ab.robot.t":"우리 로봇","ab.robot":"우리 로봇을 한 번 적고 공개하세요. 다른 나라가 동맹이 되기 전에 읽을 수 있고, 우리도 그들 것을 읽습니다.","ab.score.t":"점수 계산기","ab.score":"동맹이 몇 점을 낼지 계산해 봅니다. 3분 작전 시간에 올라갈지 계속 쏴지 정할 때 유용합니다.","ab.data.t":"통계, 설정, 내보내기","ab.data":"얼마나 정찰했는지, 언어와 화면 설정, CSV 내보내기, 백업과 복원.","s.upToDate":"최신 버전입니다","s.updating":"새 버전으로 업데이트 중…","rk.ours":"우리 기록","rk.nav":"순위","rk.title":"실시간 순위","rk.ladder":"랭킹","rk.matches":"경기","rk.scouted":"우리 기록",
  "rk.all":"전체","rk.mine":"우리","rk.done":"종료","rk.upcoming":"예정","rk.myCont":"같은 대륙",
  "rk.champion":"1위","rk.podium":"시상대","rk.playoff":"플레이오프 진출권","rk.contender":"경쟁권","rk.rising":"상승세",
  "rk.yourRank":"우리 순위","rk.toPlayoff":"진출까지","rk.you":"우리",
@@ -2986,8 +2997,9 @@ function tEn(k){ return (k in DICT.en)?DICT.en[k]:''; }
 function hintFor(k){ const hk=k+'H'; const has=(DICT[LANG]&&hk in DICT[LANG])||(hk in DICT.en); const parts=[];
   if(has&&t(hk)) parts.push(t(hk)); if(LANG!=='en'&&tEn(k)) parts.push(tEn(k)); return parts.join(' · '); }
 /* label maps rebuilt on every language change (mutated in place so all call sites stay simple) */
-const CLIMB_LABEL={}, TYPE_LABEL={}, POS_LABEL={}, ROLE={}, TRI={'2':'✓','1':'△','0':'✗'}, TRIL={}, STATE_LBL={}, DIMS=[];
+const CLIMB_LABEL={}, TYPE_LABEL={}, POS_LABEL={}, ROLE={}, TRI={'2':'✓','1':'△','0':'✗'}, TRIL={}, STATE_LBL={}, PHASE_LABEL={}, DIMS=[];
 function relabel(){
+  Object.assign(PHASE_LABEL,{prac:t('m.practice'),qual:t('m.quals'),play:t('m.playoffs')});
   Object.assign(CLIMB_LABEL,{'':'—','0':t('m.none'),'C':t('m.contact'),'1':t('m.zone')+' 1','2':t('m.zone')+' 2','3':t('m.zone')+' 3'});
   Object.assign(TYPE_LABEL,{s1:t('p.single'),s2:t('p.dual'),s3:t('p.triple'),wf:t('p.waterfall')});
   Object.assign(POS_LABEL,{wall:t('p.wall'),front:t('p.front'),center:t('p.center'),port:t('p.portZone'),brace:t('p.brace'),roam:t('p.roam')});
@@ -3024,7 +3036,8 @@ function nFlag(s){ const n=NMAP[s]; if(!n) return s?'🏳️':'🌍'; return (HT
 function nFlagTxt(s){ return NMAP[s]?NMAP[s].flag:(s?'🏳️':'🌍'); }
 function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cfg.theme||'auto'; d.cfg.event=d.cfg.event||'FGC 2026 Igniting Innovation';
   d.cfg.recent=Array.isArray(d.cfg.recent)?d.cfg.recent:[]; d.cfg.fx=d.cfg.fx||'auto'; d.cfg.custom=(d.cfg.custom&&typeof d.cfg.custom==='object')?d.cfg.custom:{};
-  d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:''};
+  d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:'',phase:'qual'};
+  d.cfg.plan.phase=d.cfg.plan.phase||'qual';
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -3053,7 +3066,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -3286,8 +3299,28 @@ function renderMList(){
 /* ---------- PIT ---------- */
 let curTeam='';
 function blankPit(){ return {sup:'',cap:0,type:'',empty:0,port:'',climb:'',climbSec:0,carry:false,carried:false,pos:[],roles:[],hp:'',drive:'',lang:[],breaks:0,notes:'',coord:[],scout:'',ts:''}; }
-function rec(){ if(!curTeam||!DB) return null; if(!DB.pit[curTeam]) DB.pit[curTeam]=blankPit(); return DB.pit[curTeam]; }
-function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); }
+let pitPhase='qual';
+/* 一個國家每個賽段一份。qual 沿用原本的 key，所以舊資料自動變成正賽那一份，
+   而且 DB.pit 仍然是平的 key->紀錄，同步合併和伺服器都不用改。 */
+function pitKey(slug,ph){ ph=ph||pitPhase; return ph==='qual'?slug:slug+'#'+ph; }
+function pitSlugOf(key){ return String(key).split('#')[0]; }
+function pitPhaseOf(key){ return String(key).split('#')[1]||'qual'; }
+/* 找這一國最合適的一份：先要指定賽段，沒有退回正賽，再沒有就挑最新的 */
+function pitFor(slug,ph){
+  if(!DB) return null;
+  const want=DB.pit[pitKey(slug,ph||pitPhase)]; if(want&&want.ts) return want;
+  const q=DB.pit[slug]; if(q&&q.ts) return q;
+  let best=null;
+  Object.entries(DB.pit).forEach(([k,v])=>{ if(pitSlugOf(k)===slug&&v&&v.ts&&(!best||v.ts>best.ts)) best=v; });
+  return best;
+}
+function rec(){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
+  if(!DB.pit[k]) DB.pit[k]=blankPit(); return DB.pit[k]; }
+function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); }
+function showSaved(ts){
+  const el=$('pSaved'); if(!el) return;
+  el.textContent = ts ? t('sc.autosaved')+' '+String(ts).replace('T',' ').slice(11,16) : t('sc.nothingYet');
+}
 /* tappable field map (own alliance drawn on the left, like the official drawing) */
 function fieldSVG(){ return `<svg viewBox="0 0 700 700" aria-label="field map">
   <rect class="fld" x="0" y="0" width="700" height="700" rx="6"/>
@@ -3314,14 +3347,14 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
   chipsInit($('pRoles'),r.roles,v=>touch('roles',v)); chipsInit($('pLang'),r.lang,v=>touch('lang',v)); chipsInit($('pCoord'),r.coord,v=>touch('coord',v));
   tgInit($('pCarry'),r.carry,v=>touch('carry',v)); tgInit($('pCarried'),r.carried,v=>touch('carried',v));
   $('pCap').value=r.cap||0; $('pEmpty').value=r.empty||0; $('pClimbSec').value=r.climbSec||0; $('pBreak').value=r.breaks||0; $('pNotes').value=r.notes||'';
-  scNowRender(); }
+  scNowRender(); showSaved(r.ts); }
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
 $('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); haptic(12); });
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
-function plan(){ return DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:''}); }
+function plan(){ const p=DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:'',phase:'qual'}); if(!p.phase) p.phase='qual'; return p; }
 function planSave(){ DB.cfg.ts=now(); save(); }
 function scWhoRender(){
   const pl=plan(), el=$('scWho'), both=[['A',pl.a],['B',pl.b]].filter(x=>x[1]);
@@ -3339,6 +3372,12 @@ function scPick(slot){
 }
 function scLoad(){
   const pl=plan();
+  pitPhase=pl.phase||'qual';
+  segInit($('scPhase'),pitPhase,v=>{
+    pitPhase=v||'qual'; plan().phase=pitPhase; planSave();
+    if(curTeam) loadPit();      // 換賽段等於換一份紀錄
+    scWhoRender();
+  });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
   scWhoRender(); mPlanBar();
@@ -3372,6 +3411,7 @@ function mPlanBar(){
   btn.textContent=`${t('sc.usePlan')} M${pl.match||'?'} · ${names}`;
   btn.onclick=()=>{
     if(pl.match) $('mMatch').value=pl.match;
+    if(pl.phase) segInit($('mPhase'),pl.phase,()=>{});
     if(pl.a){ setCbtn($('ACountry'),pl.a,t('m.whichCountry')); $('ABody').hidden=false; }
     if(pl.b){ setCbtn($('BCountry'),pl.b,t('m.whichCountry')); $('BBody').hidden=false; }
     haptic(12); toast(t('sc.planLoaded'),'ok');
@@ -3404,7 +3444,7 @@ function summary(allPhases){ const by={};
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
-  Object.keys(DB.pit).forEach(k=>{ if(!by[k]) by[k]=mk(); });
+  Object.keys(DB.pit).forEach(k=>{ const sl=pitSlugOf(k); if(!by[sl]) by[sl]=mk(); });
   Object.keys(PROFILES).forEach(k=>{ if(PROFILES[k].published&&k!==AUTH.team&&!by[k]) by[k]=mk(); });
   return by; }
 function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')||'sup';
@@ -3412,7 +3452,7 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
   const keys=Object.keys(by).sort((a,b)=>{ const A=by[a],B=by[b];
     if(mode==='sup') return av(B)-av(A); if(mode==='climb') return (CLIMB_MULT[B.best]||0)-(CLIMB_MULT[A.best]||0)||av(B)-av(A);
     if(mode==='rel') return (A.n?A.dead/A.n:1)-(B.n?B.dead/B.n:1)||av(B)-av(A); return B.n-A.n; });
-  $('tList').innerHTML=keys.length?keys.map((k,i)=>{ const b=by[k],p=DB.pit[k]; const f=(x,n)=>n?(x/n).toFixed(1):'—';
+  $('tList').innerHTML=keys.length?keys.map((k,i)=>{ const b=by[k],p=pitFor(k); const f=(x,n)=>n?(x/n).toFixed(1):'—';
     return `<div class="it" data-t="${esc(k)}"><div class="n" style="background:var(--line);color:var(--muted)">#${i+1}</div><div class="fl">${nFlag(k)}</div><div class="d"><b>${esc(nName(k))}</b> <span style="font-size:11px">${esc(nSub(k))}</span> · ${b.n} ${esc(t('n.matches'))}${PROFILES[k]&&PROFILES[k].published?` <span class="tag ok">📢 ${esc(t('n.selfTag'))}</span>`:''}
       <div class="meter"><i style="width:${b.n?Math.round(100*av(b)/maxAv):0}%"></i></div>
       <span class="tag">🏀 ${f(b.sup,b.n)}</span><span class="tag">PORT ${f(b.port,b.n)}</span>${b.best&&b.best!=='0'?`<span class="tag ${CLIMB_TAG[b.best]}">${esc(CLIMB_LABEL[b.best])}</span>`:`<span class="tag">${esc(t('n.noClimb'))}</span>`}<span class="tag">${esc(t('n.climbs'))} ${b.n?Math.round(100*b.climbN/b.n):0}%</span>${b.z3?`<span class="tag z3">Z3 ×${b.z3}</span>`:''}${b.carry?`<span class="tag ok">${esc(t('m.carried'))} ${b.carry}</span>`:''}${b.dead?`<span class="tag bad">${esc(t('n.broke'))} ${b.dead}/${b.n}</span>`:''}${b.rn?`<span class="tag">${esc(t('n.drv'))} ${f(b.rate,b.rn)}</span>`:''}${b.cards?`<span class="tag bad">${esc(t('n.cards'))} ${b.cards}</span>`:''}
@@ -3422,6 +3462,30 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
 segInit($('tSort'),'sup',renderTeams);
 segInit($('tPhase'),'all',v=>{ tPhase=v||'all'; renderTeams(); });
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
+$('pSave').onclick=async()=>{
+  if(!curTeam){ toast(t('sc.pickFirst')); return; }
+  const r=rec(); if(r&&!r.ts){ r.ts=now(); r.scout=DB.cfg.scout; }
+  saveNow();
+  toast(t('sc.saved')+' · '+nName(curTeam)+' · '+(PHASE_LABEL[pitPhase]||pitPhase),'ok');
+  haptic(18); sparkBurst($('pSave'),16); showSaved(r&&r.ts);
+  try{ await push(true); }catch(e){}
+};
+/* 有公開自介的國家直接列出來，不用先知道要找誰 */
+function renderPublished(){
+  const el=$('pubList'); if(!el) return;
+  const rows=Object.entries(PROFILES||{})
+    .filter(([k,v])=>v&&v.published)
+    .sort((a,b)=>nName(a[0]).localeCompare(nName(b[0])));
+  if(!rows.length){ el.innerHTML=`<div class="empty">${esc(t('sc.pubNone'))}</div>`; return; }
+  el.innerHTML=rows.map(([k,v])=>{
+    const nph=(v.photos||[]).length;
+    const bits=pitBits(v).slice(0,4).join(' · ');
+    return `<div class="it" data-t="${esc(k)}"><div class="fl">${nFlag(k)}</div><div class="d">
+      <b>${esc(nName(k))}</b>${nph?`<span class="tag">📷 ${nph}</span>`:''}
+      <div class="note" style="margin-top:3px">${esc(bits)}</div></div></div>`;
+  }).join('');
+  el.querySelectorAll('.it').forEach(x=>x.onclick=()=>openNation(x.dataset.t));
+}
 
 /* ---------- NATION PAGE (lobby): photos · radar · power · our numbers ---------- */
 function dims(p){ if(!p) return null; const tri={'2':5,'1':3,'0':1};
@@ -3440,7 +3504,7 @@ function radarSVG(a,b){ const N=6,R=92,cx=130,cy=128; const pt=(i,v)=>{ const an
   return h+'</svg>'; }
 let NATION='';
 function openNation(slug){ if(!slug||!DB) return; NATION=slug;
-  const s=PROFILES[slug]; const self=(s&&s.published)?s:null; const pit=DB.pit[slug]||null; const by=summary()[slug];
+  const s=PROFILES[slug]; const self=(s&&s.published)?s:null; const pit=pitFor(slug)||null; const by=summary()[slug];
   const dA=dims(self), dB=dims(pit); const pw=power(dA||dB); const f=(x,n)=>n?(x/n).toFixed(1):'—';
   const photos=(self&&self.photos)||[]; const tier=pw==null?'':pw>=80?'🔥 '+t('n.elite'):pw>=60?'💪 '+t('n.strong'):pw>=40?'👍 '+t('n.solid'):'🌱 '+t('n.dev');
   $('nBody').innerHTML=`
@@ -3514,6 +3578,7 @@ async function loadProfiles(){ if(AUTH.offline||!AUTH.token||!DB) return;
     const mine=PROFILES[AUTH.team];
     if(mine&&!DB.robot){ DB.robot=Object.assign(blankPit(),{desc:'',published:false},mine); saveNow(); if(!$('tab-robot').hidden) robotLoad(); }
     else if(mine&&DB.robot){ DB.robot.photos=mine.photos||DB.robot.photos||[]; if(!$('tab-robot').hidden) renderPhotos(); }
+    renderPublished();
     if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
   catch(e){} }
 setInterval(loadProfiles,60000);
@@ -3537,7 +3602,7 @@ function showLastLogin(){
   el.textContent=t('auth.prevLogin')+' '+String(p.t).replace('T',' ').slice(0,16)+(p.ip?'  ('+p.ip+')':'');
 }
 function refreshData(){ if(!DB) return; showLastLogin(); $('statPit').textContent=Object.keys(DB.pit).length; $('statMatch').textContent=live().length;
-  const s=new Set(Object.keys(DB.pit)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
+  const s=new Set(Object.keys(DB.pit).map(pitSlugOf)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
   $('cfgScout').value=DB.cfg.scout; segInit($('cfgTheme'),DB.cfg.theme,v=>{ DB.cfg.theme=v||'auto'; applyTheme(); touchCfg(); });
   segInit($('cfgFx'),fxMode(),v=>{ DB.cfg.fx=v||'auto'; try{ localStorage.setItem('fgc.fx',DB.cfg.fx); }catch(e){} applyFX(); touchCfg(); }); }
 $('cfgScout').oninput=e=>{ DB.cfg.scout=e.target.value; touchCfg(); };
@@ -3545,11 +3610,11 @@ function csv(rows){ return '﻿'+rows.map(r=>r.map(c=>{ const s=String(c==null?'
 function show(text,name,type){ $('out').value=text; const a=$('dlOut'); try{ a.href=URL.createObjectURL(new Blob([text],{type:type||'text/csv;charset=utf-8'})); a.download=name; }catch(e){} $('out').scrollIntoView({behavior:'smooth',block:'center'}); }
 $('expMatch').onclick=()=>{ const rows=[['Scout','Match','Team','Alliance','Partner 1','Partner 2','Suppression balls','Port balls','Climb','Partners carried','Was carried','Climb start (s left)','Status','Card','Driver','Notes','Time']];
   live().sort((a,b)=>a.match-b.match||nName(a.team).localeCompare(nName(b.team))).forEach(r=>rows.push([r.scout||DB.cfg.scout,r.match,nName(r.team),r.al==='R'?'Red':'Blue',nName(r.p1),nName(r.p2),r.sup,r.port,CLIMB_LABEL[r.climb]||'',r.carry||0,r.carried?'Yes':'',r.climbAt,r.state,r.card,r.rate,r.notes,r.ts])); show(csv(rows),'fgc_match.csv'); };
-$('expPit').onclick=()=>{ const rows=[['Scout','Team','Capacity','Shooter type','Empty full load s','Suppression','Port','Best climb','Climb s','Can carry','Can be carried','Field position','Roles','HP skill','Drivetrain','Languages','Breakdowns','Notes','Time']];
-  Object.entries(DB.pit).forEach(([k,p])=>rows.push([p.scout||'',nName(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
+$('expPit').onclick=()=>{ const rows=[['Scout','Team','Phase','Capacity','Shooter type','Empty full load s','Suppression','Port','Best climb','Climb s','Can carry','Can be carried','Field position','Roles','HP skill','Drivetrain','Languages','Breakdowns','Notes','Time']];
+  Object.entries(DB.pit).forEach(([k,p])=>rows.push([p.scout||'',nName(pitSlugOf(k)),PHASE_LABEL[pitPhaseOf(k)]||pitPhaseOf(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
 $('expSum').onclick=()=>{ const by=summary(); const f=(x,n)=>n?(x/n).toFixed(1):'';
   const rows=[['Team','Matches','Avg suppression','Avg port','Best climb','Climb %','Z3 count','Partners carried','Breakdowns','Avg driver','Pit capacity','Shooter type','Empty s','Pit shoot','Pit climb','Field position','Roles','Languages']];
-  Object.keys(by).sort((a,b)=>(by[b].n?by[b].sup/by[b].n:-1)-(by[a].n?by[a].sup/by[a].n:-1)).forEach(k=>{ const b=by[k],p=DB.pit[k]||{};
+  Object.keys(by).sort((a,b)=>(by[b].n?by[b].sup/by[b].n:-1)-(by[a].n?by[a].sup/by[a].n:-1)).forEach(k=>{ const b=by[k],p=pitFor(k)||{};
     rows.push([nName(k),b.n,f(b.sup,b.n),f(b.port,b.n),CLIMB_LABEL[b.best]||'',b.n?Math.round(100*b.climbN/b.n)+'%':'',b.z3,b.carry,b.dead,f(b.rate,b.rn),p.cap||'',TYPE_LABEL[p.type]||'',p.empty||'',TRIL[p.sup]||'',CLIMB_LABEL[p.climb]||'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),(p.lang||[]).join('/')]); }); show(csv(rows),'fgc_summary.csv'); };
 $('expJson').onclick=()=>show(JSON.stringify(DB),'fgc_backup_'+AUTH.team+'.json','application/json');
 $('copyOut').onclick=()=>{ const ta=$('out'); ta.removeAttribute('readonly'); ta.select(); ta.setSelectionRange(0,999999); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} ta.setAttribute('readonly','');
@@ -3693,7 +3758,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v22';
+const APP_VER='v24';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

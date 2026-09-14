@@ -20,8 +20,9 @@ function tEn(k){ return (k in DICT.en)?DICT.en[k]:''; }
 function hintFor(k){ const hk=k+'H'; const has=(DICT[LANG]&&hk in DICT[LANG])||(hk in DICT.en); const parts=[];
   if(has&&t(hk)) parts.push(t(hk)); if(LANG!=='en'&&tEn(k)) parts.push(tEn(k)); return parts.join(' · '); }
 /* label maps rebuilt on every language change (mutated in place so all call sites stay simple) */
-const CLIMB_LABEL={}, TYPE_LABEL={}, POS_LABEL={}, ROLE={}, TRI={'2':'✓','1':'△','0':'✗'}, TRIL={}, STATE_LBL={}, DIMS=[];
+const CLIMB_LABEL={}, TYPE_LABEL={}, POS_LABEL={}, ROLE={}, TRI={'2':'✓','1':'△','0':'✗'}, TRIL={}, STATE_LBL={}, PHASE_LABEL={}, DIMS=[];
 function relabel(){
+  Object.assign(PHASE_LABEL,{prac:t('m.practice'),qual:t('m.quals'),play:t('m.playoffs')});
   Object.assign(CLIMB_LABEL,{'':'—','0':t('m.none'),'C':t('m.contact'),'1':t('m.zone')+' 1','2':t('m.zone')+' 2','3':t('m.zone')+' 3'});
   Object.assign(TYPE_LABEL,{s1:t('p.single'),s2:t('p.dual'),s3:t('p.triple'),wf:t('p.waterfall')});
   Object.assign(POS_LABEL,{wall:t('p.wall'),front:t('p.front'),center:t('p.center'),port:t('p.portZone'),brace:t('p.brace'),roam:t('p.roam')});
@@ -58,7 +59,8 @@ function nFlag(s){ const n=NMAP[s]; if(!n) return s?'🏳️':'🌍'; return (HT
 function nFlagTxt(s){ return NMAP[s]?NMAP[s].flag:(s?'🏳️':'🌍'); }
 function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cfg.theme||'auto'; d.cfg.event=d.cfg.event||'FGC 2026 Igniting Innovation';
   d.cfg.recent=Array.isArray(d.cfg.recent)?d.cfg.recent:[]; d.cfg.fx=d.cfg.fx||'auto'; d.cfg.custom=(d.cfg.custom&&typeof d.cfg.custom==='object')?d.cfg.custom:{};
-  d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:''};
+  d.cfg.plan=(d.cfg.plan&&typeof d.cfg.plan==='object')?d.cfg.plan:{match:0,a:'',b:'',phase:'qual'};
+  d.cfg.plan.phase=d.cfg.plan.phase||'qual';
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -87,7 +89,7 @@ function boot(team){
   $('teamBtn').innerHTML=`<span class="fl">${nFlag(team)}</span><span class="nm">${esc(nName(team))}</span>`;
   $('auth').hidden=true; $('main').hidden=false; $('nav').hidden=false; document.querySelector('header').hidden=false;
   document.querySelector('nav button[data-tab=match]').click();
-  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderMList(); refreshData(); calc();
+  applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMList(); refreshData(); calc();
   if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
@@ -320,8 +322,28 @@ function renderMList(){
 /* ---------- PIT ---------- */
 let curTeam='';
 function blankPit(){ return {sup:'',cap:0,type:'',empty:0,port:'',climb:'',climbSec:0,carry:false,carried:false,pos:[],roles:[],hp:'',drive:'',lang:[],breaks:0,notes:'',coord:[],scout:'',ts:''}; }
-function rec(){ if(!curTeam||!DB) return null; if(!DB.pit[curTeam]) DB.pit[curTeam]=blankPit(); return DB.pit[curTeam]; }
-function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); }
+let pitPhase='qual';
+/* 一個國家每個賽段一份。qual 沿用原本的 key，所以舊資料自動變成正賽那一份，
+   而且 DB.pit 仍然是平的 key->紀錄，同步合併和伺服器都不用改。 */
+function pitKey(slug,ph){ ph=ph||pitPhase; return ph==='qual'?slug:slug+'#'+ph; }
+function pitSlugOf(key){ return String(key).split('#')[0]; }
+function pitPhaseOf(key){ return String(key).split('#')[1]||'qual'; }
+/* 找這一國最合適的一份：先要指定賽段，沒有退回正賽，再沒有就挑最新的 */
+function pitFor(slug,ph){
+  if(!DB) return null;
+  const want=DB.pit[pitKey(slug,ph||pitPhase)]; if(want&&want.ts) return want;
+  const q=DB.pit[slug]; if(q&&q.ts) return q;
+  let best=null;
+  Object.entries(DB.pit).forEach(([k,v])=>{ if(pitSlugOf(k)===slug&&v&&v.ts&&(!best||v.ts>best.ts)) best=v; });
+  return best;
+}
+function rec(){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
+  if(!DB.pit[k]) DB.pit[k]=blankPit(); return DB.pit[k]; }
+function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); }
+function showSaved(ts){
+  const el=$('pSaved'); if(!el) return;
+  el.textContent = ts ? t('sc.autosaved')+' '+String(ts).replace('T',' ').slice(11,16) : t('sc.nothingYet');
+}
 /* tappable field map (own alliance drawn on the left, like the official drawing) */
 function fieldSVG(){ return `<svg viewBox="0 0 700 700" aria-label="field map">
   <rect class="fld" x="0" y="0" width="700" height="700" rx="6"/>
@@ -348,14 +370,14 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
   chipsInit($('pRoles'),r.roles,v=>touch('roles',v)); chipsInit($('pLang'),r.lang,v=>touch('lang',v)); chipsInit($('pCoord'),r.coord,v=>touch('coord',v));
   tgInit($('pCarry'),r.carry,v=>touch('carry',v)); tgInit($('pCarried'),r.carried,v=>touch('carried',v));
   $('pCap').value=r.cap||0; $('pEmpty').value=r.empty||0; $('pClimbSec').value=r.climbSec||0; $('pBreak').value=r.breaks||0; $('pNotes').value=r.notes||'';
-  scNowRender(); }
+  scNowRender(); showSaved(r.ts); }
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
 $('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); haptic(12); });
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
-function plan(){ return DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:''}); }
+function plan(){ const p=DB.cfg.plan||(DB.cfg.plan={match:0,a:'',b:'',phase:'qual'}); if(!p.phase) p.phase='qual'; return p; }
 function planSave(){ DB.cfg.ts=now(); save(); }
 function scWhoRender(){
   const pl=plan(), el=$('scWho'), both=[['A',pl.a],['B',pl.b]].filter(x=>x[1]);
@@ -373,6 +395,12 @@ function scPick(slot){
 }
 function scLoad(){
   const pl=plan();
+  pitPhase=pl.phase||'qual';
+  segInit($('scPhase'),pitPhase,v=>{
+    pitPhase=v||'qual'; plan().phase=pitPhase; planSave();
+    if(curTeam) loadPit();      // 換賽段等於換一份紀錄
+    scWhoRender();
+  });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
   scWhoRender(); mPlanBar();
@@ -406,6 +434,7 @@ function mPlanBar(){
   btn.textContent=`${t('sc.usePlan')} M${pl.match||'?'} · ${names}`;
   btn.onclick=()=>{
     if(pl.match) $('mMatch').value=pl.match;
+    if(pl.phase) segInit($('mPhase'),pl.phase,()=>{});
     if(pl.a){ setCbtn($('ACountry'),pl.a,t('m.whichCountry')); $('ABody').hidden=false; }
     if(pl.b){ setCbtn($('BCountry'),pl.b,t('m.whichCountry')); $('BBody').hidden=false; }
     haptic(12); toast(t('sc.planLoaded'),'ok');
@@ -438,7 +467,7 @@ function summary(allPhases){ const by={};
     b.n++; b.sup+=r.sup||0; b.port+=r.port||0; if(r.climb&&r.climb!=='0'){ b.climbN++; if(r.climb==='3') b.z3++; }
     if((CLIMB_MULT[r.climb]||0)>(CLIMB_MULT[b.best]||0)) b.best=r.climb;
     b.carry+=r.carry||0; if(r.state==='dead'||r.state==='stuck') b.dead++; if(r.rate){ b.rate+=+r.rate; b.rn++; } if(r.card) b.cards++; });
-  Object.keys(DB.pit).forEach(k=>{ if(!by[k]) by[k]=mk(); });
+  Object.keys(DB.pit).forEach(k=>{ const sl=pitSlugOf(k); if(!by[sl]) by[sl]=mk(); });
   Object.keys(PROFILES).forEach(k=>{ if(PROFILES[k].published&&k!==AUTH.team&&!by[k]) by[k]=mk(); });
   return by; }
 function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')||'sup';
@@ -446,7 +475,7 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
   const keys=Object.keys(by).sort((a,b)=>{ const A=by[a],B=by[b];
     if(mode==='sup') return av(B)-av(A); if(mode==='climb') return (CLIMB_MULT[B.best]||0)-(CLIMB_MULT[A.best]||0)||av(B)-av(A);
     if(mode==='rel') return (A.n?A.dead/A.n:1)-(B.n?B.dead/B.n:1)||av(B)-av(A); return B.n-A.n; });
-  $('tList').innerHTML=keys.length?keys.map((k,i)=>{ const b=by[k],p=DB.pit[k]; const f=(x,n)=>n?(x/n).toFixed(1):'—';
+  $('tList').innerHTML=keys.length?keys.map((k,i)=>{ const b=by[k],p=pitFor(k); const f=(x,n)=>n?(x/n).toFixed(1):'—';
     return `<div class="it" data-t="${esc(k)}"><div class="n" style="background:var(--line);color:var(--muted)">#${i+1}</div><div class="fl">${nFlag(k)}</div><div class="d"><b>${esc(nName(k))}</b> <span style="font-size:11px">${esc(nSub(k))}</span> · ${b.n} ${esc(t('n.matches'))}${PROFILES[k]&&PROFILES[k].published?` <span class="tag ok">📢 ${esc(t('n.selfTag'))}</span>`:''}
       <div class="meter"><i style="width:${b.n?Math.round(100*av(b)/maxAv):0}%"></i></div>
       <span class="tag">🏀 ${f(b.sup,b.n)}</span><span class="tag">PORT ${f(b.port,b.n)}</span>${b.best&&b.best!=='0'?`<span class="tag ${CLIMB_TAG[b.best]}">${esc(CLIMB_LABEL[b.best])}</span>`:`<span class="tag">${esc(t('n.noClimb'))}</span>`}<span class="tag">${esc(t('n.climbs'))} ${b.n?Math.round(100*b.climbN/b.n):0}%</span>${b.z3?`<span class="tag z3">Z3 ×${b.z3}</span>`:''}${b.carry?`<span class="tag ok">${esc(t('m.carried'))} ${b.carry}</span>`:''}${b.dead?`<span class="tag bad">${esc(t('n.broke'))} ${b.dead}/${b.n}</span>`:''}${b.rn?`<span class="tag">${esc(t('n.drv'))} ${f(b.rate,b.rn)}</span>`:''}${b.cards?`<span class="tag bad">${esc(t('n.cards'))} ${b.cards}</span>`:''}
@@ -456,6 +485,30 @@ function renderTeams(){ if(!DB) return; const by=summary(), mode=segVal('tSort')
 segInit($('tSort'),'sup',renderTeams);
 segInit($('tPhase'),'all',v=>{ tPhase=v||'all'; renderTeams(); });
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
+$('pSave').onclick=async()=>{
+  if(!curTeam){ toast(t('sc.pickFirst')); return; }
+  const r=rec(); if(r&&!r.ts){ r.ts=now(); r.scout=DB.cfg.scout; }
+  saveNow();
+  toast(t('sc.saved')+' · '+nName(curTeam)+' · '+(PHASE_LABEL[pitPhase]||pitPhase),'ok');
+  haptic(18); sparkBurst($('pSave'),16); showSaved(r&&r.ts);
+  try{ await push(true); }catch(e){}
+};
+/* 有公開自介的國家直接列出來，不用先知道要找誰 */
+function renderPublished(){
+  const el=$('pubList'); if(!el) return;
+  const rows=Object.entries(PROFILES||{})
+    .filter(([k,v])=>v&&v.published)
+    .sort((a,b)=>nName(a[0]).localeCompare(nName(b[0])));
+  if(!rows.length){ el.innerHTML=`<div class="empty">${esc(t('sc.pubNone'))}</div>`; return; }
+  el.innerHTML=rows.map(([k,v])=>{
+    const nph=(v.photos||[]).length;
+    const bits=pitBits(v).slice(0,4).join(' · ');
+    return `<div class="it" data-t="${esc(k)}"><div class="fl">${nFlag(k)}</div><div class="d">
+      <b>${esc(nName(k))}</b>${nph?`<span class="tag">📷 ${nph}</span>`:''}
+      <div class="note" style="margin-top:3px">${esc(bits)}</div></div></div>`;
+  }).join('');
+  el.querySelectorAll('.it').forEach(x=>x.onclick=()=>openNation(x.dataset.t));
+}
 
 /* ---------- NATION PAGE (lobby): photos · radar · power · our numbers ---------- */
 function dims(p){ if(!p) return null; const tri={'2':5,'1':3,'0':1};
@@ -474,7 +527,7 @@ function radarSVG(a,b){ const N=6,R=92,cx=130,cy=128; const pt=(i,v)=>{ const an
   return h+'</svg>'; }
 let NATION='';
 function openNation(slug){ if(!slug||!DB) return; NATION=slug;
-  const s=PROFILES[slug]; const self=(s&&s.published)?s:null; const pit=DB.pit[slug]||null; const by=summary()[slug];
+  const s=PROFILES[slug]; const self=(s&&s.published)?s:null; const pit=pitFor(slug)||null; const by=summary()[slug];
   const dA=dims(self), dB=dims(pit); const pw=power(dA||dB); const f=(x,n)=>n?(x/n).toFixed(1):'—';
   const photos=(self&&self.photos)||[]; const tier=pw==null?'':pw>=80?'🔥 '+t('n.elite'):pw>=60?'💪 '+t('n.strong'):pw>=40?'👍 '+t('n.solid'):'🌱 '+t('n.dev');
   $('nBody').innerHTML=`
@@ -548,6 +601,7 @@ async function loadProfiles(){ if(AUTH.offline||!AUTH.token||!DB) return;
     const mine=PROFILES[AUTH.team];
     if(mine&&!DB.robot){ DB.robot=Object.assign(blankPit(),{desc:'',published:false},mine); saveNow(); if(!$('tab-robot').hidden) robotLoad(); }
     else if(mine&&DB.robot){ DB.robot.photos=mine.photos||DB.robot.photos||[]; if(!$('tab-robot').hidden) renderPhotos(); }
+    renderPublished();
     if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) renderSelf(); }
   catch(e){} }
 setInterval(loadProfiles,60000);
@@ -571,7 +625,7 @@ function showLastLogin(){
   el.textContent=t('auth.prevLogin')+' '+String(p.t).replace('T',' ').slice(0,16)+(p.ip?'  ('+p.ip+')':'');
 }
 function refreshData(){ if(!DB) return; showLastLogin(); $('statPit').textContent=Object.keys(DB.pit).length; $('statMatch').textContent=live().length;
-  const s=new Set(Object.keys(DB.pit)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
+  const s=new Set(Object.keys(DB.pit).map(pitSlugOf)); live().forEach(m=>m.team&&s.add(m.team)); $('statTeams').textContent=s.size;
   $('cfgScout').value=DB.cfg.scout; segInit($('cfgTheme'),DB.cfg.theme,v=>{ DB.cfg.theme=v||'auto'; applyTheme(); touchCfg(); });
   segInit($('cfgFx'),fxMode(),v=>{ DB.cfg.fx=v||'auto'; try{ localStorage.setItem('fgc.fx',DB.cfg.fx); }catch(e){} applyFX(); touchCfg(); }); }
 $('cfgScout').oninput=e=>{ DB.cfg.scout=e.target.value; touchCfg(); };
@@ -579,11 +633,11 @@ function csv(rows){ return '﻿'+rows.map(r=>r.map(c=>{ const s=String(c==null?'
 function show(text,name,type){ $('out').value=text; const a=$('dlOut'); try{ a.href=URL.createObjectURL(new Blob([text],{type:type||'text/csv;charset=utf-8'})); a.download=name; }catch(e){} $('out').scrollIntoView({behavior:'smooth',block:'center'}); }
 $('expMatch').onclick=()=>{ const rows=[['Scout','Match','Team','Alliance','Partner 1','Partner 2','Suppression balls','Port balls','Climb','Partners carried','Was carried','Climb start (s left)','Status','Card','Driver','Notes','Time']];
   live().sort((a,b)=>a.match-b.match||nName(a.team).localeCompare(nName(b.team))).forEach(r=>rows.push([r.scout||DB.cfg.scout,r.match,nName(r.team),r.al==='R'?'Red':'Blue',nName(r.p1),nName(r.p2),r.sup,r.port,CLIMB_LABEL[r.climb]||'',r.carry||0,r.carried?'Yes':'',r.climbAt,r.state,r.card,r.rate,r.notes,r.ts])); show(csv(rows),'fgc_match.csv'); };
-$('expPit').onclick=()=>{ const rows=[['Scout','Team','Capacity','Shooter type','Empty full load s','Suppression','Port','Best climb','Climb s','Can carry','Can be carried','Field position','Roles','HP skill','Drivetrain','Languages','Breakdowns','Notes','Time']];
-  Object.entries(DB.pit).forEach(([k,p])=>rows.push([p.scout||'',nName(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
+$('expPit').onclick=()=>{ const rows=[['Scout','Team','Phase','Capacity','Shooter type','Empty full load s','Suppression','Port','Best climb','Climb s','Can carry','Can be carried','Field position','Roles','HP skill','Drivetrain','Languages','Breakdowns','Notes','Time']];
+  Object.entries(DB.pit).forEach(([k,p])=>rows.push([p.scout||'',nName(pitSlugOf(k)),PHASE_LABEL[pitPhaseOf(k)]||pitPhaseOf(k),p.cap,TYPE_LABEL[p.type]||'',p.empty,TRIL[p.sup],TRIL[p.port],CLIMB_LABEL[p.climb]||'',p.climbSec,p.carry?'Yes':'',p.carried?'Yes':'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),p.hp,p.drive,(p.lang||[]).join('/'),p.breaks,p.notes,p.ts])); show(csv(rows),'fgc_pit.csv'); };
 $('expSum').onclick=()=>{ const by=summary(); const f=(x,n)=>n?(x/n).toFixed(1):'';
   const rows=[['Team','Matches','Avg suppression','Avg port','Best climb','Climb %','Z3 count','Partners carried','Breakdowns','Avg driver','Pit capacity','Shooter type','Empty s','Pit shoot','Pit climb','Field position','Roles','Languages']];
-  Object.keys(by).sort((a,b)=>(by[b].n?by[b].sup/by[b].n:-1)-(by[a].n?by[a].sup/by[a].n:-1)).forEach(k=>{ const b=by[k],p=DB.pit[k]||{};
+  Object.keys(by).sort((a,b)=>(by[b].n?by[b].sup/by[b].n:-1)-(by[a].n?by[a].sup/by[a].n:-1)).forEach(k=>{ const b=by[k],p=pitFor(k)||{};
     rows.push([nName(k),b.n,f(b.sup,b.n),f(b.port,b.n),CLIMB_LABEL[b.best]||'',b.n?Math.round(100*b.climbN/b.n)+'%':'',b.z3,b.carry,b.dead,f(b.rate,b.rn),p.cap||'',TYPE_LABEL[p.type]||'',p.empty||'',TRIL[p.sup]||'',CLIMB_LABEL[p.climb]||'',(p.pos||[]).map(x=>POS_LABEL[x]||x).join('/'),(p.roles||[]).map(x=>ROLE[x]||x).join('/'),(p.lang||[]).join('/')]); }); show(csv(rows),'fgc_summary.csv'); };
 $('expJson').onclick=()=>show(JSON.stringify(DB),'fgc_backup_'+AUTH.team+'.json','application/json');
 $('copyOut').onclick=()=>{ const ta=$('out'); ta.removeAttribute('readonly'); ta.select(); ta.setSelectionRange(0,999999); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} ta.setAttribute('readonly','');
@@ -727,7 +781,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v22';
+const APP_VER='v24';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
