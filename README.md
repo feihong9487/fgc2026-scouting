@@ -107,17 +107,19 @@ previous sign-in time and IP in the Data tab.
 ## Layout
 
 ```
-server.py             HTTP server + sync/auth/profile API (stdlib only, ~500 lines)
+server.py             HTTP server + sync/auth/profile API + official-results poller (stdlib only, ~1000 lines)
 build_single.py       bundles web/ into the one-file offline build
 web/
   index.html          the app
   app.css  app.js     UI and logic, no framework, no build step
+  ranks.js            official ladder / match list, fed by results.first.global
   i18n*.js            20 languages
   nations.js          175 nations (slug, name, flag, Chinese name)
   flags/              175 SVG flags
   sw.js               offline cache
   install.html        iOS profile / PWA install page
-deploy/               setup.sh, push.ps1, pull-data.ps1, runbook
+deploy/               setup.sh, push.ps1, pull-data.ps1, claim.ps1, runbook
+tools/                small Windows app for handing out claim links (build it yourself)
 docs/                 form specification (Traditional Chinese)
 ```
 

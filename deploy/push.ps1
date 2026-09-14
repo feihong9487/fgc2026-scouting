@@ -11,6 +11,7 @@ param(
   [string]$Domain = "",                            # 有網域才會申請 HTTPS 憑證
   [switch]$Setup,                                  # 第一次跑，順便安裝 Python/Caddy/systemd
   [switch]$WithData,                               # 連同本機 data\ 一起搬（第一次或搬家才用）
+  [switch]$Force,                                  # 伺服器上已經有帳號資料時，仍然要用 -WithData 蓋掉
   [string]$Key = ""                                # 私鑰路徑
 )
 
@@ -51,6 +52,14 @@ $tar = Join-Path $env:TEMP "fgc-deploy.tar.gz"
 if (Test-Path $tar) { Remove-Item $tar -Force }
 & tar -czf $tar -C $stage .
 Write-Host ("  封存 {0:N0} KB" -f ((Get-Item $tar).Length / 1KB))
+
+if ($WithData -and -not $Force) {
+  # 上線之後再帶 -WithData 等於把雲端上各隊的帳號和資料換成本機的舊版；除非明講 -Force，否則擋下來
+  $has = & ssh @sshArgs $Server "test -s /opt/fgc/data/accounts.json && echo HAS || echo NONE"
+  if ("$has" -match "HAS") {
+    throw "伺服器上已經有帳號資料（/opt/fgc/data/accounts.json）。-WithData 會用本機的 data\ 整個蓋掉它。確定要這樣就加 -Force；只是要更新程式請拿掉 -WithData。"
+  }
+}
 
 Write-Host "`n=== 3/5 上傳 ===" -ForegroundColor Cyan
 Send $tar "/tmp/fgc-deploy.tar.gz"

@@ -13,8 +13,8 @@
 | 步驟 | 內容 |
 |---|---|
 | Who are you? | 下拉選自己的國家（175 隊，來源 first.global；名單若有缺可在 `web/nations.js` 加） |
-| Team password | 所有國家預設密碼 **password** |
-| 第一次登入 | 會請你改成自己隊的密碼（全隊共用，至少 4 字），也可以按 **Skip for now** 先沿用預設；忘記密碼 → 主辦執行 `python server.py --reset-password <slug>` |
+| Team password | 全隊共用一組密碼（至少 4 字）。**沒有預設密碼**：還沒被認領的國家不能登入 |
+| 第一次登入 | 主辦方用 `deploy\claim.ps1 -Team <slug>` 取得一次性認領連結，一對一私訊給該隊；他們打開連結（或在登入頁輸入認領碼）並在同一步設好自己的密碼。忘記密碼 → 主辦執行 `claim.ps1 -Team <slug> -Reissue`（作廢舊帳號、登出所有裝置、重發一張碼，資料不動） |
 | 之後 | 右上角國旗徽章 → 改密碼 / 登出。同一隊所有裝置自動同步；不同隊互相看不到彼此的 scouting 資料 |
 
 離線單檔 `FGC2026_Scouting.html`（`python build_single.py` 產生）：iPad 直接開檔可用，但不同步、不能登入/發布。
@@ -84,9 +84,10 @@
 
 ---
 
-## 3. Nations（各國 · 國家主頁大廳）
+## 3. Ranks（排名 · 官方即時榜 + 賽程 + 我們的偵察）
 
-- 上方下拉「Look up a nation」→ 打開該國頁面；下方是我們的排名（Balls / Climb / Reliability / Matches），點一隊也會打開國家頁。
+- 三個模式：**Ladder** 官方排名（伺服器每 2 分鐘抓 results.first.global，顯示名次升降與走勢，前 24 名＝季後賽線）、**Matches** 官方賽程／比分（可篩「我的」「已打」「即將」，點一場看計分細節）、**Scouted** 我們自己記錄到的隊伍排名（Balls / Climb / Reliability / Matches，可按賽段篩）。點任何一隊都會打開國家頁。
+- 官方賽程一抓到，Scout 分頁的「My matches」賽程表會自動填入每場的兩個盟友。
 - 國家頁內容：大國旗 hero、**Power 戰力分數 0–100**（🔥 Elite ≥80 / 💪 Strong ≥60 / 👍 Solid ≥40 / 🌱 Developing）、機器照片（若該隊有上傳）、**六維雷達圖**（Shooting 投得準 / Firepower 裝得多 / Speed 射得快 / Climb 爬升 / Support 背隊友 / Feeding 餵洞口；橘＝該隊自己說的，藍＝我們 Pit 問到的）、我們記錄到的比賽數據（場數、平均投球、平均 PORT、爬升率、最高爬升、故障）、他們自己的介紹、我們的 Pit 備註、「Scout them in Pit」。
 - 戰力權重：Shooting 25% / Firepower 20% / Speed 15% / Climb 25% / Support 10% / Feeding 5%（自己說的優先，沒有就用我們的 Pit 資料）。
 
@@ -126,8 +127,9 @@ REGIONAL ALLIANCE 分數 = ⌈SUPPRESSION × (1 + Σ 三台 CLIMB MULTIPLIER)⌉
 
 ## 7. 系統
 
-- `server.py`：靜態站 + API（`/api/login`、`/api/me`、`/api/password`、`/api/logout`、`/api/state`、`/api/sync`、`/api/profile`、`/api/profiles`、`/api/photo`、`/api/photo/delete`）；資料在 `data/`（`accounts.json` PBKDF2 雜湊、`sessions.json`、`teams/<slug>.json`、`profiles.json`、`photos/`），每日備份 `backups/`。登入失敗 5 分鐘內 8 次會暫停。
-- 同步：每 8 秒 POST `/api/sync`（X-Token），以時間戳合併；離線照常可填。機器介紹每 60 秒更新一次。
+- `server.py`：靜態站 + API（`/api/login`、`/api/claim`、`/api/me`、`/api/password`、`/api/logout`、`/api/state`、`/api/sync`、`/api/official`、`/api/profile`、`/api/profiles`、`/api/photo`、`/api/photo/delete`）；資料在 `data/`（`accounts.json` PBKDF2 雜湊、`claims.json` 認領碼、`sessions.json`、`teams/<slug>.json`、`profiles.json`、`photos/`、`official.json`、`audit.log`），每日備份 `backups/`。登入／認領失敗 5 分鐘內 8 次會暫停。
+- 同步：有改動就立刻 POST `/api/sync`（X-Token），沒改動每 30 秒帶 rev 輪詢一次（伺服器沒變就回 `nochange`），以時間戳合併；賽程計畫（plan）也在 cfg 裡跟著同步。離線照常可填。機器介紹每 60 秒更新一次，伺服器上比較新的版本會覆蓋本機（本機還沒存的修改除外）。
+- 時間：資料裡的時間戳一律是 ISO；畫面上全部轉成裝置本地時間（在仁川就是 KST）。
 - 照片網址 `/photos/<slug>/<hex>.jpg` 是公開的（不含機密）。
 - 匯出：Match / Pit / Team summary CSV、JSON 備份。主題：跟隨系統 / 淺色 / 深色。
 - 語言：右上角 🌐 可切換 20 種語言（English 預設、繁體中文、简体中文、Español、Français、العربية、हिन्दी、বাংলা、Português、Русский、اردو、Bahasa Indonesia、Deutsch、日本語、한국어、Türkçe、Tiếng Việt、Kiswahili、فارسی、Italiano）；阿拉伯文/烏爾都文/波斯文自動切換為由右至左。缺字自動退回英文。

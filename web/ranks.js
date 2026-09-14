@@ -143,7 +143,7 @@ function renderRanks() {
   $('rkStatus').innerHTML = OFF.demo
     ? `<span class="live demo">SAMPLE</span>`
     : OFF.error ? `<span class="live bad">${esc(t('rk.offline'))}</span>`
-      : OFF.fetched ? `<span class="live ok"></span>${esc(t('rk.updated'))} ${esc(String(OFF.fetched).slice(11, 16))}`
+      : OFF.fetched ? `<span class="live ok"></span>${esc(t('rk.updated'))} ${esc(fmtTime(OFF.fetched))}`
         : `<span class="live wait"></span>${esc(t('rk.loading'))}`;
   if (rMode === 'ladder') host.innerHTML = ladderHTML();
   else if (rMode === 'matches') host.innerHTML = matchesHTML();
@@ -183,7 +183,7 @@ function ladderHTML() {
         <div><div class="note">${esc(t('rk.rs'))}</div><div class="stat">${mineRow.rankingScore ?? '—'}</div></div>
         <div><div class="note">${esc(t('rk.high'))}</div><div class="stat">${mineRow.highestScore ?? '—'}</div></div>
         <div><div class="note">${esc(t('rk.played'))}</div><div class="stat">${mineRow.played ?? 0}</div></div>
-        <div><div class="note">${esc(t('rk.record'))}</div><div class="stat" style="font-size:20px">${mineRow.wins ?? 0}-${mineRow.losses ?? 0}-${mineRow.ties ?? 0}</div></div>
+        ${mineRow.wins == null ? '' : `<div><div class="note">${esc(t('rk.record'))}</div><div class="stat" style="font-size:20px">${mineRow.wins}-${mineRow.losses ?? 0}-${mineRow.ties ?? 0}</div></div>`}
       </div>
       ${sparkSVG(OFF.spark[mineRow.teamKey])}
     </div>`;
@@ -211,7 +211,8 @@ function matchesHTML() {
   if (rMatchFilter === 'mine') rows = rows.filter(m => (m.participants || []).some(p => myKeys.has(p.teamKey)));
   else if (rMatchFilter === 'played') rows = rows.filter(m => m.played);
   else if (rMatchFilter === 'next') rows = rows.filter(m => !m.played);
-  rows = rows.slice(-60).reverse();
+  /* 「即將到來」要看最近的前 60 場；其他模式看最後 60 場、最新在上 */
+  rows = rMatchFilter === 'next' ? rows.slice(0, 60) : rows.slice(-60).reverse();
   if (!rows.length) return `<div class="list"><div class="empty">${esc(t('rk.noneHere'))}</div></div>`;
   const side = (m, s) => (m.participants || []).filter(p => (p.station || '').toUpperCase().startsWith(s))
     .map(p => { const sl = slugOfKey(p.teamKey); return sl ? nFlag(sl) : '🏳️'; }).join(' ');
@@ -223,7 +224,7 @@ function matchesHTML() {
       <div class="d">
         <div class="mhead"><b>${esc(m.name || ('Match ' + (m.id || '')))}</b>
           ${m.field ? `<span class="tag">F${m.field}</span>` : ''}
-          ${m.played ? '' : `<span class="tag ok">${esc(m.scheduledTime ? String(m.scheduledTime).slice(11, 16) : t('rk.upcoming'))}</span>`}</div>
+          ${m.played ? '' : `<span class="tag ok">${esc(m.scheduledTime ? fmtTime(m.scheduledTime) : t('rk.upcoming'))}</span>`}</div>
         <div class="vs">
           <span class="al R ${redWin ? 'win' : ''}">${side(m, 'R')}<b>${m.played ? (rs ?? '—') : ''}</b></span>
           <span class="vsx">vs</span>
@@ -264,7 +265,7 @@ function matchSheet(id) {
     line(t('c.ext'), m.wildfireInExtinguisher),
     line(t('rk.coop'), m.coopertition),
     line(t('rk.field'), m.field),
-    line(t('rk.time'), m.scheduledTime ? String(m.scheduledTime).replace('T', ' ').slice(0, 16) : ''),
+    line(t('rk.time'), m.scheduledTime ? fmtDT(m.scheduledTime) : ''),
   ].filter(Boolean).join('');
   openSheet(`<div class="hd"><b style="font-size:17px">${esc(m.name || 'Match')}</b>
       <button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>

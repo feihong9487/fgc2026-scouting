@@ -582,3 +582,6 @@ svg.trend.dn polyline{stroke:var(--red)}
 #scSched h2 .pill{margin-left:auto}
 #schedList{max-height:none}
 @media (max-width:380px){ .sc-p .nm{display:none} .sc-cells{grid-template-columns:1fr 1fr} }
+
+/* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
+.seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}

@@ -5,12 +5,12 @@ const I = window.I18N;
 
 I.ja = {
 "auth.who":"どのチームですか？","auth.whoH":"あなたのチーム","auth.pw":"チームのパスワード","auth.signin":"サインイン",
-"auth.defaultNote":"初期パスワードは「password」です。初回サインイン時に自分たちのパスワードを設定します。チームごとにデータは分かれています。",
+
 "auth.setTitle":"チームのパスワードを設定","auth.setH":"チーム全員で共有します","auth.newPw":"新しいパスワード","auth.repeat":"もう一度入力",
 "auth.saveStart":"保存して開始","auth.shareNote":"自分のチームだけに共有してください。忘れたら主催者にリセットを依頼。","auth.back":"戻る",
 "auth.offlineNote":"ローカルファイルとして開いています。サーバーなし、データはこの端末だけに残ります。","auth.startOffline":"オフラインで開始",
 "auth.selectCountry":"国を選んでください…","auth.errCountry":"先に国を選んでください","auth.errShort":"4文字以上","auth.errMatch":"パスワードが一致しません",
-"auth.skip":"今はスキップ（password のまま）","auth.pwSet":"パスワードを設定しました","auth.keepDefault":"初期パスワードのままにします",
+"auth.pwSet":"パスワードを設定しました",
 "menu.changePw":"チームのパスワードを変更","menu.curPw":"現在のパスワード","menu.newPw":"新しいパスワード","menu.update":"パスワードを更新","menu.signout":"サインアウト",
 "menu.switchTeam":"チームを切り替え","menu.note":"データはこの端末とサーバーに残ります。続けるには再度サインインしてください。","menu.close":"閉じる","menu.localNote":"ローカルファイルモード — アカウントなし。",
 "nav.match":"試合","nav.pit":"ピット","nav.nations":"各国","nav.robot":"自分の機体","nav.score":"得点","nav.data":"データ",
@@ -65,12 +65,12 @@ I.ja = {
 
 I.ko = {
 "auth.who":"어느 팀인가요?","auth.whoH":"당신의 팀","auth.pw":"팀 비밀번호","auth.signin":"로그인",
-"auth.defaultNote":"기본 비밀번호는 “password”입니다. 첫 로그인 때 직접 정하세요. 팀마다 데이터는 따로 저장됩니다.",
+
 "auth.setTitle":"팀 비밀번호 설정","auth.setH":"팀 전체가 함께 사용","auth.newPw":"새 비밀번호","auth.repeat":"한 번 더 입력",
 "auth.saveStart":"저장하고 시작","auth.shareNote":"우리 팀에만 알려 주세요. 잊었다면 주최 측에 초기화를 요청하세요.","auth.back":"뒤로",
 "auth.offlineNote":"로컬 파일로 열렸습니다 — 서버 없이 이 기기에만 저장됩니다.","auth.startOffline":"오프라인으로 시작",
 "auth.selectCountry":"국가를 선택하세요…","auth.errCountry":"국가를 먼저 선택하세요","auth.errShort":"4자 이상","auth.errMatch":"비밀번호가 일치하지 않습니다",
-"auth.skip":"나중에 하기 (“password” 유지)","auth.pwSet":"비밀번호를 설정했습니다","auth.keepDefault":"기본 비밀번호를 유지합니다",
+"auth.pwSet":"비밀번호를 설정했습니다",
 "menu.changePw":"팀 비밀번호 변경","menu.curPw":"현재 비밀번호","menu.newPw":"새 비밀번호","menu.update":"비밀번호 업데이트","menu.signout":"로그아웃",
 "menu.switchTeam":"팀 바꾸기","menu.note":"데이터는 이 기기와 서버에 남습니다. 계속하려면 다시 로그인하세요.","menu.close":"닫기","menu.localNote":"로컬 파일 모드 — 계정 없음.",
 "nav.match":"경기","nav.pit":"피트","nav.nations":"국가","nav.robot":"우리 로봇","nav.score":"점수","nav.data":"데이터",
@@ -125,12 +125,12 @@ I.ko = {
 
 I.vi = {
 "auth.who":"Các bạn là đội nào?","auth.whoH":"đội của bạn","auth.pw":"Mật khẩu đội","auth.signin":"Đăng nhập",
-"auth.defaultNote":"Mật khẩu mặc định là “password” — bạn sẽ đặt mật khẩu riêng khi đăng nhập lần đầu. Dữ liệu mỗi đội tách riêng.",
+
 "auth.setTitle":"Đặt mật khẩu cho đội","auth.setH":"cả đội dùng chung","auth.newPw":"mật khẩu mới","auth.repeat":"nhập lại",
 "auth.saveStart":"Lưu và bắt đầu","auth.shareNote":"Chỉ chia sẻ trong đội. Quên rồi? Nhờ ban tổ chức đặt lại.","auth.back":"Quay lại",
 "auth.offlineNote":"Mở dưới dạng tệp cục bộ — không có máy chủ, dữ liệu chỉ nằm trên thiết bị này.","auth.startOffline":"Bắt đầu ngoại tuyến",
 "auth.selectCountry":"Chọn quốc gia của bạn…","auth.errCountry":"Hãy chọn quốc gia trước","auth.errShort":"Tối thiểu 4 ký tự","auth.errMatch":"Mật khẩu không khớp",
-"auth.skip":"Bỏ qua (giữ “password”)","auth.pwSet":"Đã đặt mật khẩu","auth.keepDefault":"Giữ mật khẩu mặc định",
+"auth.pwSet":"Đã đặt mật khẩu",
 "menu.changePw":"Đổi mật khẩu đội","menu.curPw":"mật khẩu hiện tại","menu.newPw":"mật khẩu mới","menu.update":"Cập nhật mật khẩu","menu.signout":"Đăng xuất",
 "menu.switchTeam":"Đổi đội","menu.note":"Dữ liệu vẫn ở thiết bị này và trên máy chủ; đăng nhập lại để tiếp tục.","menu.close":"Đóng","menu.localNote":"Chế độ tệp cục bộ — không có tài khoản.",
 "nav.match":"Trận","nav.pit":"Pit","nav.nations":"Quốc gia","nav.robot":"Robot","nav.score":"Điểm","nav.data":"Dữ liệu",
@@ -185,12 +185,12 @@ I.vi = {
 
 I.sw = {
 "auth.who":"Ninyi ni timu gani?","auth.whoH":"timu yako","auth.pw":"Nenosiri la timu","auth.signin":"Ingia",
-"auth.defaultNote":"Nenosiri la awali ni “password” — utaweka lenu mkiingia mara ya kwanza. Data ya kila timu iko peke yake.",
+
 "auth.setTitle":"Weka nenosiri la timu yenu","auth.setH":"linatumiwa na timu nzima","auth.newPw":"nenosiri jipya","auth.repeat":"rudia",
 "auth.saveStart":"Hifadhi na anza","auth.shareNote":"Shirikisha timu yenu tu. Mmesahau? Waombe waandaaji walirejeshe.","auth.back":"Rudi",
 "auth.offlineNote":"Imefunguliwa kama faili la ndani — hakuna seva, data inabaki kwenye kifaa hiki pekee.","auth.startOffline":"Anza nje ya mtandao",
 "auth.selectCountry":"Chagua nchi yenu…","auth.errCountry":"Chagua nchi kwanza","auth.errShort":"Angalau herufi 4","auth.errMatch":"Manenosiri hayafanani",
-"auth.skip":"Ruka kwa sasa (baki na “password”)","auth.pwSet":"Nenosiri limewekwa","auth.keepDefault":"Tunabaki na nenosiri la awali",
+"auth.pwSet":"Nenosiri limewekwa",
 "menu.changePw":"Badilisha nenosiri la timu","menu.curPw":"nenosiri la sasa","menu.newPw":"nenosiri jipya","menu.update":"Sasisha nenosiri","menu.signout":"Toka",
 "menu.switchTeam":"Badilisha timu","menu.note":"Data inabaki kwenye kifaa hiki na kwenye seva; ingia tena ili kuendelea.","menu.close":"Funga","menu.localNote":"Hali ya faili la ndani — hakuna akaunti.",
 "nav.match":"Mechi","nav.pit":"Pit","nav.nations":"Nchi","nav.robot":"Roboti","nav.score":"Alama","nav.data":"Data",
@@ -245,12 +245,12 @@ I.sw = {
 
 I.fa = {
 "auth.who":"شما کدام تیم هستید؟","auth.whoH":"تیم شما","auth.pw":"گذرواژهٔ تیم","auth.signin":"ورود",
-"auth.defaultNote":"گذرواژهٔ پیش‌فرض «password» است — در نخستین ورود گذرواژهٔ خودتان را می‌گذارید. دادهٔ هر تیم جداست.",
+
 "auth.setTitle":"گذرواژهٔ تیم را بگذارید","auth.setH":"همهٔ تیم از آن استفاده می‌کنند","auth.newPw":"گذرواژهٔ جدید","auth.repeat":"دوباره بنویسید",
 "auth.saveStart":"ذخیره و شروع","auth.shareNote":"فقط با تیم خودتان در میان بگذارید. فراموش کردید؟ از برگزارکننده بخواهید بازنشانی کند.","auth.back":"بازگشت",
 "auth.offlineNote":"به‌صورت فایل محلی باز شده — بدون سرور، داده فقط روی همین دستگاه می‌ماند.","auth.startOffline":"شروع آفلاین",
 "auth.selectCountry":"کشورتان را انتخاب کنید…","auth.errCountry":"اول کشور را انتخاب کنید","auth.errShort":"دست‌کم ۴ نویسه","auth.errMatch":"گذرواژه‌ها یکسان نیستند",
-"auth.skip":"فعلاً رد شو (همان “password”)","auth.pwSet":"گذرواژه تنظیم شد","auth.keepDefault":"گذرواژهٔ پیش‌فرض می‌ماند",
+"auth.pwSet":"گذرواژه تنظیم شد",
 "menu.changePw":"تغییر گذرواژهٔ تیم","menu.curPw":"گذرواژهٔ فعلی","menu.newPw":"گذرواژهٔ جدید","menu.update":"به‌روزرسانی گذرواژه","menu.signout":"خروج",
 "menu.switchTeam":"تغییر تیم","menu.note":"داده روی این دستگاه و سرور می‌ماند؛ برای ادامه دوباره وارد شوید.","menu.close":"بستن","menu.localNote":"حالت فایل محلی — بدون حساب.",
 "nav.match":"مسابقه","nav.pit":"پیت","nav.nations":"کشورها","nav.robot":"ربات ما","nav.score":"امتیاز","nav.data":"داده",

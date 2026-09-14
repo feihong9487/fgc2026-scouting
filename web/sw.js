@@ -1,7 +1,7 @@
 /* FGC 2026 Scouting — offline cache.
    Static shell: stale-while-revalidate. Navigations: network first, cache fallback.
    Flags/photos: cache first (immutable). /api/: never cached. */
-const V = 'fgc2026-v27';
+const V = 'fgc2026-v28';
 const SHELL = [
   './', 'app.css', 'app.js', 'ranks.js', 'nations.js',
   'i18n.js', 'i18n2.js', 'i18n3.js', 'i18n4.js', 'i18n5.js', 'i18n6.js', 'i18n7.js',
@@ -38,10 +38,12 @@ self.addEventListener('fetch', e => {
 
   // page loads: fresh if possible, cached shell when offline
   if (req.mode === 'navigate') {
+    // 只有首頁才存成 './'。以前任何頁面（含 /install）都寫進 './'，開過安裝頁再離線，app 就變成安裝頁
+    const key = (url.pathname === '/' || url.pathname === '/index.html') ? './' : req;
     e.respondWith(fetch(req).then(res => {
-      const copy = res.clone(); caches.open(V).then(c => c.put('./', copy));
+      if (res.ok) { const copy = res.clone(); caches.open(V).then(c => c.put(key, copy)); }
       return res;
-    }).catch(() => caches.match('./').then(hit => hit || caches.match(req))));
+    }).catch(() => caches.match(key).then(hit => hit || caches.match('./'))));
     return;
   }
 
