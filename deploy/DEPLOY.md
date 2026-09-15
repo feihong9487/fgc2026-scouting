@@ -54,7 +54,7 @@ Get-Content $HOME\.ssh\id_ed25519_fgc.pub
 這一行會做完：
 
 1. 重新 build 離線單檔
-2. 打包 `server.py` + `web\` + `data\`（現有 11 隊的帳號與資料）
+2. 打包 `server.py` + `web\` + `data\`（本機現有的帳號與資料；**只有第一次或搬家才加 `-WithData`**，上線後再加會把雲端的資料蓋掉，腳本會擋下來要你加 `-Force`）
 3. 上傳、安裝 Python / Caddy / systemd / ufw 防火牆
 4. Caddy 自動申請 Let's Encrypt 憑證（第一次要等 10–30 秒）
 5. 啟動服務並檢查 `/health`
@@ -82,7 +82,7 @@ Get-Content $HOME\.ssh\id_ed25519_fgc.pub
 1. `.\deploy\push.ps1 ... -WithData` 把資料一起搬上去
 2. 開新網址確認能登入、資料都在
 3. 把家裡的 `server.py` 和 `cloudflared` 關掉（避免有人還在寫舊的那份，之後資料對不起來）
-4. 通知那 11 隊新網址，請他們：
+4. 通知已經在用的隊伍新網址，請他們：
    - 重新開 `https://<your-domain>/`
    - **重裝 iOS 描述檔**（舊的指向已失效的隧道網址）
    - 密碼和資料都不用重設，照舊
@@ -98,7 +98,8 @@ Get-Content $HOME\.ssh\id_ed25519_fgc.pub
 # 看服務狀態與日誌
 ssh root@<your-domain> "systemctl status fgc-scouting --no-pager; tail -30 /var/log/fgc-scouting.log"
 
-# 幫忘記密碼的隊伍重設（會登出他們所有裝置，密碼回到 password）
+# 幫忘記密碼的隊伍重發：作廢舊帳號、登出他們所有裝置、發一張新的認領碼（資料不動）。
+# 更省事的是 .\deploy\claim.ps1 -Team nepal -Reissue，會直接把要私訊的連結放進剪貼簿。
 ssh root@<your-domain> "cd /opt/fgc && sudo -u fgc python3 server.py --reset-password nepal"
 
 # 看目前有幾隊在用

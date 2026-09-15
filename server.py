@@ -1,32 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FGC 2026 Scouting — 伺服器（靜態網站 + 每隊獨立帳號/資料 + 多裝置同步）
+FGC 2026 Scouting — 伺服器（靜態網站 + 每隊獨立帳號/資料 + 多裝置同步 + 官方比分）
 
 用法：
-    python server.py                       # port 8080
+    python server.py                          # port 8080
     python server.py --port 8080 --host 0.0.0.0
-    python server.py --reset-password nepal   # 把某隊密碼重設回預設 "password"
+    python server.py --gen-claims             # 替所有還沒認領的國家發認領碼
+    python server.py --claim-link nepal       # 印出可以私訊給該隊的一鍵認領連結
+    python server.py --reset-password nepal   # 作廢該隊帳號、登出所有裝置、發一張新的認領碼
+    python server.py --audit 40               # 最近 40 筆登入/認領/改密碼紀錄
 
 帳號：
-    每一個參賽國家（web/nations.js 裡的 slug）就是一個帳號，預設密碼 "password"。
-    第一次登入必須改密碼；之後只有知道該隊密碼的人能看到／寫入該隊的 scouting 資料。
+    每一個參賽國家（web/nations.js 裡的 slug）就是一個帳號，全隊共用。
+    沒被認領的國家不能登入：第一次要用主辦方私下發的一次性認領碼，並在同一步自己設密碼，
+    所以不存在共用的預設密碼。之後只有知道該隊密碼的人能看到／寫入該隊的 scouting 資料。
+    上面的 CLI 指令是另一個程序直接改 data/ 裡的檔案，伺服器每次碰帳號前都會檢查檔案有沒有變，
+    所以發碼、作廢都不需要重啟服務。
 
 路由：
     GET  /                      → web/index.html
-    GET  /<static>              → web/ 內的 css / js
-    GET  /health                → 健康檢查
-    POST /api/login             {team, password}      → {token, team, mustChange}
-    GET  /api/me                X-Token               → {team, mustChange}
-    POST /api/password          X-Token {current,new} → {ok}
+    GET  /<static>              → web/ 內的 css / js / 國旗
+    GET  /health                → 健康檢查（不用登入）
+    GET  /install               → 手機安裝頁；/install.mobileconfig 動態產生 iOS Web Clip 描述檔
+    POST /api/login             {team, password}         → {token, team, mustChange}；未認領回 409 needClaim
+    POST /api/claim             {team, code, password}   → {token, team}
+    GET  /api/me                X-Token                  → {team, mustChange, lastLogin, prevLogin}
+    POST /api/password          X-Token {current,new}    → {ok}
     POST /api/logout            X-Token
-    GET  /api/state             X-Token               → 該隊整份資料
-    POST /api/sync              X-Token {cfg,pit,match} → 合併後的該隊資料
+    GET  /api/state             X-Token                  → 該隊整份資料
+    POST /api/sync              X-Token {rev,cfg,pit,match} → 合併後的該隊資料，或 {nochange}
+    GET  /api/official          X-Token                  → results.first.global 的排名／賽程／比分 + 名次走勢
+    POST /api/profile           X-Token {…}              → 自己隊的機器介紹（published 才公開）
+    GET  /api/profiles          X-Token                  → 所有已發布的機器介紹
+    POST /api/photo             X-Token {data}           → 上傳機器照片；/api/photo/delete 刪除
+    GET  /photos/<slug>/<hex>.jpg                        → 照片（公開）
 
 資料：
     data/accounts.json          帳號（PBKDF2 雜湊）
+    data/claims.json            認領碼（等同密碼，不進 git）
     data/sessions.json          登入 token
     data/teams/<slug>.json      每隊的 scouting 資料
+    data/profiles.json          各隊的機器介紹；data/photos/ 照片
+    data/official.json          官方比分快取；data/audit.log 稽核
     backups/<slug>_YYYYMMDD.json 每日備份
 """
 import argparse, base64, hashlib, hmac, json, mimetypes, os, plistlib, re, secrets, shutil, sys, threading, time, uuid
@@ -109,7 +125,7 @@ def web_clip_profile(base_url):
         "PayloadUUID": str(uuid.uuid5(ns, base_url)),
         "PayloadDisplayName": "FGC 2026 Scouting",
         "PayloadDescription": "Home Screen icon for the FGC 2026 Scouting app. Nothing else is changed.",
-        "PayloadOrganization": "FIRST Global Challenge 2026 · Scouting",
+        "PayloadOrganization": "Team Chinese Taipei · FGC 2026 Scouting (unofficial)",
         "PayloadRemovalDisallowed": False,
         "PayloadContent": [payload],
     }
@@ -137,6 +153,49 @@ def _write_json(path, obj):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
     os.replace(tmp, path)
+
+
+def _now():
+    """帶時區的 ISO 時間。前端會轉成裝置本地時間顯示；沒有時區的字串在仁川會被當成當地時間，差 9 小時。"""
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+# ── 帳號／認領碼／session 三個檔案是伺服器和 CLI 共用的 ──
+# --gen-claims、--claim-link、--reset-password 是另一個程序，直接改檔案。伺服器如果只認記憶體裡那份，
+# 新發的認領碼對不上（「認領碼不正確」），作廢的帳號又會在下一次登入時被寫回去。
+# 所以：自己寫檔時記下 mtime，每次碰這三份資料前先看檔案有沒有被別人動過，有就重讀。
+_MT = {}
+
+
+def _save(path, obj):
+    """寫入並記住 mtime，讓 _reload_auth 知道這是自己寫的。"""
+    _write_json(path, obj)
+    try:
+        _MT[path] = os.path.getmtime(path)
+    except OSError:
+        pass
+
+
+def _reload_auth():
+    """檔案被別的程序改過就重讀。呼叫前必須持有 LOCK。"""
+    for path, d in ((ACCOUNTS, ACC), (CLAIMS, CLAIM), (SESSIONS, SESS)):
+        try:
+            mt = os.path.getmtime(path)
+        except OSError:
+            mt = None
+        if mt == _MT.get(path):
+            continue
+        _MT[path] = mt
+        if mt is None:
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                fresh = json.load(f)
+        except Exception:
+            continue          # 讀壞了就先用記憶體那份，不要把好的清掉
+        if isinstance(fresh, dict):
+            d.clear()
+            d.update(fresh)
 
 
 NATION_NAMES = {}
@@ -224,7 +283,7 @@ def _hash(pw, salt):
 def audit(event, slug, ip, ua="", note=""):
     """每一次登入、認領、改密碼都寫一行，出事時才查得到是誰。"""
     try:
-        rec = {"t": datetime.now().isoformat(timespec="seconds"), "event": event,
+        rec = {"t": _now(), "event": event,
                "team": slug or "", "ip": ip or "", "ua": (ua or "")[:120], "note": note}
         with open(AUDIT_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -239,9 +298,9 @@ def new_claim_code():
 def issue_claim(slug):
     """發一張新的認領碼給某國並回傳。呼叫前必須持有 LOCK。"""
     code = new_claim_code()
-    CLAIM[slug] = {"code": code, "used": False, "issued": datetime.now().isoformat(timespec="seconds"),
+    CLAIM[slug] = {"code": code, "used": False, "issued": _now(),
                    "usedAt": "", "ip": ""}
-    _write_json(CLAIMS, CLAIM)
+    _save(CLAIMS, CLAIM)
     return code
 
 
@@ -259,9 +318,9 @@ def burn_claim(slug, ip):
     c = CLAIM.get(slug)
     if c:
         c["used"] = True
-        c["usedAt"] = datetime.now().isoformat(timespec="seconds")
+        c["usedAt"] = _now()
         c["ip"] = ip or ""
-        _write_json(CLAIMS, CLAIM)
+        _save(CLAIMS, CLAIM)
 
 
 def check_password(slug, pw):
@@ -279,8 +338,8 @@ def set_password(slug, pw):
     """呼叫前必須持有 LOCK。"""
     salt = secrets.token_hex(16)
     ACC[slug] = {"salt": salt, "hash": _hash(pw, salt), "changed": True,
-                 "ts": datetime.now().isoformat(timespec="seconds")}
-    _write_json(ACCOUNTS, ACC)
+                 "ts": _now()}
+    _save(ACCOUNTS, ACC)
 
 
 def note_login(slug, ip):
@@ -289,8 +348,8 @@ def note_login(slug, ip):
     if not a:
         return
     a["prevLogin"] = a.get("lastLogin", {})
-    a["lastLogin"] = {"t": datetime.now().isoformat(timespec="seconds"), "ip": ip or ""}
-    _write_json(ACCOUNTS, ACC)
+    a["lastLogin"] = {"t": _now(), "ip": ip or ""}
+    _save(ACCOUNTS, ACC)
 
 
 def new_session(slug):
@@ -301,7 +360,7 @@ def new_session(slug):
     for t in [t for t, s in SESS.items() if now - s.get("last", s.get("created", 0)) > SESSION_DAYS * 86400]:
         SESS.pop(t, None)
     SESS[tok] = {"team": slug, "created": now, "last": now}
-    _write_json(SESSIONS, SESS)
+    _save(SESSIONS, SESS)
     return tok
 
 
@@ -359,7 +418,7 @@ def official_store(build, data):
     """存檔並記一筆名次快照，之後用來算升降箭頭與走勢。呼叫前必須持有 LOCK。"""
     OFFICIAL["build"] = build or OFFICIAL.get("build", "")
     OFFICIAL["data"] = data
-    OFFICIAL["fetched"] = datetime.now().isoformat(timespec="seconds")
+    OFFICIAL["fetched"] = _now()
     OFFICIAL["error"] = ""
     ranks = {}
     for row in (data.get("rankings") or []):
@@ -424,6 +483,7 @@ class H(BaseHTTPRequestHandler):
             line = " ".join(str(a) for a in args) or str(fmt)
         if "/api/sync" in line or "/health" in line or "/api/me" in line:
             return
+        line = re.sub(r"([?&]code=)[^&\s]+", r"\1***", line)   # 認領連結裡的碼不進日誌
         try:
             sys.stdout.write("[%s] %s\n" % (self.log_date_time_string(), line))
             sys.stdout.flush()
@@ -469,13 +529,16 @@ class H(BaseHTTPRequestHandler):
         """從 X-Token 取得隊伍；失敗時已回 401。"""
         tok = self.headers.get("X-Token", "")
         with LOCK:
+            _reload_auth()
             slug = session_team(tok)
         if not slug:
             self._json(401, {"error": "請先登入"})
         return slug
 
     def _ip(self):
-        return self.headers.get("CF-Connecting-IP") or self.headers.get("X-Forwarded-For", "").split(",")[0].strip() or self.client_address[0]
+        # 只信 Caddy 補上的 X-Forwarded-For（它會覆蓋客戶端自己帶的）。以前也讀 CF-Connecting-IP，
+        # 但現在前面沒有 Cloudflare，那個標頭誰都能自己填，登入失敗次數限制會被繞過。
+        return self.headers.get("X-Forwarded-For", "").split(",")[0].strip() or self.client_address[0]
 
     def _base_url(self):
         """外部看到的網址：走 cloudflared 時要用轉發來的 host / proto。"""
@@ -526,6 +589,7 @@ class H(BaseHTTPRequestHandler):
             if not slug:
                 return
             with LOCK:
+                _reload_auth()
                 a = ACC.get(slug, {})
                 must = not a.get("changed", False)
                 last = dict(a.get("lastLogin") or {})
@@ -598,6 +662,7 @@ class H(BaseHTTPRequestHandler):
                 return self._json(400, {"error": "不是有效的隊伍 / Unknown team"})
             ua = self.headers.get("User-Agent", "")
             with LOCK:
+                _reload_auth()
                 claimed = slug in ACC
                 if not claimed:
                     audit("login-unclaimed", slug, ip, ua)
@@ -631,6 +696,7 @@ class H(BaseHTTPRequestHandler):
             if len(pw) < 4:
                 return self._json(400, {"error": "密碼至少 4 個字 / Password must be at least 4 characters"})
             with LOCK:
+                _reload_auth()
                 if slug in ACC:
                     audit("claim-taken", slug, ip, ua)
                     return self._json(409, {"error": "這個國家已經被認領了，請直接登入 / "
@@ -649,8 +715,9 @@ class H(BaseHTTPRequestHandler):
         if p == "/api/logout":
             tok = self.headers.get("X-Token", "")
             with LOCK:
+                _reload_auth()
                 if SESS.pop(tok, None) is not None:
-                    _write_json(SESSIONS, SESS)
+                    _save(SESSIONS, SESS)
             return self._json(200, {"ok": True})
 
         if p == "/api/password":
@@ -667,6 +734,7 @@ class H(BaseHTTPRequestHandler):
             if new == DEFAULT_PASSWORD:
                 return self._json(400, {"error": "不能用預設密碼 / Cannot keep the default password"})
             with LOCK:
+                _reload_auth()
                 ok, _ = check_password(slug, cur)
                 if not ok:
                     audit("pw-change-fail", slug, self._ip(), self.headers.get("User-Agent", ""))
@@ -710,7 +778,7 @@ class H(BaseHTTPRequestHandler):
             if len(json.dumps(prof, ensure_ascii=False)) > 20000:
                 return self._json(400, {"error": "太長了 / Profile too long"})
             prof["team"] = slug
-            prof["ts"] = datetime.now().isoformat(timespec="seconds")
+            prof["ts"] = _now()
             with LOCK:
                 prof["photos"] = list(PROF.get(slug, {}).get("photos") or [])   # 照片由 /api/photo 管理
                 PROF[slug] = prof
@@ -746,7 +814,7 @@ class H(BaseHTTPRequestHandler):
                     f.write(raw)
                 url = f"/photos/{slug}/{name}"
                 photos.append(url)
-                prof["ts"] = datetime.now().isoformat(timespec="seconds")
+                prof["ts"] = _now()
                 _write_json(PROFILES, PROF)
             return self._json(200, {"url": url, "photos": photos})
 
@@ -765,7 +833,7 @@ class H(BaseHTTPRequestHandler):
                 prof = PROF.get(slug)
                 if prof and url in (prof.get("photos") or []):
                     prof["photos"].remove(url)
-                    prof["ts"] = datetime.now().isoformat(timespec="seconds")
+                    prof["ts"] = _now()
                     _write_json(PROFILES, PROF)
                 try:
                     os.remove(os.path.join(PHOTO_DIR, m.group(1), m.group(2)))
@@ -814,12 +882,12 @@ def main():
     def _drop_sessions(slug):
         for t in [t for t, v in SESS.items() if v.get("team") == slug]:
             SESS.pop(t)
-        _write_json(SESSIONS, SESS)
+        _save(SESSIONS, SESS)
 
     if a.reset_password:
         slug = a.reset_password.strip().lower()
         ACC.pop(slug, None)
-        _write_json(ACCOUNTS, ACC)
+        _save(ACCOUNTS, ACC)
         _drop_sessions(slug)
         code = issue_claim(slug)
         audit("reissue", slug, "cli")
@@ -901,9 +969,9 @@ def main():
     if a.revoke_all:
         n = len(ACC)
         ACC.clear()
-        _write_json(ACCOUNTS, ACC)
+        _save(ACCOUNTS, ACC)
         SESS.clear()
-        _write_json(SESSIONS, SESS)
+        _save(SESSIONS, SESS)
         made = [(slug, issue_claim(slug)) for slug in (sorted(NATION_SLUGS) if NATION_SLUGS else [])]
         audit("revoke-all", "", "cli", note=f"{n} accounts")
         print(f"[ok] {n} 個帳號全部作廢，所有裝置登出。各隊的 scouting 資料都沒有動。")
@@ -931,7 +999,7 @@ def main():
             print(f"  區網      http://{ip}:{a.port}/   ← 同一個 Wi-Fi 的 iPad 用這個")
         except Exception:
             pass
-    print(f"  隊伍數    {len(NATION_SLUGS) or '（不限）'}   預設密碼 \"{DEFAULT_PASSWORD}\"（第一次登入必須改）")
+    print(f"  隊伍數    {len(NATION_SLUGS) or '（不限）'}   已認領 {len(ACC)} 隊   待用認領碼 {sum(1 for c in CLAIM.values() if not c.get('used'))} 張")
     print(f"  資料目錄  {DATA_DIR}")
     print(f"  每日備份  {BACKUP_DIR}")
     print(f"  官方比分  {'每 %d 秒抓一次 results.first.global' % OFFICIAL_POLL if OFFICIAL_POLL else '關閉'}")

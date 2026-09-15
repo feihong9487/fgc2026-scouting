@@ -8,12 +8,12 @@ DOMAIN="${1:-}"
 APP_DIR=/opt/fgc
 SVC_USER=fgc
 
-echo "== 1/6 套件 =="
+echo "== 1/7 套件 =="
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq python3 rsync curl gnupg ca-certificates debian-keyring debian-archive-keyring apt-transport-https
 
-echo "== 2/6 Caddy（自動 HTTPS 憑證）=="
+echo "== 2/7 Caddy（自動 HTTPS 憑證）=="
 if ! command -v caddy >/dev/null; then
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
     | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
@@ -22,12 +22,12 @@ if ! command -v caddy >/dev/null; then
   apt-get update -qq && apt-get install -y -qq caddy
 fi
 
-echo "== 3/6 使用者與目錄 =="
+echo "== 3/7 使用者與目錄 =="
 id -u "$SVC_USER" >/dev/null 2>&1 || useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin "$SVC_USER"
 mkdir -p "$APP_DIR"/{web,data,backups}
 chown -R "$SVC_USER:$SVC_USER" "$APP_DIR"
 
-echo "== 4/6 systemd 服務 =="
+echo "== 4/7 systemd 服務 =="
 cat >/etc/systemd/system/fgc-scouting.service <<UNIT
 [Unit]
 Description=FGC 2026 Scouting server
@@ -58,7 +58,7 @@ touch /var/log/fgc-scouting.log && chown "$SVC_USER" /var/log/fgc-scouting.log
 systemctl daemon-reload
 systemctl enable fgc-scouting
 
-echo "== 5/6 Caddy 設定 =="
+echo "== 5/7 Caddy 設定 =="
 if [ -n "$DOMAIN" ]; then
   cat >/etc/caddy/Caddyfile <<CADDY
 $DOMAIN {

@@ -5,27 +5,27 @@ const I = window.I18N;
 
 // ── keys introduced after i18n.js was written ──
 const EXTRA = {
-en:{"auth.skip":"Skip for now (keep “password”)","auth.pwSet":"Password set","auth.keepDefault":"Keeping the default password","p.rolesTitle":"Role & comms","p.notesPh":"e.g. intake jams often","p.ourStation":"OUR STATION","k.select":"Select country…"},
-"zh-Hant":{"auth.skip":"先跳過（保留 password）","auth.pwSet":"密碼設好了","auth.keepDefault":"先用預設密碼","p.rolesTitle":"角色跟溝通","p.notesPh":"例：intake 常卡球","p.ourStation":"我們的駕駛站","k.select":"選國家…"},
-"zh-Hans":{"auth.skip":"先跳过（保留 password）","auth.pwSet":"密码设好了","auth.keepDefault":"先用默认密码","p.rolesTitle":"角色跟沟通","p.notesPh":"例：intake 常卡球","p.ourStation":"我们的驾驶站","k.select":"选国家…"},
-es:{"auth.skip":"Omitir por ahora (dejar “password”)","auth.pwSet":"Contraseña guardada","auth.keepDefault":"Se mantiene la contraseña por defecto","p.rolesTitle":"Rol y comunicación","p.notesPh":"p. ej. el intake se atasca","p.ourStation":"NUESTRA ESTACIÓN","k.select":"Elegir país…"},
-fr:{"auth.skip":"Ignorer pour l'instant (garder « password »)","auth.pwSet":"Mot de passe enregistré","auth.keepDefault":"Mot de passe par défaut conservé","p.rolesTitle":"Rôle et communication","p.notesPh":"ex. l'intake se bloque souvent","p.ourStation":"NOTRE STATION","k.select":"Choisir un pays…"},
-pt:{"auth.skip":"Pular por agora (manter “password”)","auth.pwSet":"Senha definida","auth.keepDefault":"Mantendo a senha padrão","p.rolesTitle":"Função e comunicação","p.notesPh":"ex.: o intake trava muito","p.ourStation":"NOSSA ESTAÇÃO","k.select":"Escolher país…"},
-de:{"auth.skip":"Erst mal überspringen („password“ behalten)","auth.pwSet":"Passwort gesetzt","auth.keepDefault":"Standardpasswort bleibt","p.rolesTitle":"Rolle & Kommunikation","p.notesPh":"z. B. Intake klemmt oft","p.ourStation":"UNSERE STATION","k.select":"Land wählen…"},
-it:{"auth.skip":"Salta per ora (tieni “password”)","auth.pwSet":"Password impostata","auth.keepDefault":"Resta la password predefinita","p.rolesTitle":"Ruolo e comunicazione","p.notesPh":"es. l'intake si inceppa spesso","p.ourStation":"LA NOSTRA POSTAZIONE","k.select":"Scegli paese…"},
-ru:{"auth.skip":"Пока пропустить (оставить «password»)","auth.pwSet":"Пароль задан","auth.keepDefault":"Оставляем пароль по умолчанию","p.rolesTitle":"Роль и связь","p.notesPh":"напр. часто заедает приём","p.ourStation":"НАША СТАНЦИЯ","k.select":"Выбрать страну…"},
-tr:{"auth.skip":"Şimdilik atla (“password” kalsın)","auth.pwSet":"Şifre belirlendi","auth.keepDefault":"Varsayılan şifre korunuyor","p.rolesTitle":"Rol ve iletişim","p.notesPh":"örn. intake sık sıkışıyor","p.ourStation":"BİZİM İSTASYON","k.select":"Ülke seç…"}
+en:{"auth.pwSet":"Password set","p.rolesTitle":"Role & comms","p.notesPh":"e.g. intake jams often","p.ourStation":"OUR STATION","k.select":"Select country…"},
+"zh-Hant":{"auth.pwSet":"密碼設好了","p.rolesTitle":"角色跟溝通","p.notesPh":"例：intake 常卡球","p.ourStation":"我們的駕駛站","k.select":"選國家…"},
+"zh-Hans":{"auth.pwSet":"密码设好了","p.rolesTitle":"角色跟沟通","p.notesPh":"例：intake 常卡球","p.ourStation":"我们的驾驶站","k.select":"选国家…"},
+es:{"auth.pwSet":"Contraseña guardada","p.rolesTitle":"Rol y comunicación","p.notesPh":"p. ej. el intake se atasca","p.ourStation":"NUESTRA ESTACIÓN","k.select":"Elegir país…"},
+fr:{"auth.pwSet":"Mot de passe enregistré","p.rolesTitle":"Rôle et communication","p.notesPh":"ex. l'intake se bloque souvent","p.ourStation":"NOTRE STATION","k.select":"Choisir un pays…"},
+pt:{"auth.pwSet":"Senha definida","p.rolesTitle":"Função e comunicação","p.notesPh":"ex.: o intake trava muito","p.ourStation":"NOSSA ESTAÇÃO","k.select":"Escolher país…"},
+de:{"auth.pwSet":"Passwort gesetzt","p.rolesTitle":"Rolle & Kommunikation","p.notesPh":"z. B. Intake klemmt oft","p.ourStation":"UNSERE STATION","k.select":"Land wählen…"},
+it:{"auth.pwSet":"Password impostata","p.rolesTitle":"Ruolo e comunicazione","p.notesPh":"es. l'intake si inceppa spesso","p.ourStation":"LA NOSTRA POSTAZIONE","k.select":"Scegli paese…"},
+ru:{"auth.pwSet":"Пароль задан","p.rolesTitle":"Роль и связь","p.notesPh":"напр. часто заедает приём","p.ourStation":"НАША СТАНЦИЯ","k.select":"Выбрать страну…"},
+tr:{"auth.pwSet":"Şifre belirlendi","p.rolesTitle":"Rol ve iletişim","p.notesPh":"örn. intake sık sıkışıyor","p.ourStation":"BİZİM İSTASYON","k.select":"Ülke seç…"}
 };
 Object.keys(EXTRA).forEach(function(l){ I[l]=Object.assign(I[l]||{},EXTRA[l]); });
 
 I.ar = {
 "auth.who":"من أنتم؟","auth.whoH":"فريقكم","auth.pw":"كلمة مرور الفريق","auth.signin":"تسجيل الدخول",
-"auth.defaultNote":"كلمة المرور الافتراضية هي “password” — ستضعون كلمتكم عند أول دخول. بيانات كل فريق منفصلة.",
+
 "auth.setTitle":"ضعوا كلمة مرور فريقكم","auth.setH":"يشترك فيها كل الفريق","auth.newPw":"كلمة مرور جديدة","auth.repeat":"أعيدوا كتابتها",
 "auth.saveStart":"حفظ والبدء","auth.shareNote":"شاركوها مع فريقكم فقط. نسيتموها؟ اطلبوا من المنظّم إعادة ضبطها.","auth.back":"رجوع",
 "auth.offlineNote":"مفتوح كملف محلي — بلا خادم، تبقى البيانات على هذا الجهاز فقط.","auth.startOffline":"ابدأ دون اتصال",
 "auth.selectCountry":"اختاروا بلدكم…","auth.errCountry":"اختاروا البلد أولاً","auth.errShort":"٤ أحرف على الأقل","auth.errMatch":"كلمتا المرور غير متطابقتين",
-"auth.skip":"تخطّي الآن (إبقاء “password”)","auth.pwSet":"تم ضبط كلمة المرور","auth.keepDefault":"سنبقي كلمة المرور الافتراضية",
+"auth.pwSet":"تم ضبط كلمة المرور",
 "menu.changePw":"تغيير كلمة مرور الفريق","menu.curPw":"كلمة المرور الحالية","menu.newPw":"كلمة مرور جديدة","menu.update":"تحديث كلمة المرور","menu.signout":"تسجيل الخروج",
 "menu.switchTeam":"تغيير الفريق","menu.note":"تبقى بياناتكم على هذا الجهاز وعلى الخادم؛ سجّلوا الدخول مجدداً للمتابعة.","menu.close":"إغلاق","menu.localNote":"وضع الملف المحلي — بلا حساب.",
 "nav.match":"المباراة","nav.pit":"الورشة","nav.nations":"الدول","nav.robot":"روبوتنا","nav.score":"النقاط","nav.data":"البيانات",
@@ -80,12 +80,12 @@ I.ar = {
 
 I.hi = {
 "auth.who":"आप कौन हैं?","auth.whoH":"आपकी टीम","auth.pw":"टीम पासवर्ड","auth.signin":"साइन इन",
-"auth.defaultNote":"डिफ़ॉल्ट पासवर्ड “password” है — पहली बार साइन इन करते समय अपना पासवर्ड सेट करें। हर टीम का डेटा अलग रहता है।",
+
 "auth.setTitle":"अपनी टीम का पासवर्ड सेट करें","auth.setH":"पूरी टीम इसे साझा करती है","auth.newPw":"नया पासवर्ड","auth.repeat":"दोबारा लिखें",
 "auth.saveStart":"सहेजें और शुरू करें","auth.shareNote":"इसे सिर्फ़ अपनी टीम को दें। भूल गए? आयोजक से रीसेट करवाएँ।","auth.back":"वापस",
 "auth.offlineNote":"लोकल फ़ाइल के रूप में खुला है — कोई सर्वर नहीं, डेटा सिर्फ़ इसी डिवाइस पर रहेगा।","auth.startOffline":"ऑफ़लाइन शुरू करें",
 "auth.selectCountry":"अपना देश चुनें…","auth.errCountry":"पहले देश चुनें","auth.errShort":"कम से कम 4 अक्षर","auth.errMatch":"पासवर्ड मेल नहीं खाते",
-"auth.skip":"अभी छोड़ें (“password” रहने दें)","auth.pwSet":"पासवर्ड सेट हो गया","auth.keepDefault":"डिफ़ॉल्ट पासवर्ड रखा जा रहा है",
+"auth.pwSet":"पासवर्ड सेट हो गया",
 "menu.changePw":"टीम पासवर्ड बदलें","menu.curPw":"मौजूदा पासवर्ड","menu.newPw":"नया पासवर्ड","menu.update":"पासवर्ड अपडेट करें","menu.signout":"साइन आउट",
 "menu.switchTeam":"टीम बदलें","menu.note":"आपका डेटा इस डिवाइस और सर्वर पर रहता है; जारी रखने के लिए फिर साइन इन करें।","menu.close":"बंद करें","menu.localNote":"लोकल फ़ाइल मोड — कोई खाता नहीं।",
 "nav.match":"मैच","nav.pit":"पिट","nav.nations":"देश","nav.robot":"रोबोट","nav.score":"स्कोर","nav.data":"डेटा",
@@ -140,12 +140,12 @@ I.hi = {
 
 I.bn = {
 "auth.who":"আপনারা কারা?","auth.whoH":"আপনার দল","auth.pw":"দলের পাসওয়ার্ড","auth.signin":"সাইন ইন",
-"auth.defaultNote":"ডিফল্ট পাসওয়ার্ড “password” — প্রথমবার সাইন ইন করার সময় নিজেদের পাসওয়ার্ড দেবেন। প্রতিটি দলের তথ্য আলাদা।",
+
 "auth.setTitle":"আপনার দলের পাসওয়ার্ড দিন","auth.setH":"পুরো দল একসাথে ব্যবহার করবে","auth.newPw":"নতুন পাসওয়ার্ড","auth.repeat":"আবার লিখুন",
 "auth.saveStart":"সেভ করে শুরু করুন","auth.shareNote":"শুধু নিজের দলকে দিন। ভুলে গেলে আয়োজকদের বলুন রিসেট করতে।","auth.back":"ফিরে যান",
 "auth.offlineNote":"লোকাল ফাইল হিসেবে খোলা — সার্ভার নেই, তথ্য শুধু এই ডিভাইসে থাকবে।","auth.startOffline":"অফলাইনে শুরু",
 "auth.selectCountry":"আপনার দেশ বেছে নিন…","auth.errCountry":"আগে দেশ বেছে নিন","auth.errShort":"কমপক্ষে ৪ অক্ষর","auth.errMatch":"পাসওয়ার্ড মিলছে না",
-"auth.skip":"আপাতত বাদ দিন (“password” রাখুন)","auth.pwSet":"পাসওয়ার্ড সেট হয়েছে","auth.keepDefault":"ডিফল্ট পাসওয়ার্ডই থাকছে",
+"auth.pwSet":"পাসওয়ার্ড সেট হয়েছে",
 "menu.changePw":"দলের পাসওয়ার্ড বদলান","menu.curPw":"বর্তমান পাসওয়ার্ড","menu.newPw":"নতুন পাসওয়ার্ড","menu.update":"পাসওয়ার্ড আপডেট","menu.signout":"সাইন আউট",
 "menu.switchTeam":"দল বদলান","menu.note":"তথ্য এই ডিভাইসে ও সার্ভারে থাকে; চালিয়ে যেতে আবার সাইন ইন করুন।","menu.close":"বন্ধ","menu.localNote":"লোকাল ফাইল মোড — কোনো অ্যাকাউন্ট নেই।",
 "nav.match":"ম্যাচ","nav.pit":"পিট","nav.nations":"দেশ","nav.robot":"রোবট","nav.score":"স্কোর","nav.data":"ডেটা",
@@ -200,12 +200,12 @@ I.bn = {
 
 I.ur = {
 "auth.who":"آپ کون ہیں؟","auth.whoH":"آپ کی ٹیم","auth.pw":"ٹیم کا پاس ورڈ","auth.signin":"سائن اِن",
-"auth.defaultNote":"پہلے سے طے شدہ پاس ورڈ “password” ہے — پہلی بار سائن اِن پر اپنا پاس ورڈ رکھیں۔ ہر ٹیم کا ڈیٹا الگ ہے۔",
+
 "auth.setTitle":"اپنی ٹیم کا پاس ورڈ رکھیں","auth.setH":"پوری ٹیم مشترکہ استعمال کرے گی","auth.newPw":"نیا پاس ورڈ","auth.repeat":"دوبارہ لکھیں",
 "auth.saveStart":"محفوظ کر کے شروع کریں","auth.shareNote":"صرف اپنی ٹیم کو دیں۔ بھول جائیں تو منتظم سے ری سیٹ کروائیں۔","auth.back":"واپس",
 "auth.offlineNote":"لوکل فائل کے طور پر کھلا ہے — کوئی سرور نہیں، ڈیٹا صرف اسی ڈیوائس پر رہے گا۔","auth.startOffline":"آف لائن شروع کریں",
 "auth.selectCountry":"اپنا ملک منتخب کریں…","auth.errCountry":"پہلے ملک منتخب کریں","auth.errShort":"کم از کم ۴ حروف","auth.errMatch":"پاس ورڈ مماثل نہیں",
-"auth.skip":"ابھی چھوڑ دیں (“password” رہنے دیں)","auth.pwSet":"پاس ورڈ سیٹ ہو گیا","auth.keepDefault":"طے شدہ پاس ورڈ برقرار ہے",
+"auth.pwSet":"پاس ورڈ سیٹ ہو گیا",
 "menu.changePw":"ٹیم کا پاس ورڈ بدلیں","menu.curPw":"موجودہ پاس ورڈ","menu.newPw":"نیا پاس ورڈ","menu.update":"پاس ورڈ اپ ڈیٹ","menu.signout":"سائن آؤٹ",
 "menu.switchTeam":"ٹیم بدلیں","menu.note":"ڈیٹا اسی ڈیوائس اور سرور پر رہتا ہے؛ جاری رکھنے کے لیے دوبارہ سائن اِن کریں۔","menu.close":"بند کریں","menu.localNote":"لوکل فائل موڈ — کوئی اکاؤنٹ نہیں۔",
 "nav.match":"میچ","nav.pit":"پِٹ","nav.nations":"ممالک","nav.robot":"روبوٹ","nav.score":"اسکور","nav.data":"ڈیٹا",
@@ -260,12 +260,12 @@ I.ur = {
 
 I.id = {
 "auth.who":"Kalian dari mana?","auth.whoH":"tim kalian","auth.pw":"Kata sandi tim","auth.signin":"Masuk",
-"auth.defaultNote":"Kata sandi bawaan adalah “password” — kalian akan membuat sendiri saat pertama masuk. Data tiap tim terpisah.",
+"auth.defaultNote":"Setiap negara punya akun dan data sendiri. Pertama kali? Panitia mengirimkan kode klaim sekali pakai ke tim kalian.",
 "auth.setTitle":"Buat kata sandi tim","auth.setH":"dipakai bersama satu tim","auth.newPw":"kata sandi baru","auth.repeat":"ulangi",
 "auth.saveStart":"Simpan & mulai","auth.shareNote":"Bagikan hanya ke tim sendiri. Lupa? Minta panitia mengatur ulang.","auth.back":"Kembali",
 "auth.offlineNote":"Dibuka sebagai berkas lokal — tanpa server, data hanya tersimpan di perangkat ini.","auth.startOffline":"Mulai luring",
 "auth.selectCountry":"Pilih negara kalian…","auth.errCountry":"Pilih negara dulu","auth.errShort":"Minimal 4 karakter","auth.errMatch":"Kata sandi tidak sama",
-"auth.skip":"Lewati dulu (tetap “password”)","auth.pwSet":"Kata sandi tersimpan","auth.keepDefault":"Tetap memakai kata sandi bawaan",
+"auth.pwSet":"Kata sandi tersimpan",
 "menu.changePw":"Ganti kata sandi tim","menu.curPw":"kata sandi sekarang","menu.newPw":"kata sandi baru","menu.update":"Perbarui kata sandi","menu.signout":"Keluar",
 "menu.switchTeam":"Ganti tim","menu.note":"Data tetap di perangkat ini dan di server; masuk lagi untuk melanjutkan.","menu.close":"Tutup","menu.localNote":"Mode berkas lokal — tanpa akun.",
 "nav.match":"Pertandingan","nav.pit":"Pit","nav.nations":"Negara","nav.robot":"Robot","nav.score":"Skor","nav.data":"Data",

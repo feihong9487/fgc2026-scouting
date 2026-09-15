@@ -9,7 +9,7 @@ window.I18N_RTL = ["ar","ur","fa"];
 
 I18N.en = {
 "auth.who":"Who are you?","auth.whoH":"your team","auth.pw":"Team password","auth.signin":"Sign in",
-"auth.defaultNote":"Default password is “password” — you'll set your own on first sign-in. Each team's data is separate.",
+"auth.defaultNote":"Each nation has its own account and its own data. First time here? The organizer sends your team a one-time claim code.",
 "auth.setTitle":"Set your team password","auth.setH":"shared by your whole team","auth.newPw":"new password","auth.repeat":"repeat it",
 "auth.saveStart":"Save & start scouting","auth.shareNote":"Share it only with your own team. Forgot it? Ask the organizer to reset it.","auth.back":"Back",
 "auth.offlineNote":"Opened as a local file — no server, data stays on this device only.","auth.startOffline":"Start offline",
@@ -68,7 +68,7 @@ I18N.en = {
 
 I18N["zh-Hant"] = {
 "auth.who":"你們是哪一隊？","auth.whoH":"選自己的國家","auth.pw":"隊伍密碼","auth.signin":"登入",
-"auth.defaultNote":"預設密碼是「password」，第一次登入會請你改成自己的。每一隊的資料是分開的。",
+"auth.defaultNote":"每一隊有自己的帳號和資料。第一次登入需要主辦方私訊給你們隊的一次性認領碼。",
 "auth.setTitle":"幫你們隊設一個密碼","auth.setH":"全隊共用","auth.newPw":"新密碼","auth.repeat":"再輸入一次",
 "auth.saveStart":"儲存並開始 scouting","auth.shareNote":"只給自己隊的人。忘記了找主辦重設。","auth.back":"返回",
 "auth.offlineNote":"這是本機檔案模式：沒有伺服器，資料只留在這台裝置。","auth.startOffline":"離線開始",
@@ -127,7 +127,7 @@ I18N["zh-Hant"] = {
 
 I18N["zh-Hans"] = {
 "auth.who":"你们是哪一队？","auth.whoH":"选自己的国家","auth.pw":"队伍密码","auth.signin":"登录",
-"auth.defaultNote":"默认密码是“password”，第一次登录会请你改成自己的。每一队的数据是分开的。",
+"auth.defaultNote":"每一队有自己的账号和数据。第一次登录需要主办方私信给你们队的一次性认领码。",
 "auth.setTitle":"给你们队设一个密码","auth.setH":"全队共用","auth.newPw":"新密码","auth.repeat":"再输入一次",
 "auth.saveStart":"保存并开始 scouting","auth.shareNote":"只给自己队的人。忘记了找主办重置。","auth.back":"返回",
 "auth.offlineNote":"这是本地文件模式：没有服务器，数据只留在这台设备。","auth.startOffline":"离线开始",
@@ -186,7 +186,7 @@ I18N["zh-Hans"] = {
 
 I18N.es = {
 "auth.who":"¿Quiénes son?","auth.whoH":"tu equipo","auth.pw":"Contraseña del equipo","auth.signin":"Iniciar sesión",
-"auth.defaultNote":"La contraseña por defecto es “password”; la cambiarás al entrar por primera vez. Los datos de cada equipo están separados.",
+"auth.defaultNote":"Cada nación tiene su propia cuenta y sus propios datos. ¿Primera vez? El organizador envía a tu equipo un código de reclamación de un solo uso.",
 "auth.setTitle":"Define la contraseña de tu equipo","auth.setH":"compartida por todo el equipo","auth.newPw":"nueva contraseña","auth.repeat":"repítela",
 "auth.saveStart":"Guardar y empezar","auth.shareNote":"Compártela solo con tu equipo. ¿La olvidaste? Pide al organizador que la restablezca.","auth.back":"Volver",
 "auth.offlineNote":"Abierto como archivo local: sin servidor, los datos quedan solo en este dispositivo.","auth.startOffline":"Empezar sin conexión",
@@ -245,7 +245,7 @@ I18N.es = {
 
 I18N.fr = {
 "auth.who":"Qui êtes-vous ?","auth.whoH":"votre équipe","auth.pw":"Mot de passe de l'équipe","auth.signin":"Se connecter",
-"auth.defaultNote":"Le mot de passe par défaut est « password » ; vous choisirez le vôtre à la première connexion. Les données de chaque équipe sont séparées.",
+"auth.defaultNote":"Chaque nation a son propre compte et ses propres données. Première fois ? L'organisateur envoie à votre équipe un code de réclamation à usage unique.",
 "auth.setTitle":"Définissez le mot de passe de l'équipe","auth.setH":"partagé par toute l'équipe","auth.newPw":"nouveau mot de passe","auth.repeat":"répétez-le",
 "auth.saveStart":"Enregistrer et commencer","auth.shareNote":"Ne le partagez qu'avec votre équipe. Oublié ? Demandez à l'organisateur de le réinitialiser.","auth.back":"Retour",
 "auth.offlineNote":"Ouvert en fichier local : pas de serveur, les données restent sur cet appareil.","auth.startOffline":"Commencer hors ligne",
@@ -304,7 +304,7 @@ I18N.fr = {
 
 I18N.pt = {
 "auth.who":"Quem são vocês?","auth.whoH":"a sua equipe","auth.pw":"Senha da equipe","auth.signin":"Entrar",
-"auth.defaultNote":"A senha padrão é “password” — você definirá a sua no primeiro acesso. Os dados de cada equipe são separados.",
+"auth.defaultNote":"Cada nação tem a sua própria conta e os seus dados. Primeira vez? O organizador envia à sua equipe um código de reivindicação de uso único.",
 "auth.setTitle":"Defina a senha da equipe","auth.setH":"compartilhada por toda a equipe","auth.newPw":"nova senha","auth.repeat":"repita",
 "auth.saveStart":"Salvar e começar","auth.shareNote":"Compartilhe só com a sua equipe. Esqueceu? Peça ao organizador para redefinir.","auth.back":"Voltar",
 "auth.offlineNote":"Aberto como arquivo local — sem servidor, os dados ficam só neste aparelho.","auth.startOffline":"Começar offline",
@@ -363,7 +363,7 @@ I18N.pt = {
 
 I18N.de = {
 "auth.who":"Wer seid ihr?","auth.whoH":"euer Team","auth.pw":"Team-Passwort","auth.signin":"Anmelden",
-"auth.defaultNote":"Das Standardpasswort ist „password“ – beim ersten Anmelden legt ihr euer eigenes fest. Die Daten jedes Teams sind getrennt.",
+"auth.defaultNote":"Jede Nation hat ein eigenes Konto mit eigenen Daten. Zum ersten Mal hier? Der Organisator schickt eurem Team einen einmaligen Claim-Code.",
 "auth.setTitle":"Team-Passwort festlegen","auth.setH":"vom ganzen Team geteilt","auth.newPw":"neues Passwort","auth.repeat":"wiederholen",
 "auth.saveStart":"Speichern & loslegen","auth.shareNote":"Nur mit dem eigenen Team teilen. Vergessen? Den Organisator um Zurücksetzen bitten.","auth.back":"Zurück",
 "auth.offlineNote":"Als lokale Datei geöffnet – kein Server, Daten bleiben nur auf diesem Gerät.","auth.startOffline":"Offline starten",
@@ -422,7 +422,7 @@ I18N.de = {
 
 I18N.it = {
 "auth.who":"Chi siete?","auth.whoH":"la vostra squadra","auth.pw":"Password della squadra","auth.signin":"Accedi",
-"auth.defaultNote":"La password predefinita è “password”: la cambierete al primo accesso. I dati di ogni squadra sono separati.",
+"auth.defaultNote":"Ogni nazione ha il proprio account e i propri dati. Prima volta? L'organizzatore invia alla tua squadra un codice di attivazione monouso.",
 "auth.setTitle":"Imposta la password della squadra","auth.setH":"condivisa da tutta la squadra","auth.newPw":"nuova password","auth.repeat":"ripetila",
 "auth.saveStart":"Salva e inizia","auth.shareNote":"Condividila solo con la tua squadra. Dimenticata? Chiedi all'organizzatore di reimpostarla.","auth.back":"Indietro",
 "auth.offlineNote":"Aperto come file locale: nessun server, i dati restano solo su questo dispositivo.","auth.startOffline":"Inizia offline",
@@ -481,7 +481,7 @@ I18N.it = {
 
 I18N.ru = {
 "auth.who":"Кто вы?","auth.whoH":"ваша команда","auth.pw":"Пароль команды","auth.signin":"Войти",
-"auth.defaultNote":"Пароль по умолчанию — «password»; при первом входе вы зададите свой. Данные каждой команды хранятся отдельно.",
+"auth.defaultNote":"У каждой страны свой аккаунт и свои данные. Впервые здесь? Организатор пришлёт вашей команде одноразовый код активации.",
 "auth.setTitle":"Задайте пароль команды","auth.setH":"общий для всей команды","auth.newPw":"новый пароль","auth.repeat":"повторите",
 "auth.saveStart":"Сохранить и начать","auth.shareNote":"Делитесь только со своей командой. Забыли? Попросите организатора сбросить.","auth.back":"Назад",
 "auth.offlineNote":"Открыто как локальный файл — без сервера, данные остаются только на этом устройстве.","auth.startOffline":"Начать офлайн",
@@ -540,7 +540,7 @@ I18N.ru = {
 
 I18N.tr = {
 "auth.who":"Siz kimsiniz?","auth.whoH":"takımınız","auth.pw":"Takım şifresi","auth.signin":"Giriş yap",
-"auth.defaultNote":"Varsayılan şifre “password”; ilk girişte kendi şifrenizi belirlersiniz. Her takımın verisi ayrıdır.",
+"auth.defaultNote":"Her ülkenin kendi hesabı ve verisi vardır. İlk kez mi? Organizatör takımınıza tek kullanımlık bir talep kodu gönderir.",
 "auth.setTitle":"Takım şifrenizi belirleyin","auth.setH":"tüm takım ortak kullanır","auth.newPw":"yeni şifre","auth.repeat":"tekrar",
 "auth.saveStart":"Kaydet ve başla","auth.shareNote":"Sadece kendi takımınızla paylaşın. Unuttunuz mu? Organizatörden sıfırlamasını isteyin.","auth.back":"Geri",
 "auth.offlineNote":"Yerel dosya olarak açıldı — sunucu yok, veriler yalnızca bu cihazda kalır.","auth.startOffline":"Çevrimdışı başla",
