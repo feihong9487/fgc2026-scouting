@@ -51,6 +51,7 @@ public class ClaimForm : Form
         }
     }
 
+    static readonly Dictionary<string, List<string>> AltNames = new Dictionary<string, List<string>>();
     readonly Dictionary<string, string> nameBySlug = new Dictionary<string, string>();
     readonly Dictionary<string, string> statusBySlug = new Dictionary<string, string>();
     bool pendingRefill;
@@ -282,12 +283,25 @@ public class ClaimForm : Form
                 if (!m.Success) return null;
                 var body = m.Groups[1].Value;
                 var outp = new Dictionary<string, string>();
-                foreach (Match e in Regex.Matches(body,
-                    "\"slug\"\\s*:\\s*\"(.*?)\"\\s*,\\s*\"name\"\\s*:\\s*\"(.*?)\""))
+                AltNames.Clear();
+                foreach (Match e in Regex.Matches(body, "\\{.*?\\}"))
                 {
-                    var slug = e.Groups[1].Value;
-                    var name = Regex.Unescape(e.Groups[2].Value);
-                    if (slug.Length > 0) outp[slug] = name;
+                    var one = e.Value;
+                    var ms = Regex.Match(one, "\"slug\"\\s*:\\s*\"(.*?)\"");
+                    var mn = Regex.Match(one, "\"name\"\\s*:\\s*\"(.*?)\"");
+                    if (!ms.Success || !mn.Success) continue;
+                    var slug = ms.Groups[1].Value;
+                    if (slug.Length == 0) continue;
+                    outp[slug] = Regex.Unescape(mn.Groups[1].Value);
+                    // 別名：打 Ivory Coast 或 Republic of Moldova 也要找得到
+                    var ma = Regex.Match(one, "\"alt\"\\s*:\\s*\\[(.*?)\\]");
+                    if (ma.Success)
+                    {
+                        var list = new List<string>();
+                        foreach (Match a in Regex.Matches(ma.Groups[1].Value, "\"(.*?)\""))
+                            list.Add(Regex.Unescape(a.Groups[1].Value));
+                        if (list.Count > 0) AltNames[slug] = list;
+                    }
                 }
                 return outp.Count > 0 ? outp : null;
             }
@@ -376,6 +390,12 @@ public class ClaimForm : Form
         if (nameBySlug.ContainsKey(dashed)) return dashed;
         foreach (var kv in nameBySlug)
             if (string.Equals(kv.Value, s, StringComparison.OrdinalIgnoreCase)) return kv.Key;
+        foreach (var kv in AltNames)
+        {
+            if (!nameBySlug.ContainsKey(kv.Key)) continue;
+            foreach (var a in kv.Value)
+                if (string.Equals(a, s, StringComparison.OrdinalIgnoreCase)) return kv.Key;
+        }
         return null;
     }
 
@@ -548,6 +568,9 @@ public class ClaimForm : Form
             return 2;
         }
         Console.WriteLine("名單 " + names.Count + " 國，來源 " + site);
+        Console.WriteLine("有別名的國家 " + AltNames.Count + " 個，別名總數 " + AltNames.Values.Sum(v => v.Count));
+        foreach (var k in new[] { "cote-divoire", "turkiye", "eswatini", "netherlands", "moldova" })
+            Console.WriteLine("    " + k + " -> " + (AltNames.ContainsKey(k) ? string.Join(" / ", AltNames[k].ToArray()) : "(沒抓到)"));
 
         Func<string, Nat> item = slug => new Nat { Slug = slug, Name = names[slug], Status = null };
         var cases = new List<string[]>
@@ -565,6 +588,12 @@ public class ClaimForm : Form
             new[] { "Malta  (malta)  ●",          "malta" },
             new[] { "Venezuela",                  "venezuela" },
             new[] { "Hope (Refugees)",            "hope" },          // 隊名自己就有括號
+            new[] { "Moldova",                    "moldova" },
+            new[] { "Republic of Moldova",        "moldova" },       // 舊的正式名稱
+            new[] { "Ivory Coast",                "cote-divoire" },
+            new[] { "Turkey",                     "turkiye" },
+            new[] { "Swaziland",                  "eswatini" },
+            new[] { "Holland",                    "netherlands" },
             new[] { "Hope (Refugees)  (hope)",    "hope" },
             new[] { "Kazakh",                     null },        // 打一半，不准猜
             new[] { "Nowhereland",                null },

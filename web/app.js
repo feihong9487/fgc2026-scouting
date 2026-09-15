@@ -222,7 +222,8 @@ function openPicker(cb,opt){ opt=opt||{};
   const g=sh.querySelector('#pkG'), q=sh.querySelector('#pkQ');
   const card=(slug,name,flag,sub,cls)=>`<button class="c ${cls||''}" data-v="${esc(slug)}"><span class="fl">${flag}</span><span>${esc(name)}<span class="zh">${esc(sub||'')}</span></span></button>`;
   const render=()=>{ const s=q.value.trim().toLowerCase();
-    const hit=NATIONS.filter(n=>!s||n.name.toLowerCase().includes(s)||n.slug.includes(s)||(n.zh||'').includes(s));
+    const hit=NATIONS.filter(n=>!s||n.name.toLowerCase().includes(s)||n.slug.includes(s)||(n.zh||'').includes(s)
+      ||(n.alt||[]).some(a=>a.toLowerCase().includes(s)));   // 別名：打 Ivory Coast 也要找得到 Cote d'Ivoire
     let h='';
     if(!s&&DB){ const rec=[...DB.cfg.recent].filter((v,i,a)=>v&&a.indexOf(v)===i&&(NMAP[v]||DB.cfg.custom[v])).slice(0,8);
       if(rec.length){ h+=`<div class="lab">${esc(t('k.recent'))}</div>`+rec.map(sl=>card(sl,nName(sl),nFlag(sl),nSub(sl),'rec')).join('')+`<div class="lab">${esc(t('k.all'))}</div>`; } }
