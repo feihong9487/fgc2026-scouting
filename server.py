@@ -855,6 +855,10 @@ def main():
     ap.add_argument("--gen-claims", action="store_true",
                     help="替所有還沒認領的國家產生認領碼，印出清單後結束（清單請私下發，不要貼群組）")
     ap.add_argument("--show-claim", metavar="SLUG", help="印出某一國目前的認領碼")
+    ap.add_argument("--rotate-unused", action="store_true",
+                    help="把所有還沒用掉的認領碼全部換新（外流時用，已認領的帳號不受影響）")
+    ap.add_argument("--claim-status", action="store_true",
+                    help="列出每一國的狀態（claimed / ready / none），給工具讀的")
     ap.add_argument("--claim-link", metavar="SLUG",
                     help="印出可以直接私訊給該隊的一鍵認領連結")
     ap.add_argument("--base-url", default="https://fgc-scout.duckdns.org/",
@@ -924,6 +928,32 @@ def main():
             print(f"[info] {slug} 的認領碼已經被用掉了（{c.get('usedAt','')} from {c.get('ip','')}）")
         else:
             print(f"{slug} 的認領碼：{c['code']}")
+        return
+
+    if a.rotate_unused:
+        n = 0
+        for slug in sorted(set(list(CLAIM) + (list(NATION_SLUGS) if NATION_SLUGS else []))):
+            if slug in ACC:
+                continue                     # 已經認領的不動，他們用的是自己的密碼
+            c = CLAIM.get(slug)
+            if c and c.get("used"):
+                continue                     # 用掉的碼本來就沒用了
+            issue_claim(slug)
+            n += 1
+        audit("rotate-unused", "", "cli", note="%d codes" % n)
+        print("[ok] 換掉了 %d 張還沒用掉的認領碼。之前發出去但還沒被用的連結全部失效。" % n)
+        print("     已經認領的隊伍不受影響，照樣用自己的密碼登入。")
+        return
+
+    if a.claim_status:
+        pool = sorted(NATION_SLUGS) if NATION_SLUGS else sorted(set(list(ACC) + list(CLAIM)))
+        for slug in pool:
+            if slug in ACC:
+                st = "claimed"
+            else:
+                c = CLAIM.get(slug)
+                st = "ready" if (c and not c.get("used")) else "none"
+            print("%s	%s" % (slug, st))
         return
 
     if a.claim_link:

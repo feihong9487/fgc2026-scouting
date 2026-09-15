@@ -50,8 +50,9 @@ def main():
            GEN]
     p = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
     if p.returncode != 0:
-        print(p.stdout)
-        print(p.stderr)
+        out = (p.stdout or '') + (p.stderr or '')
+        sys.stdout.buffer.write(out.encode('utf-8', 'replace'))
+        sys.stdout.flush()
         sys.exit('編譯失敗')
     os.remove(GEN)
     print('好了：%s  (%d KB，%d 個國家)' % (EXE, os.path.getsize(EXE) // 1024, len(rows)))
