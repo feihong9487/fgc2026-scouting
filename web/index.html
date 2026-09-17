@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="fgc2026-192.png">
 <link rel="apple-touch-icon" href="fgc2026-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="app.css?v=29">
+<link rel="stylesheet" href="app.css?v=30">
 </head>
 <body>
 <div id="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><div class="noise"></div>
@@ -44,6 +44,9 @@
       <button class="btn pri wide" id="aGo" data-i18n="auth.signin">Sign in</button>
       <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. First time here? The organizer gives your team a claim code.</p>
       <p class="err" id="aErr" hidden></p>
+      <div class="or"><span data-i18n="auth.or">or</span></div>
+      <button class="btn wide" id="aGuest" data-i18n="auth.guest">👀 Just looking — continue as guest</button>
+      <p class="note" data-i18n="auth.guestNote">Guests can see rankings, schedules and every published robot, scout on this phone and use the calculator. Nothing is saved to the server.</p>
     </div>
 
     <div id="authClaim" class="auth-view" hidden>
@@ -293,6 +296,7 @@
   <div class="card">
     <h2><span class="ic">📢</span><span data-i18n="r.title">Our robot</span> <span class="pill" data-i18n="r.shared">shared</span><span class="zh" data-hint="r.title"></span></h2>
     <p class="note" data-i18n="r.intro">Fill this in once and publish — every signed-in team can read it in their Pit tab, and you can read theirs. Honest numbers help partners plan the huddle.</p>
+    <div class="warn" id="rGuest" hidden><span data-i18n="r.guestBanner">You are a guest: this page stays on your phone and is never published. Sign in with your team's claim code to share your robot.</span></div>
     <div class="f" style="margin-top:12px"><button class="tg" id="rPub" aria-pressed="false"><span data-i18n="r.publish">Publish to all teams</span> <span class="zh" data-hint="r.publish"></span></button></div>
     <div class="warn nudge" id="rNudge" hidden>
       <span data-i18n="r.nudge">Saved — but only your team can see it. Publish it so the teams you play with can plan around your robot, and you can read theirs.</span>
@@ -444,15 +448,15 @@
   <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg><span data-i18n="nav.data">Data</span><span class="zh" data-hint="nav.data"></span></button>
 </nav>
 
-<script src="nations.js?v=29"></script>
-<script src="i18n.js?v=29"></script>
-<script src="i18n2.js?v=29"></script>
-<script src="i18n3.js?v=29"></script>
-<script src="i18n4.js?v=29"></script>
-<script src="i18n5.js?v=29"></script>
-<script src="i18n6.js?v=29"></script>
-<script src="i18n7.js?v=29"></script>
-<script src="ranks.js?v=29"></script>
-<script src="app.js?v=29"></script>
+<script src="nations.js?v=30"></script>
+<script src="i18n.js?v=30"></script>
+<script src="i18n2.js?v=30"></script>
+<script src="i18n3.js?v=30"></script>
+<script src="i18n4.js?v=30"></script>
+<script src="i18n5.js?v=30"></script>
+<script src="i18n6.js?v=30"></script>
+<script src="i18n7.js?v=30"></script>
+<script src="ranks.js?v=30"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>

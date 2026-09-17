@@ -78,6 +78,13 @@ AUDIT_LOG = os.path.join(DATA_DIR, "audit.log")  # 所有登入/改密碼事件�
 CLAIM_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # 拿掉容易看錯的 I O 0 1
 
 DEFAULT_PASSWORD = "password"   # 只有舊帳號還吃這個；新帳號一律走認領碼
+
+# 訪客模式：給評審和當天才想用的隊伍。不用認領碼就能登入，只能看官方排名／賽程／各隊公開的機器介紹、
+# 在自己手機上做 scouting、用計分機；不能發布機器介紹、不能上傳照片、不能把任何東西存到伺服器。
+# token 是固定的（從 data/guest.secret 推導），所以不佔 sessions.json，重開伺服器也不會失效。
+GUEST_SLUG = "guest"
+GUEST_SECRET_FILE = os.path.join(DATA_DIR, "guest.secret")
+GUEST_TOKEN = ""
 SESSION_DAYS = 45
 PBKDF2_ITER = 120_000
 
@@ -364,8 +371,29 @@ def new_session(slug):
     return tok
 
 
+def guest_token():
+    """固定的訪客 token；第一次呼叫時產生 data/guest.secret。"""
+    global GUEST_TOKEN
+    if GUEST_TOKEN:
+        return GUEST_TOKEN
+    os.makedirs(DATA_DIR, exist_ok=True)
+    try:
+        with open(GUEST_SECRET_FILE, "r", encoding="utf-8") as f:
+            sec = f.read().strip()
+    except OSError:
+        sec = ""
+    if not sec:
+        sec = secrets.token_hex(32)
+        with open(GUEST_SECRET_FILE, "w", encoding="utf-8") as f:
+            f.write(sec)
+    GUEST_TOKEN = "guest." + hmac.new(sec.encode(), b"fgc2026-guest", hashlib.sha256).hexdigest()[:40]
+    return GUEST_TOKEN
+
+
 def session_team(tok):
     """呼叫前必須持有 LOCK。"""
+    if tok and tok == guest_token():
+        return GUEST_SLUG
     s = SESS.get(tok or "")
     if not s:
         return None
@@ -525,6 +553,15 @@ class H(BaseHTTPRequestHandler):
             return None
         return d
 
+    def _team_rw(self):
+        """要寫伺服器的路由用這個：訪客一律 403。"""
+        slug = self._team()
+        if slug == GUEST_SLUG:
+            self._json(403, {"error": "訪客模式只能看，不能存到伺服器 / Guest mode is read-only — "
+                                      "sign in with your team's claim code to save or publish", "guest": True})
+            return None
+        return slug
+
     def _team(self):
         """從 X-Token 取得隊伍；失敗時已回 401。"""
         tok = self.headers.get("X-Token", "")
@@ -584,10 +621,16 @@ class H(BaseHTTPRequestHandler):
                 info = {"ok": True, "teams": len(os.listdir(TEAM_DIR)) if os.path.isdir(TEAM_DIR) else 0,
                         "accounts": len(ACC), "sessions": len(SESS)}
             return self._json(200, info)
+        if p == "/api/guest":
+            # 訪客登入：不用密碼、不用認領碼。只記一筆 audit 方便看有多少人用過。
+            audit("login-guest", GUEST_SLUG, self._ip(), self.headers.get("User-Agent", ""))
+            return self._json(200, {"token": guest_token(), "team": GUEST_SLUG, "guest": True, "mustChange": False})
         if p == "/api/me":
             slug = self._team()
             if not slug:
                 return
+            if slug == GUEST_SLUG:
+                return self._json(200, {"team": GUEST_SLUG, "guest": True, "mustChange": False, "lastLogin": {}, "prevLogin": {}})
             with LOCK:
                 _reload_auth()
                 a = ACC.get(slug, {})
@@ -599,6 +642,8 @@ class H(BaseHTTPRequestHandler):
             slug = self._team()
             if not slug:
                 return
+            if slug == GUEST_SLUG:
+                return self._json(200, blank())
             with LOCK:
                 raw = json.dumps(team_state(slug), ensure_ascii=False).encode("utf-8")
             return self._json(200, raw=raw)
@@ -626,6 +671,9 @@ class H(BaseHTTPRequestHandler):
 
         if p in ("/install", "/install/"):
             return self._static("/install.html")
+        if p in ("/guest", "/guest/"):
+            # 海報 QR 用這個網址；轉到首頁帶 ?guest=1，讓 app 自動以訪客登入
+            return self._send(302, b"", extra={"Location": "/?guest=1", "Cache-Control": "no-store"})
 
         if p == "/favicon.ico":
             return self._static("/fgc2026-64.png")
@@ -721,7 +769,7 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, {"ok": True})
 
         if p == "/api/password":
-            slug = self._team()
+            slug = self._team_rw()
             if not slug:
                 return
             d = self._body()
@@ -744,7 +792,7 @@ class H(BaseHTTPRequestHandler):
 
         if p == "/api/sync":
             # 客戶端沒有新資料時只送 {"rev": n} 當作輪詢；伺服器也沒變就回 nochange（省頻寬）
-            slug = self._team()
+            slug = self._team_rw()
             if not slug:
                 return
             d = self._body()
@@ -768,7 +816,7 @@ class H(BaseHTTPRequestHandler):
 
         if p == "/api/profile":
             # 自己隊的機器介紹（只能改自己的）
-            slug = self._team()
+            slug = self._team_rw()
             if not slug:
                 return
             d = self._body()
@@ -787,7 +835,7 @@ class H(BaseHTTPRequestHandler):
 
         if p == "/api/photo":
             # 上傳自己隊的機器照片（前端已縮到 ≤1280px 的 JPEG，base64 data URL）
-            slug = self._team()
+            slug = self._team_rw()
             if not slug:
                 return
             d = self._body()
@@ -819,7 +867,7 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, {"url": url, "photos": photos})
 
         if p == "/api/photo/delete":
-            slug = self._team()
+            slug = self._team_rw()
             if not slug:
                 return
             d = self._body()

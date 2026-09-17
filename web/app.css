@@ -585,3 +585,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 /* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
 .seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}
+
+/* 登入頁「或」分隔線（訪客按鈕上方） */
+.or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}

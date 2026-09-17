@@ -55,14 +55,18 @@ function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
 
 /* ---------- data (per signed-in team) ---------- */
-const AUTH = {token:'',team:'',offline:false};
+const AUTH = {token:'',team:'',offline:false,guest:false};
+/* 訪客（評審／當天才想用的隊伍）：能看排名、賽程、各隊公開資料，能在自己手機上 scouting 和用計分機；
+   不能發布機器介紹、不能上傳照片、不能存任何東西到伺服器。本機檔案模式也一樣不能寫伺服器。 */
+const RO = ()=>AUTH.offline||AUTH.guest;
+const GUEST='guest';
 const SYNC={on:false,busy:false,dirty:true,rev:-1,lastPoll:0,POLL:30000,last:{k:'',c:'',extra:''}};
 let DB = null, K = '';
-function nName(s){ if(NMAP[s]) return NMAP[s].name; if(DB&&DB.cfg.custom&&DB.cfg.custom[s]) return DB.cfg.custom[s]; return s||''; }
+function nName(s){ if(s===GUEST) return t('auth.guestName'); if(NMAP[s]) return NMAP[s].name; if(DB&&DB.cfg.custom&&DB.cfg.custom[s]) return DB.cfg.custom[s]; return s||''; }
 function nZh(s){ return NMAP[s]?(NMAP[s].zh||''):''; }
 function nSub(s){ return LANG.startsWith('zh')?nZh(s):''; }
 /* flag as <img> (flags/<cc>.svg) when served over http — emoji flags don't render on Windows; emoji fallback offline */
-function nFlag(s){ const n=NMAP[s]; if(!n) return s?'🏳️':'🌍'; return (HTTP&&n.cc)?`<img class="flag" src="flags/${n.cc}.svg" alt="${n.flag}" loading="lazy">`:n.flag; }
+function nFlag(s){ if(s===GUEST) return '👀'; const n=NMAP[s]; if(!n) return s?'🏳️':'🌍'; return (HTTP&&n.cc)?`<img class="flag" src="flags/${n.cc}.svg" alt="${n.flag}" loading="lazy">`:n.flag; }
 function nFlagTxt(s){ return NMAP[s]?NMAP[s].flag:(s?'🏳️':'🌍'); }
 function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cfg.theme||'auto'; d.cfg.event=d.cfg.event||'FGC 2026 Igniting Innovation';
   d.cfg.recent=Array.isArray(d.cfg.recent)?d.cfg.recent:[]; d.cfg.fx=d.cfg.fx||'auto'; d.cfg.custom=(d.cfg.custom&&typeof d.cfg.custom==='object')?d.cfg.custom:{};
@@ -100,14 +104,15 @@ function boot(team){
   applyTheme(); applyFX(); mountSlots(); applyLang(); initRanks(); mLoad(); scLoad(); renderPublished(); renderMine(); autoSched(); renderMList(); refreshData(); calc();
   /* 賽程要在任何分頁都能自己出現，所以開機就抓一次官方資料 */
   if(!AUTH.offline && typeof ranksFetch==='function') setTimeout(()=>ranksFetch(true),400);
-  if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
+  if(AUTH.guest){ SYNC.on=false; setSync('s.guest'); loadProfiles(); }
+  else if(!AUTH.offline){ SYNC.on=true; SYNC.rev=-1; SYNC.dirty=true; SYNC.lastPoll=0; push(true); loadProfiles(); } else setSync('s.local');
 }
 $('aTeam').onclick=()=>openPicker(sl=>setCbtn($('aTeam'),sl,t('auth.selectCountry')),{custom:false});
 $('aTeamOff').onclick=()=>openPicker(sl=>setCbtn($('aTeamOff'),sl,t('auth.selectCountry')),{custom:false});
 $('aEye').onclick=()=>{ const i=$('aPw'); i.type=i.type==='password'?'text':'password'; };
 $('aPw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('aGo').click(); });
 function afterLogin(d){
-  AUTH.token=d.token; AUTH.team=d.team;
+  AUTH.token=d.token; AUTH.team=d.team; AUTH.guest=!!d.guest||d.team===GUEST;
   try{ localStorage.setItem('fgc.auth',JSON.stringify({token:d.token,team:d.team})); }catch(e){}
   LAST_LOGIN=d.prevLogin||null;
   $('aPw').value=''; haptic(18);
@@ -154,6 +159,11 @@ $('aSet').onclick=async()=>{
   finally{ $('aSet').disabled=false; }
 };
 $('aBack').onclick=()=>{ api('/api/logout').catch(()=>{}); signedOut(); };
+async function guestLogin(){ showErr($('aErr'),''); $('aGuest').disabled=true;
+  try{ afterLogin(await api('/api/guest')); }
+  catch(e){ showErr($('aErr'),e.message); }
+  finally{ $('aGuest').disabled=false; } }
+$('aGuest').onclick=guestLogin;
 $('aGoOff').onclick=()=>{ const tm=$('aTeamOff').dataset.v; if(!tm){ flash($('aTeamOff')); return; } boot(tm); };
 $('langBtn').onclick=()=>{
   const {sh,close}=openSheet(`<div class="hd"><b style="font-size:17px">🌐 ${esc(t('d.language'))}</b><button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>
@@ -161,19 +171,19 @@ $('langBtn').onclick=()=>{
   sh.querySelectorAll('.langgrid button').forEach(b=>b.onclick=()=>{ setLang(b.dataset.l); close(); haptic(12); }); };
 $('teamBtn').onclick=()=>{
   const {sh,close}=openSheet(`<div class="hd"><b style="font-size:17px">${nFlag(AUTH.team)} ${esc(nName(AUTH.team))}</b><button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>
-    <div class="menu">${AUTH.offline?`<p class="note">${esc(t('menu.localNote'))}</p>`:`
+    <div class="menu">${AUTH.guest?`<p class="note">${esc(t('menu.guestNote'))}</p>`:AUTH.offline?`<p class="note">${esc(t('menu.localNote'))}</p>`:`
       <div class="f"><label>${esc(t('menu.changePw'))}</label>
         <input type="password" id="cpCur" placeholder="${esc(t('menu.curPw'))}" autocomplete="current-password" style="margin-bottom:8px">
         <input type="password" id="cpNew" placeholder="${esc(t('menu.newPw'))}" autocomplete="new-password"></div>
       <button class="btn wide" id="cpGo">${esc(t('menu.update'))}</button><p class="err" id="cpErr" hidden></p>`}
       <div class="f" style="margin-top:14px"><label>${esc(t('d.language'))}</label><select class="langsel"></select></div>
-      <button class="btn dgr wide" id="soGo" style="margin-top:12px">${esc(AUTH.offline?t('menu.switchTeam'):t('menu.signout'))}</button>
-      <p class="note" style="margin-top:8px">${esc(t('menu.note'))}</p></div>`);
+      <button class="btn dgr wide" id="soGo" style="margin-top:12px">${esc(AUTH.offline?t('menu.switchTeam'):AUTH.guest?t('menu.guestSignin'):t('menu.signout'))}</button>
+      ${AUTH.guest?'':`<p class="note" style="margin-top:8px">${esc(t('menu.note'))}</p>`}</div>`);
   const sel=sh.querySelector('select.langsel'); META.forEach(([c,n])=>{ const o=document.createElement('option'); o.value=c; o.textContent=n; sel.appendChild(o); }); sel.value=LANG;
   const cp=sh.querySelector('#cpGo'); if(cp) cp.onclick=async()=>{ const c=sh.querySelector('#cpCur').value,n=sh.querySelector('#cpNew').value; const er=sh.querySelector('#cpErr');
     if(n.length<4){ showErr(er,t('auth.errShort')); return; } cp.disabled=true;
     try{ await api('/api/password',{current:c,new:n}); toast(t('auth.pwSet'),'ok'); close(); }catch(e){ showErr(er,e.message); } finally{ cp.disabled=false; } };
-  sh.querySelector('#soGo').onclick=()=>{ close(); saveNow(); if(AUTH.offline){ DB=null; showAuth('authOffline'); } else { api('/api/logout').catch(()=>{}); signedOut(); } };
+  sh.querySelector('#soGo').onclick=()=>{ close(); saveNow(); if(AUTH.offline){ DB=null; showAuth('authOffline'); } else if(AUTH.guest){ AUTH.guest=false; DB=null; signedOut(); } else { api('/api/logout').catch(()=>{}); signedOut(); } };
 };
 
 /* ---------- tabs ---------- */
@@ -718,7 +728,7 @@ function rtouch(k,v){ const r=robot(); r[k]=v; r.dirty=true; save(); updateRobot
 function updateRobotBtn(){ const r=robot(); $('rSave').textContent=r.published?t('r.savePub'):t('r.savePriv');
   $('rStatus').textContent=r.dirty?t('r.unsaved'):(r.ts?t('r.savedAt')+' '+fmtDT(r.ts)+' · '+(r.published?t('r.visible'):t('r.private')):t('r.notSaved'));
   /* filled it in but never flipped the switch — say so loudly instead of leaving it private by accident */
-  $('rNudge').hidden=!(r.ts&&!r.published&&!AUTH.offline); }
+  $('rNudge').hidden=!(r.ts&&!r.published&&!RO()); $('rGuest').hidden=!AUTH.guest; $('rPub').parentElement.hidden=!!AUTH.guest; }
 $('rNudgeGo').onclick=()=>{ const r=robot(); r.published=true; r.dirty=true; $('rPub').setAttribute('aria-pressed','true'); saveProfile(true); };
 function robotLoad(){ const r=robot(); mountMap('rMapWrap','rPos');
   segInit($('rSup'),r.sup,v=>rtouch('sup',v)); segInit($('rPort'),r.port,v=>rtouch('port',v)); segInit($('rClimb'),r.climb,v=>rtouch('climb',v));
@@ -735,20 +745,20 @@ function renderPhotos(){ const r=robot(); const ph=(PROFILES[AUTH.team]&&PROFILE
   $('rPhotos').querySelectorAll('.x').forEach(b=>b.onclick=async()=>{ if(!confirm(t('r.delPhoto'))) return;
     try{ const d=await api('/api/photo/delete',{url:b.dataset.u}); (PROFILES[AUTH.team]||(PROFILES[AUTH.team]={})).photos=d.photos; r.photos=d.photos; saveNow(); renderPhotos(); toast(t('r.deleted'),'ok'); }
     catch(e){ toast(e.message,'err'); } });
-  $('rFileBtn').classList.toggle('dis',ph.length>=4||AUTH.offline); }
+  $('rFileBtn').classList.toggle('dis',ph.length>=4||RO()); }
 function shrink(file){ return new Promise((res,rej)=>{ const img=new Image(); const u=URL.createObjectURL(file);
   img.onload=()=>{ const s=Math.min(1,1280/Math.max(img.width,img.height)); const w=Math.round(img.width*s),h=Math.round(img.height*s);
     const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg',.82)); };
   img.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error('Cannot read this image')); }; img.src=u; }); }
 $('rFile').onchange=async e=>{ const files=[...(e.target.files||[])]; e.target.value=''; if(!files.length) return;
-  if(AUTH.offline){ toast(t('r.localCant'),'err'); return; }
+  if(RO()){ toast(t(AUTH.guest?'r.guestCant':'r.localCant'),'err'); return; }
   for(const f of files){ const r=robot(); if((r.photos||[]).length>=4){ toast(t('r.max'),'err'); break; }
     try{ toast(t('r.uploading')); const data=await shrink(f); const d=await api('/api/photo',{data}); r.photos=d.photos; (PROFILES[AUTH.team]||(PROFILES[AUTH.team]={})).photos=d.photos; saveNow(); renderPhotos(); toast(t('r.added'),'ok'); haptic(14); }
     catch(err){ toast(err.message,'err'); } } };
 { const num={rCap:'cap',rEmpty:'empty',rClimbSec:'climbSec'}; Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>rtouch(k,parseInt(e.target.value,10)||0));
   $('rDesc').oninput=e=>rtouch('desc',e.target.value); }
 async function saveProfile(quiet){ const r=robot();
-  if(AUTH.offline){ r.ts=now(); r.dirty=false; saveNow(); updateRobotBtn(); toast(t('r.localSaved'),'ok'); return; }
+  if(RO()){ r.published=false; $('rPub').setAttribute('aria-pressed','false'); r.ts=now(); r.dirty=false; saveNow(); updateRobotBtn(); toast(t(AUTH.guest?'r.guestSaved':'r.localSaved'),'ok'); return; }
   $('rSave').disabled=true;
   try{ const d=await api('/api/profile',r); Object.assign(r,d); r.dirty=false; saveNow(); PROFILES[AUTH.team]=d; updateRobotBtn(); haptic(18);
     toast(d.published?t('r.published'):t('r.savedTeam'),'ok'); if(d.published) sparkBurst($('rSave'),14); }
@@ -960,7 +970,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v29';
+const APP_VER='v30';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
@@ -991,13 +1001,19 @@ function claimFromURL(){
   applyLang(); applyFX();
   if(!HTTP&&$('cInstall')) $('cInstall').hidden=true;
   const invite=claimFromURL();
+  const wantGuest=/[?&]guest=1/.test(location.search);
+  if(wantGuest){ try{ history.replaceState(null,'','./'); }catch(e){} }
   const last=(()=>{ try{ return localStorage.getItem('fgc.team')||''; }catch(e){ return ''; } })();
   if(!HTTP){ AUTH.offline=true; setSync('s.local'); if(last&&NMAP[last]) setCbtn($('aTeamOff'),last,t('auth.selectCountry')); showAuth('authOffline'); return; }
   setSync('s.connecting');
   try{ const a=JSON.parse(localStorage.getItem('fgc.auth')||'null');
-    if(a&&a.token){ AUTH.token=a.token; const me=await api('/api/me'); AUTH.team=me.team;
+    if(a&&a.token){ AUTH.token=a.token; const me=await api('/api/me'); AUTH.team=me.team; AUTH.guest=!!me.guest||me.team===GUEST;
       if(me.mustChange){ showAuth('authSet'); } else boot(me.team); return; } }
   catch(e){}
+  if(wantGuest){
+    /* 海報 QR：fgc-scout.duckdns.org/guest → 這裡。沒登入過就直接以訪客進入 */
+    showAuth('authLogin'); await guestLogin(); return;
+  }
   if(invite){
     CLAIMING=invite.team;
     setCbtn($('aTeam'),invite.team,t('auth.selectCountry'));
