@@ -295,11 +295,29 @@ def new_claim_code():
     return "-".join("".join(secrets.choice(CLAIM_ALPHA) for _ in range(4)) for _ in range(2))
 
 
+PREV_KEEP = 6       # 每國最多記幾張被換掉的舊碼，夠涵蓋一場比賽裡的換碼次數
+
+
+def _norm_code(code):
+    return re.sub(r"[^A-Za-z0-9]", "", str(code or "")).upper()
+
+
 def issue_claim(slug):
-    """發一張新的認領碼給某國並回傳。呼叫前必須持有 LOCK。"""
+    """發一張新的認領碼給某國並回傳。呼叫前必須持有 LOCK。
+
+    舊碼要留著（只留正規化後的字串，反正已經作廢了）。--gen-claims / --rotate-unused
+    換碼的那一刻，之前私訊出去的連結就全部失效了，但拿到連結的隊伍完全看不出來：
+    他們點下去只會看到「認領碼不正確」，跟打錯字是同一句話，於是一直重試。愛爾蘭就這樣
+    卡了三天。記著舊碼，check_claim 才有辦法回一句「這條連結過期了，去要新的」。
+    """
+    old = CLAIM.get(slug) or {}
+    prev = list(old.get("prev") or [])
+    if old.get("code") and not old.get("used"):
+        prev.append({"code": _norm_code(old["code"]), "issued": old.get("issued", ""),
+                     "replaced": _now()})
     code = new_claim_code()
     CLAIM[slug] = {"code": code, "used": False, "issued": _now(),
-                   "usedAt": "", "ip": ""}
+                   "usedAt": "", "ip": "", "prev": prev[-PREV_KEEP:]}
     _save(CLAIMS, CLAIM)
     return code
 
@@ -309,9 +327,26 @@ def check_claim(slug, code):
     c = CLAIM.get(slug)
     if not c or c.get("used"):
         return False
-    given = re.sub(r"[^A-Za-z0-9]", "", str(code or "")).upper()
-    want = re.sub(r"[^A-Za-z0-9]", "", c.get("code", "")).upper()
+    given = _norm_code(code)
+    want = _norm_code(c.get("code", ""))
     return bool(want) and hmac.compare_digest(given, want)
+
+
+def stale_claim(slug, code):
+    """這組碼是不是這一國「以前」的碼（被換掉的，或已經用過的那張）。
+
+    回傳 True 代表對方手上的連結是真的，只是過期了 —— 這跟打錯字要講不一樣的話。
+    """
+    c = CLAIM.get(slug)
+    if not c:
+        return False
+    given = _norm_code(code)
+    if not given:
+        return False
+    olds = [_norm_code(p.get("code", "")) for p in (c.get("prev") or [])]
+    if c.get("used"):
+        olds.append(_norm_code(c.get("code", "")))
+    return any(o and hmac.compare_digest(given, o) for o in olds)
 
 
 def burn_claim(slug, ip):
@@ -703,6 +738,12 @@ class H(BaseHTTPRequestHandler):
                                                      "Already claimed — sign in with your team password"})
                 if not check_claim(slug, code):
                     FAILS.setdefault(ip, []).append(time.time())
+                    # 碼是真的、只是被換掉了 → 要講「連結過期」，不然對方會一直重打同一串。
+                    if stale_claim(slug, code):
+                        audit("claim-stale", slug, ip, ua)
+                        return self._json(403, {"error":
+                            "這條連結已經失效，請向主辦方要一條新的 / "
+                            "This link has expired — ask the organizer for a new one"})
                     audit("claim-fail", slug, ip, ua)
                     return self._json(403, {"error": "認領碼不正確 / Wrong claim code"})
                 set_password(slug, pw)
@@ -857,6 +898,8 @@ def main():
     ap.add_argument("--show-claim", metavar="SLUG", help="印出某一國目前的認領碼")
     ap.add_argument("--rotate-unused", action="store_true",
                     help="把所有還沒用掉的認領碼全部換新（外流時用，已認領的帳號不受影響）")
+    ap.add_argument("--yes", action="store_true",
+                    help="不要問我，直接做（給 --rotate-unused 這種會波及所有隊伍的動作用）")
     ap.add_argument("--claim-status", action="store_true",
                     help="列出每一國的狀態（claimed / ready / none），給工具讀的")
     ap.add_argument("--claim-link", metavar="SLUG",
@@ -927,10 +970,31 @@ def main():
         elif c.get("used"):
             print(f"[info] {slug} 的認領碼已經被用掉了（{c.get('usedAt','')} from {c.get('ip','')}）")
         else:
-            print(f"{slug} 的認領碼：{c['code']}")
+            print(f"{slug} 的認領碼：{c['code']}（{c.get('issued','')} 發出）")
+            prev = c.get("prev") or []
+            if prev:
+                # 換過碼 = 之前私訊出去的連結已經失效。隊伍說「碼不對」時第一個要看這個。
+                print(f"[note] 這一國換過 {len(prev)} 次碼，最後一次 {prev[-1].get('replaced','')}。")
+                print("       如果他們手上的連結比這個時間早，那條已經失效了，重發一條給他們。")
         return
 
     if a.rotate_unused:
+        # 這行會讓「所有已經私訊出去、還沒被用掉的連結」一次全部失效，而隊伍那邊只會看到
+        # 登入失敗。9/15 它被連跑兩次、中間隔 13 分鐘，第二次把第一次剛發出去的連結也清掉了。
+        # 所以現在要明講後果並要人點頭；腳本裡用請加 --yes。
+        pend = [s for s in sorted(set(list(CLAIM) + (list(NATION_SLUGS) if NATION_SLUGS else [])))
+                if s not in ACC and not (CLAIM.get(s) or {}).get("used")]
+        if not a.yes:
+            print(f"[warn] 這會換掉 {len(pend)} 張還沒用掉的認領碼。")
+            print("       所有已經發出去、對方還沒點的連結都會失效，而且他們只會看到登入失敗。")
+            print("       確定要換（外流時才需要）請輸入 yes：", end="", flush=True)
+            try:
+                if input().strip().lower() != "yes":
+                    print("[info] 沒有換，什麼都沒動。")
+                    return
+            except EOFError:
+                print("\n[info] 沒有互動輸入可用，什麼都沒動。要在腳本裡跑請加 --yes。")
+                return
         n = 0
         for slug in sorted(set(list(CLAIM) + (list(NATION_SLUGS) if NATION_SLUGS else []))):
             if slug in ACC:
@@ -963,11 +1027,15 @@ def main():
             print(f"[info] {slug} 已經認領過了。要重發請用 --reset-password {slug}")
             return
         if not c or c.get("used"):
-            c = {"code": issue_claim(slug)}
+            issue_claim(slug)
+            c = CLAIM[slug]
             print(f"[info] {slug} 原本沒有可用的碼，已經發一張新的")
         base = a.base_url if a.base_url.endswith("/") else a.base_url + "/"
         link = f"{base}?claim={slug}&code={c['code']}"
         name = NATION_NAMES.get(slug, slug)
+        # 留一筆「這一國拿過連結」。沒有這筆紀錄，隊伍回報登入不了時，稽核檔裡只看得到
+        # claim-fail，看不出來他們手上那條是什麼時候發的、是不是已經被換碼洗掉了。
+        audit("claim-link", slug, "cli", note="issued %s" % c.get("issued", ""))
         print()
         print("把下面整段私訊給該隊（不要貼群組）：")
         print("-" * 64)
