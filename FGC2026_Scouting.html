@@ -600,6 +600,96 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 /* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
 .seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}
+
+/* ───────── MAP：全場示意圖 + 可拖曳的機器人圖標 ─────────
+   #mpField 的長寬比必須等於 SVG viewBox 的長寬比（8520 × 7300），不然 SVG 會置中留黑邊，
+   拖曳時「螢幕座標 → 場地毫米」那段換算就會整個偏掉。改 viewBox 記得一起改這裡。 */
+#mpField{position:relative;width:100%;aspect-ratio:8520/7300;touch-action:none;user-select:none;-webkit-user-select:none}
+.mp-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.mp-carpet{fill:color-mix(in srgb,var(--ink) 7%,var(--panel-solid));stroke:none}
+.mp-rail{fill:none;stroke:var(--line-2);stroke-width:70}
+.mp-stn{fill:color-mix(in srgb,var(--muted) 14%,transparent)}
+.mp-stn.r{fill:color-mix(in srgb,var(--red) 13%,transparent)}
+.mp-stn.b{fill:color-mix(in srgb,var(--blue) 13%,transparent)}
+.mp-zone{stroke-width:34;stroke-dasharray:150 110}
+.mp-zone.r{fill:var(--red-soft);stroke:color-mix(in srgb,var(--red) 60%,transparent)}
+.mp-zone.b{fill:var(--blue-soft);stroke:color-mix(in srgb,var(--blue) 60%,transparent)}
+.mp-sup{stroke:var(--line-2);stroke-width:26}
+.mp-sup.r{fill:color-mix(in srgb,var(--red) 30%,var(--panel-solid))}
+.mp-sup.b{fill:color-mix(in srgb,var(--blue) 30%,var(--panel-solid))}
+.mp-ext{fill:color-mix(in srgb,var(--ember,var(--muted)) 26%,var(--panel-solid));stroke:var(--line-2);stroke-width:26}
+.mp-shield{stroke:var(--line-2);stroke-width:26}
+.mp-shield.r{fill:color-mix(in srgb,var(--red) 20%,var(--panel-solid))}
+.mp-shield.b{fill:color-mix(in srgb,var(--blue) 20%,var(--panel-solid))}
+.mp-port{stroke-width:120;stroke-linecap:round}
+.mp-port.r{stroke:var(--red)}.mp-port.b{stroke:var(--blue)}
+.br{stroke-width:110;stroke-linecap:round}
+.br.z1{stroke:var(--z1)}.br.z2{stroke:var(--z2)}.br.z3{stroke:var(--z3)}
+.mp-t{fill:var(--muted);font-size:210px;font-weight:800;text-anchor:middle;dominant-baseline:middle;letter-spacing:-4px}
+.mp-t.sm{font-size:162px}
+.mp-t.xs{font-size:140px}
+.mp-t.stn{font-size:186px;font-weight:900}
+.mp-t.zn{font-size:168px;font-weight:900;fill:var(--ink);opacity:.55}
+.mp-bot{position:absolute;width:10.4%;aspect-ratio:1;min-width:38px;transform:translate(-50%,-50%);
+  border-radius:50%;border:2.5px solid #fff;padding:0;cursor:grab;touch-action:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;
+  box-shadow:0 5px 16px rgba(0,0,0,.34);transition:box-shadow var(--d),transform var(--d-s) var(--e)}
+.mp-bot.r{background:var(--red)}
+.mp-bot.b{background:var(--blue)}
+.mp-bot .n{color:#fff;font-weight:900;font-size:13px;letter-spacing:-.02em;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.mp-bot .f{line-height:0;font-size:12px}
+.mp-bot .f img.flag{height:9px;width:auto;border-radius:1.5px;display:block}
+.mp-bot.drag{cursor:grabbing;transform:translate(-50%,-50%) scale(1.16);box-shadow:0 12px 30px rgba(0,0,0,.45);z-index:3}
+.mp-bot:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.mp-side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mp-side .f label{display:flex;align-items:center;gap:6px}
+.mp-side .dot{width:11px;height:11px;border-radius:50%;flex:none}
+.mp-side .dot.r{background:var(--red)}.mp-side .dot.b{background:var(--blue)}
+#mpNames{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.mp-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;
+  border:1.5px solid var(--line-2);background:var(--panel)}
+.mp-chip.r{border-color:color-mix(in srgb,var(--red) 45%,var(--line-2));color:var(--red)}
+.mp-chip.b{border-color:color-mix(in srgb,var(--blue) 45%,var(--line-2));color:var(--blue)}
+.mp-chip b{color:var(--ink);font-weight:700}
+@media (max-width:360px){ .mp-bot .n{font-size:11px} .mp-t{font-size:240px} }
+
+/* 直向手機上場地被壓得很小（寬度就那麼多），提醒轉橫向；桌機和平板不會看到這行。 */
+.mp-rot{display:none}
+@media (orientation:portrait) and (max-width:620px){
+  .mp-rot{display:flex;gap:9px;align-items:center;margin:0 0 12px;padding:10px 13px;border-radius:13px;
+    border:1.5px dashed var(--line-2);background:color-mix(in srgb,var(--ember-soft,var(--line)) 70%,transparent);
+    color:var(--muted);font-size:12.5px;line-height:1.5}
+  .mp-rot .ic{font-size:19px;line-height:1;color:var(--ember);flex:none;
+    animation:mpRot 2.6s var(--e) infinite}
+  .mp-rot .zh{display:block;font-size:11.5px;opacity:.8}
+}
+@keyframes mpRot{0%,62%{transform:rotate(0)}78%{transform:rotate(90deg)}100%{transform:rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){ .mp-rot .ic{animation:none} }
+/* 轉成橫向之後：高度才是瓶頸，把場地縮到剛好一屏，不用捲動就能整張看完。 */
+@media (orientation:landscape) and (max-height:620px){
+  #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 118px);height:calc(100dvh - 118px)}
+  #tab-map .intro{display:none}
+}
+
+/* 全螢幕：把場地撐到整個畫面。這張圖接近正方形，所以真正決定大小的是螢幕的短邊 ——
+   一般排版下短邊被導覽列和卡片邊距吃掉，全螢幕才拿得回來，橫向也才真的比直向大。 */
+.mp-exp{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border-radius:50%;
+  border:1.5px solid var(--line-2);background:var(--panel);color:var(--muted);font-size:15px;line-height:1;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform var(--d-s) var(--e),color var(--d-s),border-color var(--d-s)}
+.mp-exp:active{transform:scale(.9)}
+.mp-exp:hover{color:var(--ink);border-color:var(--line-2)}
+body.mp-full{overflow:hidden}
+body.mp-full header,body.mp-full nav,body.mp-full footer,body.mp-full #mFab,
+body.mp-full #tab-map .intro,body.mp-full #tab-map .card:not(.mp-stage),
+body.mp-full #mpFoot,body.mp-full #mpCtl,body.mp-full .mp-rot{display:none}
+body.mp-full #tab-map .mp-stage{position:fixed;inset:0;z-index:50;margin:0;padding:6px;border:0;border-radius:0;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:none;animation:none}
+body.mp-full #mpField{max-width:100%;margin:0;
+  width:min(100vw - 12px, calc((100vh - 12px) * 8520 / 7300));
+  width:min(100vw - 12px, calc((100dvh - 12px) * 8520 / 7300));
+  height:auto}
+body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right))}
 </style>
 </head>
 <body>
@@ -975,6 +1065,32 @@ svg.trend.dn polyline{stroke:var(--red)}
   </div>
 </section>
 
+<!-- ───────── MAP ───────── -->
+<section id="tab-map" hidden>
+  <div class="intro"><span class="ii">🗺️</span><div><b data-i18n="ab.map.t">…</b><p data-i18n="ab.map">…</p><span class="zh" data-hint="ab.map"></span></div></div>
+  <div class="card">
+    <div class="mp-side">
+      <div class="f"><label><span class="dot r"></span><span data-i18n="mp.red">Red robots</span></label>
+        <div class="seg n4" id="mpRN"><button data-v="0" data-c="gray">0</button><button data-v="1" data-c="R">1</button><button data-v="2" data-c="R">2</button><button data-v="3" data-c="R">3</button></div></div>
+      <div class="f"><label><span class="dot b"></span><span data-i18n="mp.blue">Blue robots</span></label>
+        <div class="seg n4" id="mpBN"><button data-v="0" data-c="gray">0</button><button data-v="1" data-c="B">1</button><button data-v="2" data-c="B">2</button><button data-v="3" data-c="B">3</button></div></div>
+    </div>
+    <p class="note" id="mpEmpty" style="margin:12px 0 0"><span data-i18n="mp.empty">Add robots above, then drag them on the field.</span> <span class="zh" data-hint="mp.empty"></span></p>
+    <div id="mpNames"></div>
+  </div>
+  <div class="card mp-stage">
+    <button class="mp-exp" id="mpExp" aria-label="Full screen">⛶</button>
+    <p class="mp-rot" id="mpRot"><span class="ic" aria-hidden="true">↻</span><span><span data-i18n="mp.rotate">Turn your phone sideways — the field gets much bigger.</span><span class="zh" data-hint="mp.rotate"></span></span></p>
+    <div id="mpField"></div>
+    <p class="note" id="mpFoot" style="margin:12px 0 0"><span data-i18n="mp.hint">Drag a robot to move it. Tap it to name the country or take it off.</span> <span class="zh" data-hint="mp.hint"></span></p>
+    <div class="row" id="mpCtl" style="margin-top:12px">
+      <button class="btn" id="mpReset" data-i18n="mp.reset">Reset positions</button>
+      <button class="btn dgr" id="mpClear" data-i18n="mp.clearAll">Clear field</button>
+    </div>
+  </div>
+  <p class="note" data-i18n="mp.scale">Field drawn to scale from the official drawings (7 m × 7 m). Robot icons are enlarged so they can be tapped; BRACE zones are shown as equal thirds.</p>
+</section>
+
 <!-- ───────── DATA ───────── -->
 <section id="tab-data" hidden>
   <div class="intro"><span class="ii">📊</span><div><b data-i18n="ab.data.t">…</b><p data-i18n="ab.data">…</p><span class="zh" data-hint="ab.data"></span></div></div>
@@ -1028,6 +1144,7 @@ svg.trend.dn polyline{stroke:var(--red)}
   <button role="tab" data-tab="pit" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L13 18a2.1 2.1 0 0 1-3-3l6.7-6.7a4 4 0 0 0-5-5l2.6 2.6-1.4 1.4-2.6-2.6"/><path d="M4 20l3-3"/></svg><span data-i18n="sc.nav">Scout</span><span class="zh" data-hint="sc.nav"></span></button>
   <button role="tab" data-tab="teams" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg><span data-i18n="rk.nav">Ranks</span><span class="zh" data-hint="rk.nav"></span></button>
   <button role="tab" data-tab="robot" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 4h6M8 20v2M16 20v2"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="14" r="1.2"/></svg><span data-i18n="nav.robot">Robot</span><span class="zh" data-hint="nav.robot"></span></button>
+  <button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3z"/><path d="M9 3v15M15 6v15"/></svg><span data-i18n="nav.map">Map</span><span class="zh" data-hint="nav.map"></span></button>
   <button role="tab" data-tab="calc" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg><span data-i18n="nav.score">Score</span><span class="zh" data-hint="nav.score"></span></button>
   <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg><span data-i18n="nav.data">Data</span><span class="zh" data-hint="nav.data"></span></button>
 </nav>
@@ -2756,6 +2873,211 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 
 </script>
 <script>
+// FGC 2026 Scouting — translations part 8: the Map tab (field diagram + draggable robot markers).
+// Field labels (mp.ext / mp.sup / mp.shield / mp.start / mp.stnR / mp.stnB) are drawn inside the
+// SVG, so they are only translated where the term stays short; everywhere else the English term
+// from the game manual is used, which is what teams hear on the field anyway.
+(function(){
+const I = window.I18N, ADD = {
+en:{"nav.map":"Map","ab.map.t":"Strategy map","ab.map":"The full FGC 2026 field. Put up to three robots per alliance on it and drag them around while you talk through a match.",
+ "mp.rotate":"Turn your phone sideways and tap ⛶ — that is when the field is biggest.","mp.expand":"Full screen","mp.exit":"Leave full screen",
+ "mp.red":"Red robots","mp.blue":"Blue robots","mp.empty":"Add robots above, then drag them on the field.",
+ "mp.hint":"Drag a robot to move it. Tap it to name the country or take it off.",
+ "mp.scale":"Field drawn to scale from the official drawings (7 m × 7 m). Robot icons are enlarged so they can be tapped; BRACE zones are shown as equal thirds.",
+ "mp.reset":"Reset positions","mp.clearAll":"Clear field","mp.resetDone":"Robots back on their start zones",
+ "mp.setCountry":"Set country","mp.changeCountry":"Change country","mp.clearCountry":"Remove country","mp.toStart":"Back to start zone","mp.remove":"Take off the field",
+ "mp.sheetNote":"The map is shared with your whole team and syncs between your devices.",
+ "mp.ext":"EXTINGUISHER","mp.sup":"SUPPRESSION","mp.shield":"FIRE SHIELD","mp.start":"START","mp.stnR":"RED STATION","mp.stnB":"BLUE STATION"},
+
+"zh-Hant":{"nav.map":"地圖","ab.map.t":"戰術地圖","ab.map":"FGC 2026 全場場地。紅藍各最多放三台機器人，邊拖邊討論這場怎麼打。",
+ "mp.rotate":"手機轉成橫向再點 ⛶ 放大，場地最大。","mp.expand":"全螢幕","mp.exit":"離開全螢幕",
+ "mp.red":"紅方機器人","mp.blue":"藍方機器人","mp.empty":"先在上面加機器人，再到場地上拖。",
+ "mp.hint":"拖曳機器人可以移動；點一下可以指定國家或把它拿掉。",
+ "mp.scale":"場地照官方圖面等比例畫（7 公尺見方）。機器人圖標有放大，才點得到；支架的三個 ZONE 以等分表示。",
+ "mp.reset":"回到出發位置","mp.clearAll":"清空場地","mp.resetDone":"機器人都回到出發區了",
+ "mp.setCountry":"指定國家","mp.changeCountry":"換一個國家","mp.clearCountry":"取消國家","mp.toStart":"回出發區","mp.remove":"從場上移除",
+ "mp.sheetNote":"這張圖是整隊共用的，會同步到你所有裝置。",
+ "mp.ext":"滅火器","mp.sup":"抑制單元","mp.shield":"火盾","mp.start":"出發區","mp.stnR":"紅方聯盟站","mp.stnB":"藍方聯盟站"},
+
+"zh-Hans":{"nav.map":"地图","ab.map.t":"战术地图","ab.map":"FGC 2026 全场场地。红蓝各最多放三台机器人，边拖边讨论这场怎么打。",
+ "mp.rotate":"手机转成横向再点 ⛶ 放大，场地最大。","mp.expand":"全屏","mp.exit":"退出全屏",
+ "mp.red":"红方机器人","mp.blue":"蓝方机器人","mp.empty":"先在上面加机器人，再到场地上拖。",
+ "mp.hint":"拖动机器人可以移动；点一下可以指定国家或把它拿掉。",
+ "mp.scale":"场地照官方图纸等比例绘制（7 米见方）。机器人图标有放大，才点得到；支架的三个 ZONE 以等分表示。",
+ "mp.reset":"回到出发位置","mp.clearAll":"清空场地","mp.resetDone":"机器人都回到出发区了",
+ "mp.setCountry":"指定国家","mp.changeCountry":"换一个国家","mp.clearCountry":"取消国家","mp.toStart":"回出发区","mp.remove":"从场上移除",
+ "mp.sheetNote":"这张图是整队共用的，会同步到你所有设备。",
+ "mp.ext":"灭火器","mp.sup":"抑制单元","mp.shield":"火盾","mp.start":"出发区","mp.stnR":"红方联盟站","mp.stnB":"蓝方联盟站"},
+
+es:{"nav.map":"Mapa","ab.map.t":"Mapa de estrategia","ab.map":"El campo completo de la FGC 2026. Pon hasta tres robots por alianza y arrástralos mientras planean el partido.",
+ "mp.rotate":"Gira el teléfono y toca ⛶: así el campo se ve lo más grande posible.","mp.expand":"Pantalla completa","mp.exit":"Salir de pantalla completa",
+ "mp.red":"Robots rojos","mp.blue":"Robots azules","mp.empty":"Añade robots arriba y luego arrástralos por el campo.",
+ "mp.hint":"Arrastra un robot para moverlo. Tócalo para asignarle un país o quitarlo.",
+ "mp.scale":"Campo dibujado a escala según los planos oficiales (7 m × 7 m). Los iconos están agrandados para poder tocarlos; las ZONAS del BRACE se muestran en tercios iguales.",
+ "mp.reset":"Volver a la salida","mp.clearAll":"Vaciar el campo","mp.resetDone":"Robots de vuelta en su zona de salida",
+ "mp.setCountry":"Asignar país","mp.changeCountry":"Cambiar país","mp.clearCountry":"Quitar país","mp.toStart":"A la zona de salida","mp.remove":"Sacar del campo",
+ "mp.sheetNote":"El mapa es de todo el equipo y se sincroniza entre tus dispositivos.",
+ "mp.start":"SALIDA","mp.stnR":"ESTACIÓN ROJA","mp.stnB":"ESTACIÓN AZUL"},
+
+fr:{"nav.map":"Carte","ab.map.t":"Carte de stratégie","ab.map":"Le terrain complet de la FGC 2026. Placez jusqu'à trois robots par alliance et déplacez-les en discutant du match.",
+ "mp.rotate":"Mets ton téléphone à l'horizontale et touche ⛶ : c'est là que le terrain est le plus grand.","mp.expand":"Plein écran","mp.exit":"Quitter le plein écran",
+ "mp.red":"Robots rouges","mp.blue":"Robots bleus","mp.empty":"Ajoutez des robots ci-dessus, puis faites-les glisser sur le terrain.",
+ "mp.hint":"Faites glisser un robot pour le déplacer. Touchez-le pour lui donner un pays ou le retirer.",
+ "mp.scale":"Terrain à l'échelle d'après les plans officiels (7 m × 7 m). Les icônes sont agrandies pour rester cliquables ; les ZONES du BRACE sont affichées en tiers égaux.",
+ "mp.reset":"Retour au départ","mp.clearAll":"Vider le terrain","mp.resetDone":"Robots revenus dans leur zone de départ",
+ "mp.setCountry":"Choisir le pays","mp.changeCountry":"Changer de pays","mp.clearCountry":"Retirer le pays","mp.toStart":"Zone de départ","mp.remove":"Retirer du terrain",
+ "mp.sheetNote":"La carte est partagée avec toute l'équipe et synchronisée entre vos appareils.",
+ "mp.start":"DÉPART","mp.stnR":"STATION ROUGE","mp.stnB":"STATION BLEUE"},
+
+pt:{"nav.map":"Mapa","ab.map.t":"Mapa de estratégia","ab.map":"O campo completo da FGC 2026. Coloque até três robôs por aliança e arraste-os enquanto discutem a partida.",
+ "mp.rotate":"Roda o telemóvel e toca em ⛶ — é assim que o campo fica maior.","mp.expand":"Ecrã inteiro","mp.exit":"Sair do ecrã inteiro",
+ "mp.red":"Robôs vermelhos","mp.blue":"Robôs azuis","mp.empty":"Adicione robôs acima e depois arraste-os no campo.",
+ "mp.hint":"Arraste um robô para movê-lo. Toque nele para definir o país ou retirá-lo.",
+ "mp.scale":"Campo em escala a partir dos desenhos oficiais (7 m × 7 m). Os ícones estão ampliados para poderem ser tocados; as ZONAS do BRACE aparecem em terços iguais.",
+ "mp.reset":"Voltar ao início","mp.clearAll":"Limpar o campo","mp.resetDone":"Robôs de volta à zona de partida",
+ "mp.setCountry":"Definir país","mp.changeCountry":"Trocar país","mp.clearCountry":"Remover país","mp.toStart":"Zona de partida","mp.remove":"Tirar do campo",
+ "mp.sheetNote":"O mapa é de toda a equipa e sincroniza entre os teus dispositivos.",
+ "mp.start":"PARTIDA","mp.stnR":"ESTAÇÃO VERMELHA","mp.stnB":"ESTAÇÃO AZUL"},
+
+de:{"nav.map":"Karte","ab.map.t":"Strategiekarte","ab.map":"Das komplette FGC-2026-Feld. Stellt bis zu drei Roboter pro Allianz darauf und schiebt sie hin und her, während ihr das Match durchsprecht.",
+ "mp.rotate":"Handy quer drehen und ⛶ antippen — so ist das Feld am größten.","mp.expand":"Vollbild","mp.exit":"Vollbild verlassen",
+ "mp.red":"Rote Roboter","mp.blue":"Blaue Roboter","mp.empty":"Oben Roboter hinzufügen, dann auf dem Feld ziehen.",
+ "mp.hint":"Roboter ziehen zum Verschieben. Antippen, um ein Land zu setzen oder ihn herunterzunehmen.",
+ "mp.scale":"Feld maßstabsgetreu nach den offiziellen Zeichnungen (7 m × 7 m). Die Symbole sind vergrößert, damit man sie treffen kann; die BRACE-ZONEN sind als gleiche Drittel dargestellt.",
+ "mp.reset":"Zurück zum Start","mp.clearAll":"Feld leeren","mp.resetDone":"Roboter stehen wieder in der Startzone",
+ "mp.setCountry":"Land festlegen","mp.changeCountry":"Land ändern","mp.clearCountry":"Land entfernen","mp.toStart":"Zur Startzone","mp.remove":"Vom Feld nehmen",
+ "mp.sheetNote":"Die Karte gehört dem ganzen Team und wird zwischen euren Geräten synchronisiert.",
+ "mp.start":"START","mp.stnR":"ROTE STATION","mp.stnB":"BLAUE STATION"},
+
+it:{"nav.map":"Mappa","ab.map.t":"Mappa strategica","ab.map":"Il campo completo della FGC 2026. Metti fino a tre robot per alleanza e trascinali mentre discutete il match.",
+ "mp.rotate":"Gira il telefono e tocca ⛶: così il campo è al massimo.","mp.expand":"Schermo intero","mp.exit":"Esci da schermo intero",
+ "mp.red":"Robot rossi","mp.blue":"Robot blu","mp.empty":"Aggiungi i robot qui sopra, poi trascinali sul campo.",
+ "mp.hint":"Trascina un robot per spostarlo. Toccalo per assegnargli un paese o toglierlo.",
+ "mp.scale":"Campo in scala dai disegni ufficiali (7 m × 7 m). Le icone sono ingrandite per poterle toccare; le ZONE del BRACE sono mostrate in terzi uguali.",
+ "mp.reset":"Torna alla partenza","mp.clearAll":"Svuota il campo","mp.resetDone":"Robot di nuovo nella zona di partenza",
+ "mp.setCountry":"Imposta paese","mp.changeCountry":"Cambia paese","mp.clearCountry":"Togli il paese","mp.toStart":"Zona di partenza","mp.remove":"Togli dal campo",
+ "mp.sheetNote":"La mappa è di tutta la squadra e si sincronizza tra i tuoi dispositivi.",
+ "mp.start":"PARTENZA","mp.stnR":"STAZIONE ROSSA","mp.stnB":"STAZIONE BLU"},
+
+ru:{"nav.map":"Карта","ab.map.t":"Карта стратегии","ab.map":"Полное поле FGC 2026. Поставьте до трёх роботов на альянс и двигайте их, пока обсуждаете матч.",
+ "mp.rotate":"Поверните телефон и нажмите ⛶ — так поле будет самым большим.","mp.expand":"Во весь экран","mp.exit":"Выйти из полноэкранного режима",
+ "mp.red":"Красные роботы","mp.blue":"Синие роботы","mp.empty":"Добавьте роботов выше, затем перетаскивайте их по полю.",
+ "mp.hint":"Перетащите робота, чтобы передвинуть. Нажмите, чтобы указать страну или убрать его.",
+ "mp.scale":"Поле вычерчено в масштабе по официальным чертежам (7 м × 7 м). Значки увеличены, чтобы по ним можно было попасть; ЗОНЫ BRACE показаны равными третями.",
+ "mp.reset":"Вернуть на старт","mp.clearAll":"Очистить поле","mp.resetDone":"Роботы вернулись в стартовую зону",
+ "mp.setCountry":"Указать страну","mp.changeCountry":"Сменить страну","mp.clearCountry":"Убрать страну","mp.toStart":"В стартовую зону","mp.remove":"Убрать с поля",
+ "mp.sheetNote":"Карта общая для всей команды и синхронизируется между вашими устройствами.",
+ "mp.start":"СТАРТ","mp.stnR":"КРАСНАЯ СТАНЦИЯ","mp.stnB":"СИНЯЯ СТАНЦИЯ"},
+
+ja:{"nav.map":"マップ","ab.map.t":"作戦マップ","ab.map":"FGC 2026 のフィールド全体です。各アライアンス最大3台までロボットを置いて、動かしながら試合の作戦を話せます。",
+ "mp.rotate":"スマホを横向きにして ⛶ を押すと、フィールドが一番大きくなります。","mp.expand":"全画面","mp.exit":"全画面をやめる",
+ "mp.red":"赤のロボット","mp.blue":"青のロボット","mp.empty":"上でロボットを追加してから、フィールド上でドラッグしてください。",
+ "mp.hint":"ドラッグで移動、タップで国の割り当てや取り外しができます。",
+ "mp.scale":"フィールドは公式図面どおりの縮尺（7 m × 7 m）です。ロボットのアイコンはタップしやすいように拡大してあり、BRACE の ZONE は3等分で表示しています。",
+ "mp.reset":"スタート位置に戻す","mp.clearAll":"フィールドを空にする","mp.resetDone":"ロボットをスタートゾーンに戻しました",
+ "mp.setCountry":"国を設定","mp.changeCountry":"国を変更","mp.clearCountry":"国を外す","mp.toStart":"スタートゾーンへ","mp.remove":"フィールドから外す",
+ "mp.sheetNote":"このマップはチーム全員で共有され、端末間で同期されます。",
+ "mp.ext":"消火器","mp.sup":"抑制ユニット","mp.shield":"防火シールド","mp.start":"スタート","mp.stnR":"赤ステーション","mp.stnB":"青ステーション"},
+
+ko:{"nav.map":"맵","ab.map.t":"전략 맵","ab.map":"FGC 2026 전체 경기장입니다. 얼라이언스마다 최대 3대까지 로봇을 올려놓고 끌어가며 경기를 논의하세요.",
+ "mp.rotate":"휴대폰을 가로로 돌리고 ⛶ 를 누르면 경기장이 가장 커집니다.","mp.expand":"전체 화면","mp.exit":"전체 화면 끄기",
+ "mp.red":"레드 로봇","mp.blue":"블루 로봇","mp.empty":"위에서 로봇을 추가한 다음 경기장에서 끌어 보세요.",
+ "mp.hint":"로봇을 끌면 이동하고, 누르면 국가를 지정하거나 뺄 수 있습니다.",
+ "mp.scale":"경기장은 공식 도면 축척 그대로입니다(7 m × 7 m). 로봇 아이콘은 누르기 쉽도록 확대했고, BRACE의 ZONE은 3등분으로 표시했습니다.",
+ "mp.reset":"시작 위치로","mp.clearAll":"경기장 비우기","mp.resetDone":"로봇을 시작 구역으로 되돌렸습니다",
+ "mp.setCountry":"국가 지정","mp.changeCountry":"국가 변경","mp.clearCountry":"국가 해제","mp.toStart":"시작 구역으로","mp.remove":"경기장에서 빼기",
+ "mp.sheetNote":"이 맵은 팀 전체가 함께 쓰며 기기 간에 동기화됩니다.",
+ "mp.ext":"소화기","mp.sup":"진압 유닛","mp.shield":"방화막","mp.start":"시작","mp.stnR":"레드 스테이션","mp.stnB":"블루 스테이션"},
+
+vi:{"nav.map":"Bản đồ","ab.map.t":"Bản đồ chiến thuật","ab.map":"Toàn bộ sân thi đấu FGC 2026. Đặt tối đa ba robot cho mỗi liên minh rồi kéo chúng khi bàn chiến thuật.",
+ "mp.rotate":"Xoay ngang điện thoại rồi chạm ⛶ — sân sẽ to nhất.","mp.expand":"Toàn màn hình","mp.exit":"Thoát toàn màn hình",
+ "mp.red":"Robot đỏ","mp.blue":"Robot xanh","mp.empty":"Thêm robot ở trên rồi kéo chúng trên sân.",
+ "mp.hint":"Kéo robot để di chuyển. Chạm vào robot để đặt quốc gia hoặc lấy ra khỏi sân.",
+ "mp.scale":"Sân được vẽ đúng tỉ lệ theo bản vẽ chính thức (7 m × 7 m). Biểu tượng robot được phóng to cho dễ chạm; các ZONE của BRACE hiển thị chia ba bằng nhau.",
+ "mp.reset":"Về vị trí xuất phát","mp.clearAll":"Dọn sân","mp.resetDone":"Robot đã về khu xuất phát",
+ "mp.setCountry":"Đặt quốc gia","mp.changeCountry":"Đổi quốc gia","mp.clearCountry":"Bỏ quốc gia","mp.toStart":"Về khu xuất phát","mp.remove":"Lấy khỏi sân",
+ "mp.sheetNote":"Bản đồ dùng chung cho cả đội và được đồng bộ giữa các thiết bị của bạn.",
+ "mp.start":"XUẤT PHÁT"},
+
+id:{"nav.map":"Peta","ab.map.t":"Peta strategi","ab.map":"Lapangan FGC 2026 lengkap. Taruh maksimal tiga robot per aliansi lalu geser-geser sambil membahas pertandingan.",
+ "mp.rotate":"Putar ponsel ke mendatar lalu ketuk ⛶ — lapangan paling besar begitu.","mp.expand":"Layar penuh","mp.exit":"Keluar layar penuh",
+ "mp.red":"Robot merah","mp.blue":"Robot biru","mp.empty":"Tambahkan robot di atas, lalu geser di lapangan.",
+ "mp.hint":"Geser robot untuk memindahkannya. Ketuk untuk memberi negara atau mengeluarkannya.",
+ "mp.scale":"Lapangan digambar sesuai skala dari gambar resmi (7 m × 7 m). Ikon robot diperbesar agar bisa disentuh; ZONE pada BRACE ditampilkan sebagai tiga bagian sama besar.",
+ "mp.reset":"Kembali ke awal","mp.clearAll":"Kosongkan lapangan","mp.resetDone":"Robot kembali ke zona awal",
+ "mp.setCountry":"Pilih negara","mp.changeCountry":"Ganti negara","mp.clearCountry":"Hapus negara","mp.toStart":"Ke zona awal","mp.remove":"Keluarkan dari lapangan",
+ "mp.sheetNote":"Peta ini milik satu tim dan tersinkron antar perangkatmu.",
+ "mp.start":"MULAI"},
+
+tr:{"nav.map":"Harita","ab.map.t":"Strateji haritası","ab.map":"FGC 2026 sahasının tamamı. Her ittifak için en fazla üç robot koyup maçı konuşurken sürükleyin.",
+ "mp.rotate":"Telefonu yan çevirip ⛶ simgesine dokun — saha en büyük böyle olur.","mp.expand":"Tam ekran","mp.exit":"Tam ekrandan çık",
+ "mp.red":"Kırmızı robotlar","mp.blue":"Mavi robotlar","mp.empty":"Yukarıdan robot ekleyin, sonra sahada sürükleyin.",
+ "mp.hint":"Taşımak için robotu sürükleyin. Ülke atamak veya sahadan almak için dokunun.",
+ "mp.scale":"Saha, resmi çizimlere göre ölçekli (7 m × 7 m). Robot simgeleri dokunulabilsin diye büyütüldü; BRACE ZONE'ları eşit üçte bir olarak gösteriliyor.",
+ "mp.reset":"Başlangıca dön","mp.clearAll":"Sahayı temizle","mp.resetDone":"Robotlar başlangıç bölgesine döndü",
+ "mp.setCountry":"Ülke ata","mp.changeCountry":"Ülkeyi değiştir","mp.clearCountry":"Ülkeyi kaldır","mp.toStart":"Başlangıç bölgesine","mp.remove":"Sahadan al",
+ "mp.sheetNote":"Harita tüm takımın ortak malı ve cihazların arasında eşitlenir.",
+ "mp.start":"BAŞLANGIÇ"},
+
+ar:{"nav.map":"الخريطة","ab.map.t":"خريطة الاستراتيجية","ab.map":"ملعب FGC 2026 كاملاً. ضع حتى ثلاثة روبوتات لكل تحالف وحرّكها وأنتم تناقشون المباراة.",
+ "mp.rotate":"أدر هاتفك أفقياً واضغط ⛶ — عندها يصبح الملعب في أكبر حجم.","mp.expand":"ملء الشاشة","mp.exit":"إنهاء ملء الشاشة",
+ "mp.red":"روبوتات الأحمر","mp.blue":"روبوتات الأزرق","mp.empty":"أضف الروبوتات بالأعلى ثم اسحبها على الملعب.",
+ "mp.hint":"اسحب الروبوت لتحريكه. اضغط عليه لتحديد الدولة أو إزالته.",
+ "mp.scale":"الملعب مرسوم بالمقياس حسب الرسومات الرسمية (٧ م × ٧ م). أيقونات الروبوتات مكبَّرة ليسهل لمسها، ومناطق BRACE معروضة كأثلاث متساوية.",
+ "mp.reset":"العودة إلى البداية","mp.clearAll":"إفراغ الملعب","mp.resetDone":"عادت الروبوتات إلى منطقة الانطلاق",
+ "mp.setCountry":"تحديد الدولة","mp.changeCountry":"تغيير الدولة","mp.clearCountry":"إزالة الدولة","mp.toStart":"إلى منطقة الانطلاق","mp.remove":"إخراج من الملعب",
+ "mp.sheetNote":"الخريطة مشتركة مع كل الفريق وتتزامن بين أجهزتك."},
+
+fa:{"nav.map":"نقشه","ab.map.t":"نقشهٔ راهبرد","ab.map":"کل زمین FGC 2026. تا سه ربات برای هر اتحاد بگذارید و هنگام بحث دربارهٔ مسابقه آن‌ها را جابه‌جا کنید.",
+ "mp.rotate":"گوشی را افقی بگیرید و ⛶ را بزنید — زمین در بیشترین اندازه می‌شود.","mp.expand":"تمام‌صفحه","mp.exit":"خروج از تمام‌صفحه",
+ "mp.red":"ربات‌های قرمز","mp.blue":"ربات‌های آبی","mp.empty":"بالا ربات اضافه کنید، بعد روی زمین بکشید.",
+ "mp.hint":"برای جابه‌جایی ربات را بکشید. برای تعیین کشور یا برداشتن آن، رویش بزنید.",
+ "mp.scale":"زمین بر اساس نقشه‌های رسمی و با مقیاس رسم شده است (۷ م × ۷ م). نمادهای ربات بزرگ‌تر شده‌اند تا بتوان لمسشان کرد؛ ZONEهای BRACE به سه بخش مساوی نشان داده شده‌اند.",
+ "mp.reset":"بازگشت به شروع","mp.clearAll":"خالی کردن زمین","mp.resetDone":"ربات‌ها به منطقهٔ شروع برگشتند",
+ "mp.setCountry":"تعیین کشور","mp.changeCountry":"تغییر کشور","mp.clearCountry":"حذف کشور","mp.toStart":"به منطقهٔ شروع","mp.remove":"برداشتن از زمین",
+ "mp.sheetNote":"این نقشه برای کل تیم است و بین دستگاه‌های شما همگام می‌شود."},
+
+hi:{"nav.map":"मैप","ab.map.t":"रणनीति मैप","ab.map":"पूरा FGC 2026 मैदान। हर अलायंस के लिए तीन तक रोबोट रखें और मैच पर बात करते हुए उन्हें खिसकाएँ।",
+ "mp.rotate":"फ़ोन आड़ा करके ⛶ दबाएँ — तब मैदान सबसे बड़ा दिखता है।","mp.expand":"पूर्ण स्क्रीन","mp.exit":"पूर्ण स्क्रीन से बाहर",
+ "mp.red":"लाल रोबोट","mp.blue":"नीले रोबोट","mp.empty":"ऊपर रोबोट जोड़ें, फिर मैदान पर खींचें।",
+ "mp.hint":"रोबोट को खींचकर हिलाएँ। देश चुनने या हटाने के लिए उस पर टैप करें।",
+ "mp.scale":"मैदान आधिकारिक ड्रॉइंग के अनुपात में बनाया गया है (7 मी × 7 मी)। रोबोट के आइकॉन बड़े किए गए हैं ताकि टैप हो सकें; BRACE के ZONE बराबर तिहाई में दिखाए गए हैं।",
+ "mp.reset":"शुरुआत पर लौटाएँ","mp.clearAll":"मैदान खाली करें","mp.resetDone":"रोबोट अपने स्टार्ट ज़ोन में लौट आए",
+ "mp.setCountry":"देश चुनें","mp.changeCountry":"देश बदलें","mp.clearCountry":"देश हटाएँ","mp.toStart":"स्टार्ट ज़ोन में","mp.remove":"मैदान से हटाएँ",
+ "mp.sheetNote":"यह मैप पूरी टीम का है और आपके सभी डिवाइस पर सिंक होता है।"},
+
+bn:{"nav.map":"ম্যাপ","ab.map.t":"কৌশলের ম্যাপ","ab.map":"পুরো FGC 2026 মাঠ। প্রতি অ্যালায়েন্সে তিনটি পর্যন্ত রোবট বসিয়ে ম্যাচ নিয়ে আলোচনা করতে করতে সরান।",
+ "mp.rotate":"ফোন আড়াআড়ি করে ⛶ চাপুন — তখনই মাঠ সবচেয়ে বড় দেখায়।","mp.expand":"পূর্ণ স্ক্রিন","mp.exit":"পূর্ণ স্ক্রিন বন্ধ",
+ "mp.red":"লাল রোবট","mp.blue":"নীল রোবট","mp.empty":"উপরে রোবট যোগ করুন, তারপর মাঠে টেনে সরান।",
+ "mp.hint":"সরাতে রোবট টেনে নিন। দেশ দিতে বা তুলে নিতে ট্যাপ করুন।",
+ "mp.scale":"মাঠ অফিশিয়াল ড্রয়িং অনুযায়ী মাপমতো আঁকা (৭ মি × ৭ মি)। ট্যাপ করার সুবিধার্থে রোবটের আইকন বড় করা হয়েছে; BRACE-এর ZONE সমান তিন ভাগে দেখানো হয়েছে।",
+ "mp.reset":"শুরুর জায়গায়","mp.clearAll":"মাঠ খালি করুন","mp.resetDone":"রোবটগুলো স্টার্ট জোনে ফিরেছে",
+ "mp.setCountry":"দেশ দিন","mp.changeCountry":"দেশ বদলান","mp.clearCountry":"দেশ সরান","mp.toStart":"স্টার্ট জোনে","mp.remove":"মাঠ থেকে তুলে নিন",
+ "mp.sheetNote":"ম্যাপটি পুরো দলের এবং আপনার সব ডিভাইসে সিঙ্ক হয়।"},
+
+ur:{"nav.map":"نقشہ","ab.map.t":"حکمتِ عملی کا نقشہ","ab.map":"FGC 2026 کا پورا میدان۔ ہر الائنس کے لیے تین تک روبوٹ رکھیں اور میچ پر بات کرتے ہوئے انہیں کھسکائیں۔",
+ "mp.rotate":"فون آڑا کر کے ⛶ دبائیں — تب میدان سب سے بڑا نظر آتا ہے۔","mp.expand":"پوری اسکرین","mp.exit":"پوری اسکرین سے نکلیں",
+ "mp.red":"سرخ روبوٹ","mp.blue":"نیلے روبوٹ","mp.empty":"اوپر روبوٹ شامل کریں، پھر میدان پر کھینچیں۔",
+ "mp.hint":"ہلانے کے لیے روبوٹ کو کھینچیں۔ ملک مقرر کرنے یا ہٹانے کے لیے اس پر ٹیپ کریں۔",
+ "mp.scale":"میدان سرکاری ڈرائنگ کے مطابق پیمانے پر بنایا گیا ہے (۷ م × ۷ م)۔ روبوٹ کے آئیکن بڑے کیے گئے ہیں تاکہ ٹیپ ہو سکیں؛ BRACE کے ZONE برابر تہائیوں میں دکھائے گئے ہیں۔",
+ "mp.reset":"ابتدائی جگہ پر","mp.clearAll":"میدان خالی کریں","mp.resetDone":"روبوٹ اپنے اسٹارٹ زون میں واپس آ گئے",
+ "mp.setCountry":"ملک مقرر کریں","mp.changeCountry":"ملک بدلیں","mp.clearCountry":"ملک ہٹائیں","mp.toStart":"اسٹارٹ زون میں","mp.remove":"میدان سے ہٹائیں",
+ "mp.sheetNote":"یہ نقشہ پوری ٹیم کا ہے اور آپ کے تمام آلات پر سنک ہوتا ہے۔"},
+
+sw:{"nav.map":"Ramani","ab.map.t":"Ramani ya mkakati","ab.map":"Uwanja mzima wa FGC 2026. Weka hadi roboti tatu kwa kila muungano na uzivute mnapojadili mchezo.",
+ "mp.rotate":"Geuza simu ulalo kisha gusa ⛶ — hapo uwanja ndio mkubwa zaidi.","mp.expand":"Skrini nzima","mp.exit":"Toka skrini nzima",
+ "mp.red":"Roboti nyekundu","mp.blue":"Roboti za bluu","mp.empty":"Ongeza roboti hapo juu, kisha zivute uwanjani.",
+ "mp.hint":"Vuta roboti ili kuihamisha. Iguse ili kuweka nchi au kuiondoa.",
+ "mp.scale":"Uwanja umechorwa kwa kipimo halisi kutoka michoro rasmi (m 7 × m 7). Alama za roboti zimekuzwa ili ziguswe kwa urahisi; ZONE za BRACE zimeonyeshwa kama theluthi sawa.",
+ "mp.reset":"Rudi mwanzo","mp.clearAll":"Safisha uwanja","mp.resetDone":"Roboti zimerudi eneo la kuanzia",
+ "mp.setCountry":"Weka nchi","mp.changeCountry":"Badilisha nchi","mp.clearCountry":"Ondoa nchi","mp.toStart":"Eneo la kuanzia","mp.remove":"Ondoa uwanjani",
+ "mp.sheetNote":"Ramani ni ya timu nzima na inasawazishwa kati ya vifaa vyako."}
+};
+Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
+})();
+
+</script>
+<script>
 'use strict';
 /* FGC 2026 Scouting — live ladder / match history / analytics, fed by results.first.global */
 
@@ -3046,6 +3368,208 @@ function initRanks() {
 </script>
 <script>
 'use strict';
+/* FGC 2026 Scouting — Map：全場示意圖 + 可拖曳的機器人圖標，賽前對著它講站位用。
+   場地幾何照官方圖面 FG26_F（2026-05-07 版）：7000 × 7000 mm，圖裡的座標一律是場地毫米，
+   要畫的時候才換算成 viewBox。圖標位置也存毫米，所以換手機、轉螢幕、放大縮小都對得上，
+   存成像素就會跟著螢幕寬度跑掉。 */
+
+const MP = {
+  F: 7000,                                   // 場地邊長（mm）
+  VB: {x:-760, y:-150, w:8520, h:7300},      // 左右多留的是聯盟站（在場地外）
+  MAX: 3,                                    // 每一方最多三台，規則寫死的
+  PAD: 250,                                  // 圖標中心離護欄至少這麼遠；等於出發區的中線，夾限才不會把剛擺好的機器人推開
+  /* 出發位置：機器人開賽時待在自己那側的 REGIONAL ZONE（貼著護欄的 500 mm 寬長條）*/
+  START: {r:[[250,2050],[250,3500],[250,4950]], b:[[6750,2050],[6750,3500],[6750,4950]]}
+};
+const MP_SIDES = ['r','b'];
+const MP_LBL = {r:'R', b:'B'};
+
+/* ---------- 資料 ---------- */
+/* 存在 cfg 底下：cfg 整包會跟著同步走（server 端以 cfg.ts 比新舊），隊上每支手機看到的是同一張圖。
+   兩台同時拖會是「後存的贏」，跟 cfg 裡其他東西一樣，討論站位夠用了。 */
+function mapState(){
+  const m = DB.cfg.map;
+  MP_SIDES.forEach(s=>{
+    if(!Array.isArray(m[s])) m[s]=[];
+    m[s]=m[s].slice(0,MP.MAX).map((r,i)=>{                 // 同步回來的資料可能是別的版本寫的
+      const d=mapStart(s,i), o=(r&&typeof r==='object')?r:{};
+      o.x=Number.isFinite(+o.x)?mapClamp(+o.x):d.x;        // 沒有座標就放回出發區，不要讓圖標消失
+      o.y=Number.isFinite(+o.y)?mapClamp(+o.y):d.y;
+      o.slug=typeof o.slug==='string'?o.slug:'';
+      return o;
+    });
+  });
+  return m;
+}
+function mapClamp(v){ return Math.max(MP.PAD, Math.min(MP.F-MP.PAD, Math.round(v))); }   // 場地是正方形，x/y 同一條夾限
+function mapStart(side,i){ const p=MP.START[side][i%MP.MAX]; return {x:p[0],y:p[1]}; }
+
+/* ---------- 場地 ---------- */
+/* 元件座標（mm，y 從放滅火器的那一邊往下算）：
+     滅火器 + 兩座抑制單元       上緣，x 1500–5500 的梯形，前緣在 y=1200
+     支架 BRACE                  從火盾旁的護欄 (1200,6750) 拉到滅火器上緣外角 (2900,1200)
+     火盾 FIRE SHIELD            下方兩個角，斜面朝場內，PORT 在斜面上
+     出發區 REGIONAL ZONE        貼左右護欄，500 寬 × 4000 長                                */
+const MP_BRACE = {
+  r: {x1:1200, y1:6750, x2:2900, y2:1200},
+  b: {x1:5800, y1:6750, x2:4100, y2:1200}
+};
+function mapBraceSeg(b,a,z){                 // 把支架切成三段 ZONE，低的那端是 ZONE 1
+  const at=k=>({x:b.x1+(b.x2-b.x1)*k, y:b.y1+(b.y2-b.y1)*k});
+  const p=at(a), q=at(z);
+  return `<line x1="${p.x.toFixed(0)}" y1="${p.y.toFixed(0)}" x2="${q.x.toFixed(0)}" y2="${q.y.toFixed(0)}" class="br z${Math.round(a*3)+1}"/>`;
+}
+function mapFieldSVG(){
+  const tx=(x,y,s,cls,rot)=>`<text x="${x}" y="${y}"${cls?` class="${cls}"`:''}${rot?` transform="rotate(${rot} ${x} ${y})"`:''}>${esc(s)}</text>`;
+  let s='';
+  s+=`<rect x="0" y="0" width="7000" height="7000" rx="60" class="mp-carpet"/>`;
+  /* 聯盟站：在護欄外面，紅左藍右（照官方圖面的擺法） */
+  s+=`<rect x="-700" y="1100" width="480" height="4800" rx="40" class="mp-stn r"/>`;
+  s+=`<rect x="7220" y="1100" width="480" height="4800" rx="40" class="mp-stn b"/>`;
+  s+=tx(-460,3500,t('mp.stnR'),'mp-t stn',-90)+tx(7460,3500,t('mp.stnB'),'mp-t stn',90);
+  /* 出發區 */
+  s+=`<rect x="0" y="1400" width="500" height="4000" class="mp-zone r"/>`;
+  s+=`<rect x="6500" y="1400" width="500" height="4000" class="mp-zone b"/>`;
+  s+=tx(250,3500,t('mp.start'),'mp-t sm',-90)+tx(6750,3500,t('mp.start'),'mp-t sm',90);
+  /* 抑制單元 ×2 + 滅火器：三塊拼起來就是官方圖上那個梯形 */
+  s+=`<polygon points="1500,0 2900,0 2900,1200 2600,1200" class="mp-sup r"/>`;
+  s+=`<polygon points="4100,0 5500,0 4400,1200 4100,1200" class="mp-sup b"/>`;
+  s+=`<rect x="2900" y="0" width="1200" height="1200" class="mp-ext"/>`;
+  /* 三個標籤排在不同高度：並排的話 SUPPRESSION／EXTINGUISHER 在手機上會疊在一起 */
+  s+=tx(2300,430,t('mp.sup'),'mp-t xs')+tx(4700,430,t('mp.sup'),'mp-t xs')+tx(3500,930,t('mp.ext'),'mp-t sm');
+  /* 支架：低端在火盾旁，ZONE 1 → 3 由低到高 */
+  MP_SIDES.forEach(k=>{ const b=MP_BRACE[k];
+    s+=mapBraceSeg(b,0,1/3)+mapBraceSeg(b,1/3,2/3)+mapBraceSeg(b,2/3,1);
+    for(let i=0;i<3;i++){ const k2=(i+0.5)/3, x=b.x1+(b.x2-b.x1)*k2, y=b.y1+(b.y2-b.y1)*k2;
+      s+=tx(x+(k==='r'?-300:300),y,'Z'+(i+1),'mp-t zn'); } });
+  /* 火盾：佔住下方兩個角，斜面朝場內，PORT（機器人推球進去的洞）在斜面靠內側那一段 */
+  s+=`<polygon points="0,5806 1250,6750 1250,7000 0,7000" class="mp-shield r"/>`;
+  s+=`<polygon points="7000,5806 5750,6750 5750,7000 7000,7000" class="mp-shield b"/>`;
+  s+=`<line x1="640" y1="6280" x2="1250" y2="6750" class="mp-port r"/>`;
+  s+=`<line x1="6360" y1="6280" x2="5750" y2="6750" class="mp-port b"/>`;
+  s+=tx(430,6800,t('mp.shield'),'mp-t sm')+tx(6570,6800,t('mp.shield'),'mp-t sm');
+  s+=`<rect x="0" y="0" width="7000" height="7000" rx="60" class="mp-rail"/>`;
+  return `<svg viewBox="${MP.VB.x} ${MP.VB.y} ${MP.VB.w} ${MP.VB.h}" class="mp-svg" aria-hidden="true">${s}</svg>`;
+}
+
+/* ---------- 圖標 ---------- */
+const mpPctX = mm=>((mm-MP.VB.x)/MP.VB.w*100);
+const mpPctY = mm=>((mm-MP.VB.y)/MP.VB.h*100);
+function mapTokenHTML(side,i,r){
+  const nm=r.slug?nName(r.slug):(MP_LBL[side]+(i+1));
+  return `<button class="mp-bot ${side}" data-s="${side}" data-i="${i}" style="left:${mpPctX(r.x).toFixed(3)}%;top:${mpPctY(r.y).toFixed(3)}%"
+    aria-label="${esc(nm)}"><span class="n">${MP_LBL[side]}${i+1}</span>${r.slug?`<span class="f">${nFlag(r.slug)}</span>`:''}</button>`;
+}
+function mapRender(){
+  if(!DB||!$('mpField')) return;
+  const st=mapState();
+  $('mpField').innerHTML=mapFieldSVG()+MP_SIDES.map(s=>st[s].map((r,i)=>mapTokenHTML(s,i,r)).join('')).join('');
+  /* segInit 在「再點一次已選的那顆」時會回傳空字串（取消選取）。那在這裡會變成 0 台，
+     等於手滑一下就把排好的站位全清掉。空字串一律當沒事發生，要清就去點 0。 */
+  MP_SIDES.forEach(s=>{ const seg=$('mp'+s.toUpperCase()+'N'); if(!seg) return;
+    segInit(seg,String(st[s].length),v=>{ if(v==='') mapRender(); else mapSetCount(s,parseInt(v,10)); }); });
+  const n=st.r.length+st.b.length;
+  $('mpNames').innerHTML=n?MP_SIDES.map(s=>st[s].map((r,i)=>
+      `<span class="mp-chip ${s}">${MP_LBL[s]}${i+1}<b>${r.slug?esc(nName(r.slug)):'—'}</b></span>`).join('')).join(''):'';
+  $('mpEmpty').hidden=n>0;
+  $('mpField').querySelectorAll('.mp-bot').forEach(mapBindDrag);
+  mapExpBtn();
+}
+function mapSetCount(side,n){
+  const st=mapState(), cur=st[side].length;
+  n=Math.max(0,Math.min(MP.MAX,n|0));
+  if(n===cur) return;
+  while(st[side].length<n){ const i=st[side].length; st[side].push(Object.assign({slug:''},mapStart(side,i))); }
+  st[side].length=n;
+  touchCfg(); haptic(12); mapRender();
+}
+
+/* 拖曳用 pointer 事件：滑鼠、手指、觸控筆同一套。指標按住後鎖在這顆圖標上（setPointerCapture），
+   手指滑出圖標範圍也不會掉拖曳。沒有移動就當成點一下，開設定表。 */
+function mapBindDrag(el){
+  const side=el.dataset.s, idx=+el.dataset.i;
+  let box=null, dx=0, dy=0, moved=false, id=null;
+  const mm=e=>{ const fx=(e.clientX-box.left)/box.width, fy=(e.clientY-box.top)/box.height;
+    return {x:MP.VB.x+fx*MP.VB.w, y:MP.VB.y+fy*MP.VB.h}; };
+  el.addEventListener('pointerdown',e=>{
+    const r=mapState()[side][idx]; if(!r) return;
+    box=$('mpField').getBoundingClientRect(); id=e.pointerId; moved=false;
+    const p=mm(e); dx=r.x-p.x; dy=r.y-p.y;
+    el.setPointerCapture(id); el.classList.add('drag'); e.preventDefault();
+  });
+  el.addEventListener('pointermove',e=>{
+    if(id===null||e.pointerId!==id||!box) return;
+    const r=mapState()[side][idx]; if(!r) return;
+    const p=mm(e);
+    const nx=mapClamp(p.x+dx), ny=mapClamp(p.y+dy);
+    if(Math.abs(nx-r.x)>60||Math.abs(ny-r.y)>60) moved=true;
+    r.x=nx; r.y=ny;
+    el.style.left=mpPctX(nx).toFixed(3)+'%'; el.style.top=mpPctY(ny).toFixed(3)+'%';
+    save();                                  // 拖的時候只存本機（已經有防抖），放開才推同步
+  });
+  const end=e=>{
+    if(id===null||(e.pointerId!=null&&e.pointerId!==id)) return;
+    el.classList.remove('drag'); id=null;
+    if(moved){ touchCfg(); haptic(8); } else mapSheet(side,idx);
+  };
+  el.addEventListener('pointerup',end);
+  el.addEventListener('pointercancel',end);
+}
+
+function mapSheet(side,idx){
+  const st=mapState(), r=st[side][idx]; if(!r) return;
+  const nm=MP_LBL[side]+(idx+1);
+  const {sh,close}=openSheet(`<div class="hd"><b style="font-size:17px">${side==='r'?'🔴':'🔵'} ${esc(nm)}${r.slug?' · '+esc(nName(r.slug)):''}</b>
+      <button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>
+    <div class="menu">
+      <button class="btn wide" id="mpPick">${esc(r.slug?t('mp.changeCountry'):t('mp.setCountry'))}</button>
+      ${r.slug?`<button class="btn wide" id="mpClr" style="margin-top:8px">${esc(t('mp.clearCountry'))}</button>`:''}
+      <button class="btn wide" id="mpHome" style="margin-top:8px">${esc(t('mp.toStart'))}</button>
+      <button class="btn dgr wide" id="mpDel" style="margin-top:8px">${esc(t('mp.remove'))}</button>
+      <p class="note" style="margin-top:10px">${esc(t('mp.sheetNote'))}</p></div>`);
+  sh.querySelector('#mpPick').onclick=()=>{ close(); openPicker(sl=>{ r.slug=sl; touchCfg(); mapRender(); }); };
+  const clr=sh.querySelector('#mpClr'); if(clr) clr.onclick=()=>{ r.slug=''; touchCfg(); mapRender(); close(); };
+  sh.querySelector('#mpHome').onclick=()=>{ Object.assign(r,mapStart(side,idx)); touchCfg(); mapRender(); close(); };
+  sh.querySelector('#mpDel').onclick=()=>{ st[side].splice(idx,1); touchCfg(); haptic(12); mapRender(); close(); };
+}
+
+function mapReset(){
+  const st=mapState();
+  MP_SIDES.forEach(s=>st[s].forEach((r,i)=>Object.assign(r,mapStart(s,i))));
+  touchCfg(); mapRender(); toast(t('mp.resetDone'),'ok');
+}
+function mapClear(){
+  const st=mapState(); MP_SIDES.forEach(s=>{ st[s].length=0; });
+  touchCfg(); mapRender();
+}
+/* 全螢幕：場地接近正方形，實際大小由螢幕短邊決定。平常那條短邊要分給導覽列、卡片邊距和
+   上面那張控制卡，全螢幕才拿得回來 —— 也是轉成橫向唯一真的會變大的情況。 */
+function mapExpBtn(){                              // 換語言時 applyLang 只會重畫 [data-i18n]，
+  const b=$('mpExp'); if(!b) return;               // 這顆鈕的字在 aria-label 上，得自己跟著更新
+  const on=document.body.classList.contains('mp-full');
+  b.textContent = on?'✕':'⛶';
+  b.setAttribute('aria-label', t(on?'mp.exit':'mp.expand'));
+}
+function mapFull(on){ document.body.classList.toggle('mp-full',!!on); mapExpBtn(); }
+function mapToggleFull(){ mapFull(!document.body.classList.contains('mp-full')); }
+
+/* map.js 比 app.js 早載入，所以按鈕不能在最外層綁（那時候 $ / t 都還不存在）。
+   一律等 app.js 切到這一頁、呼叫 mapLoad() 之後再綁；重複指定 onclick 沒有副作用。 */
+let MP_KEYS=false;
+function mapLoad(){
+  if(!DB||!$('mpField')) return;
+  $('mpReset').onclick=mapReset;
+  $('mpClear').onclick=mapClear;
+  $('mpExp').onclick=mapToggleFull;
+  if(!MP_KEYS){ MP_KEYS=true;                    // Esc 退出全螢幕，鍵盤使用者才有退路
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.body.classList.contains('mp-full')) mapFull(false); }); }
+  mapFull(document.body.classList.contains('mp-full'));
+  mapRender();
+}
+
+</script>
+<script>
+'use strict';
 /* FGC 2026 Scouting — app logic
    Sections: i18n · data · auth · widgets · country picker · match · pit · nations · robot · calc · data tab · ux · sync · init */
 const NATIONS = window.NATIONS || [];
@@ -3096,7 +3620,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -3117,6 +3641,9 @@ function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cf
   d.cfg.plan.phase=d.cfg.plan.phase||'qual';
   if(!d.cfg.plan.n||typeof d.cfg.plan.n!=='object') d.cfg.plan.n={prac:1,qual:8,play:4};
   if(!d.cfg.plan.rows||typeof d.cfg.plan.rows!=='object') d.cfg.plan.rows={};
+  /* Map 分頁的擺位：放在 cfg 裡，跟著 cfg 一起同步，隊上每支手機看到同一張圖 */
+  if(!d.cfg.map||typeof d.cfg.map!=='object') d.cfg.map={r:[],b:[]};
+  ['r','b'].forEach(k=>{ d.cfg.map[k]=Array.isArray(d.cfg.map[k])?d.cfg.map[k].slice(0,3):[]; });
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -3226,12 +3753,13 @@ $('teamBtn').onclick=()=>{
 /* ---------- tabs ---------- */
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['match','pit','teams','robot','calc','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
+  ['match','pit','teams','robot','calc','map','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
   const m=b.dataset.tab==='match'; $('mFab').hidden=!m; $('main').classList.toggle('fab-on',m);
   if(b.dataset.tab==='data') refreshData();
   if(b.dataset.tab==='teams') ranksLoad();
   if(b.dataset.tab==='calc') calc();
   if(b.dataset.tab==='robot') robotLoad();
+  if(b.dataset.tab==='map') mapLoad(); else mapFull(false);   // 換頁一定要退出地圖全螢幕，不然導覽列還藏著
   window.scrollTo(0,0);
 });
 
@@ -4007,7 +4535,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v29';
+const APP_VER='v30';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

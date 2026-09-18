@@ -585,3 +585,93 @@ svg.trend.dn polyline{stroke:var(--red)}
 
 /* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
 .seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}
+
+/* ───────── MAP：全場示意圖 + 可拖曳的機器人圖標 ─────────
+   #mpField 的長寬比必須等於 SVG viewBox 的長寬比（8520 × 7300），不然 SVG 會置中留黑邊，
+   拖曳時「螢幕座標 → 場地毫米」那段換算就會整個偏掉。改 viewBox 記得一起改這裡。 */
+#mpField{position:relative;width:100%;aspect-ratio:8520/7300;touch-action:none;user-select:none;-webkit-user-select:none}
+.mp-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.mp-carpet{fill:color-mix(in srgb,var(--ink) 7%,var(--panel-solid));stroke:none}
+.mp-rail{fill:none;stroke:var(--line-2);stroke-width:70}
+.mp-stn{fill:color-mix(in srgb,var(--muted) 14%,transparent)}
+.mp-stn.r{fill:color-mix(in srgb,var(--red) 13%,transparent)}
+.mp-stn.b{fill:color-mix(in srgb,var(--blue) 13%,transparent)}
+.mp-zone{stroke-width:34;stroke-dasharray:150 110}
+.mp-zone.r{fill:var(--red-soft);stroke:color-mix(in srgb,var(--red) 60%,transparent)}
+.mp-zone.b{fill:var(--blue-soft);stroke:color-mix(in srgb,var(--blue) 60%,transparent)}
+.mp-sup{stroke:var(--line-2);stroke-width:26}
+.mp-sup.r{fill:color-mix(in srgb,var(--red) 30%,var(--panel-solid))}
+.mp-sup.b{fill:color-mix(in srgb,var(--blue) 30%,var(--panel-solid))}
+.mp-ext{fill:color-mix(in srgb,var(--ember,var(--muted)) 26%,var(--panel-solid));stroke:var(--line-2);stroke-width:26}
+.mp-shield{stroke:var(--line-2);stroke-width:26}
+.mp-shield.r{fill:color-mix(in srgb,var(--red) 20%,var(--panel-solid))}
+.mp-shield.b{fill:color-mix(in srgb,var(--blue) 20%,var(--panel-solid))}
+.mp-port{stroke-width:120;stroke-linecap:round}
+.mp-port.r{stroke:var(--red)}.mp-port.b{stroke:var(--blue)}
+.br{stroke-width:110;stroke-linecap:round}
+.br.z1{stroke:var(--z1)}.br.z2{stroke:var(--z2)}.br.z3{stroke:var(--z3)}
+.mp-t{fill:var(--muted);font-size:210px;font-weight:800;text-anchor:middle;dominant-baseline:middle;letter-spacing:-4px}
+.mp-t.sm{font-size:162px}
+.mp-t.xs{font-size:140px}
+.mp-t.stn{font-size:186px;font-weight:900}
+.mp-t.zn{font-size:168px;font-weight:900;fill:var(--ink);opacity:.55}
+.mp-bot{position:absolute;width:10.4%;aspect-ratio:1;min-width:38px;transform:translate(-50%,-50%);
+  border-radius:50%;border:2.5px solid #fff;padding:0;cursor:grab;touch-action:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;
+  box-shadow:0 5px 16px rgba(0,0,0,.34);transition:box-shadow var(--d),transform var(--d-s) var(--e)}
+.mp-bot.r{background:var(--red)}
+.mp-bot.b{background:var(--blue)}
+.mp-bot .n{color:#fff;font-weight:900;font-size:13px;letter-spacing:-.02em;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.mp-bot .f{line-height:0;font-size:12px}
+.mp-bot .f img.flag{height:9px;width:auto;border-radius:1.5px;display:block}
+.mp-bot.drag{cursor:grabbing;transform:translate(-50%,-50%) scale(1.16);box-shadow:0 12px 30px rgba(0,0,0,.45);z-index:3}
+.mp-bot:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.mp-side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mp-side .f label{display:flex;align-items:center;gap:6px}
+.mp-side .dot{width:11px;height:11px;border-radius:50%;flex:none}
+.mp-side .dot.r{background:var(--red)}.mp-side .dot.b{background:var(--blue)}
+#mpNames{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.mp-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;
+  border:1.5px solid var(--line-2);background:var(--panel)}
+.mp-chip.r{border-color:color-mix(in srgb,var(--red) 45%,var(--line-2));color:var(--red)}
+.mp-chip.b{border-color:color-mix(in srgb,var(--blue) 45%,var(--line-2));color:var(--blue)}
+.mp-chip b{color:var(--ink);font-weight:700}
+@media (max-width:360px){ .mp-bot .n{font-size:11px} .mp-t{font-size:240px} }
+
+/* 直向手機上場地被壓得很小（寬度就那麼多），提醒轉橫向；桌機和平板不會看到這行。 */
+.mp-rot{display:none}
+@media (orientation:portrait) and (max-width:620px){
+  .mp-rot{display:flex;gap:9px;align-items:center;margin:0 0 12px;padding:10px 13px;border-radius:13px;
+    border:1.5px dashed var(--line-2);background:color-mix(in srgb,var(--ember-soft,var(--line)) 70%,transparent);
+    color:var(--muted);font-size:12.5px;line-height:1.5}
+  .mp-rot .ic{font-size:19px;line-height:1;color:var(--ember);flex:none;
+    animation:mpRot 2.6s var(--e) infinite}
+  .mp-rot .zh{display:block;font-size:11.5px;opacity:.8}
+}
+@keyframes mpRot{0%,62%{transform:rotate(0)}78%{transform:rotate(90deg)}100%{transform:rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){ .mp-rot .ic{animation:none} }
+/* 轉成橫向之後：高度才是瓶頸，把場地縮到剛好一屏，不用捲動就能整張看完。 */
+@media (orientation:landscape) and (max-height:620px){
+  #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 118px);height:calc(100dvh - 118px)}
+  #tab-map .intro{display:none}
+}
+
+/* 全螢幕：把場地撐到整個畫面。這張圖接近正方形，所以真正決定大小的是螢幕的短邊 ——
+   一般排版下短邊被導覽列和卡片邊距吃掉，全螢幕才拿得回來，橫向也才真的比直向大。 */
+.mp-exp{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border-radius:50%;
+  border:1.5px solid var(--line-2);background:var(--panel);color:var(--muted);font-size:15px;line-height:1;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform var(--d-s) var(--e),color var(--d-s),border-color var(--d-s)}
+.mp-exp:active{transform:scale(.9)}
+.mp-exp:hover{color:var(--ink);border-color:var(--line-2)}
+body.mp-full{overflow:hidden}
+body.mp-full header,body.mp-full nav,body.mp-full footer,body.mp-full #mFab,
+body.mp-full #tab-map .intro,body.mp-full #tab-map .card:not(.mp-stage),
+body.mp-full #mpFoot,body.mp-full #mpCtl,body.mp-full .mp-rot{display:none}
+body.mp-full #tab-map .mp-stage{position:fixed;inset:0;z-index:50;margin:0;padding:6px;border:0;border-radius:0;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:none;animation:none}
+body.mp-full #mpField{max-width:100%;margin:0;
+  width:min(100vw - 12px, calc((100vh - 12px) * 8520 / 7300));
+  width:min(100vw - 12px, calc((100dvh - 12px) * 8520 / 7300));
+  height:auto}
+body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right))}

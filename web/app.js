@@ -49,7 +49,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -70,6 +70,9 @@ function norm(d){ d.cfg=d.cfg||{}; d.cfg.scout=d.cfg.scout||''; d.cfg.theme=d.cf
   d.cfg.plan.phase=d.cfg.plan.phase||'qual';
   if(!d.cfg.plan.n||typeof d.cfg.plan.n!=='object') d.cfg.plan.n={prac:1,qual:8,play:4};
   if(!d.cfg.plan.rows||typeof d.cfg.plan.rows!=='object') d.cfg.plan.rows={};
+  /* Map 分頁的擺位：放在 cfg 裡，跟著 cfg 一起同步，隊上每支手機看到同一張圖 */
+  if(!d.cfg.map||typeof d.cfg.map!=='object') d.cfg.map={r:[],b:[]};
+  ['r','b'].forEach(k=>{ d.cfg.map[k]=Array.isArray(d.cfg.map[k])?d.cfg.map[k].slice(0,3):[]; });
   d.pit=d.pit||{}; d.match=Array.isArray(d.match)?d.match:[]; d.robot=(d.robot&&typeof d.robot==='object')?d.robot:null; return d; }
 function load(){ try{ const r=JSON.parse(localStorage.getItem(K)); if(r&&r.cfg) return norm(r); }catch(e){} return norm({}); }
 let tSave=null;
@@ -179,12 +182,13 @@ $('teamBtn').onclick=()=>{
 /* ---------- tabs ---------- */
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  ['match','pit','teams','robot','calc','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
+  ['match','pit','teams','robot','calc','map','data'].forEach(tb=>$('tab-'+tb).hidden=(tb!==b.dataset.tab));
   const m=b.dataset.tab==='match'; $('mFab').hidden=!m; $('main').classList.toggle('fab-on',m);
   if(b.dataset.tab==='data') refreshData();
   if(b.dataset.tab==='teams') ranksLoad();
   if(b.dataset.tab==='calc') calc();
   if(b.dataset.tab==='robot') robotLoad();
+  if(b.dataset.tab==='map') mapLoad(); else mapFull(false);   // 換頁一定要退出地圖全螢幕，不然導覽列還藏著
   window.scrollTo(0,0);
 });
 
@@ -960,7 +964,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v29';
+const APP_VER='v30';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

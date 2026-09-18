@@ -1,10 +1,10 @@
 /* FGC 2026 Scouting — offline cache.
    Static shell: stale-while-revalidate. Navigations: network first, cache fallback.
    Flags/photos: cache first (immutable). /api/: never cached. */
-const V = 'fgc2026-v29';
+const V = 'fgc2026-v30';
 const SHELL = [
-  './', 'app.css', 'app.js', 'ranks.js', 'nations.js',
-  'i18n.js', 'i18n2.js', 'i18n3.js', 'i18n4.js', 'i18n5.js', 'i18n6.js', 'i18n7.js',
+  './', 'app.css', 'app.js', 'ranks.js', 'map.js', 'nations.js',
+  'i18n.js', 'i18n2.js', 'i18n3.js', 'i18n4.js', 'i18n5.js', 'i18n6.js', 'i18n7.js', 'i18n8.js',
   'manifest.webmanifest', 'fgc2026-64.png', 'fgc2026-192.png', 'fgc2026-512.png'
 ];
 
