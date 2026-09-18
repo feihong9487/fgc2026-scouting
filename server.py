@@ -555,6 +555,12 @@ class H(BaseHTTPRequestHandler):
             pass
 
     # -- helpers --
+    def handle_one_request(self):
+        """同一條 keep-alive 連線上的每個請求都共用這個 handler 物件，所以 _read_body 必須
+        逐次歸零 —— 忘了歸零的話，第二個請求開始 _drain 會誤以為內文讀過了，直接跳過。"""
+        self._read_body = False
+        return BaseHTTPRequestHandler.handle_one_request(self)
+
     def _drain(self):
         """回應之前，把還沒讀掉的請求內文吃乾淨。
 
