@@ -75,6 +75,7 @@ HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時�
 CLAIMS = os.path.join(DATA_DIR, "claims.json")   # 每個國家的認領碼，只有主辦方能發
 CLAIM = {}
 AUDIT_LOG = os.path.join(DATA_DIR, "audit.log")  # 所有登入/改密碼事件，出事時可以追
+MAX_BODY = 8 * 1024 * 1024     # 請求內文上限；_body 和 _drain 共用同一個門檻
 CLAIM_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # 拿掉容易看錯的 I O 0 1
 
 DEFAULT_PASSWORD = "password"   # 只有舊帳號還吃這個；新帳號一律走認領碼
@@ -554,7 +555,37 @@ class H(BaseHTTPRequestHandler):
             pass
 
     # -- helpers --
+    def _drain(self):
+        """回應之前，把還沒讀掉的請求內文吃乾淨。
+
+        protocol_version 是 HTTP/1.1，連線會留著重用（Caddy 對上游正是這樣做的）。
+        只要有一條路徑在還沒讀內文就先回應 —— 401、400、429、訪客的 403 都是 ——
+        那幾個位元組就留在 socket 裡，變成「下一個請求」的開頭，伺服器看到的是
+        `{"rev":0}POST /api/password` 這種東西，回 501。而那個下一個請求很可能是
+        別隊的登入或認領：一個人被擋下，順手把另一個人的驗證也弄壞。
+        """
+        if getattr(self, "_read_body", False):
+            return
+        self._read_body = True
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            n = 0
+        if n <= 0:
+            return
+        if n > MAX_BODY:
+            self.close_connection = True      # 太大就不吞了，收掉這條連線比較乾淨
+            return
+        left = n
+        while left > 0:
+            chunk = self.rfile.read(min(left, 65536))
+            if not chunk:
+                self.close_connection = True
+                return
+            left -= len(chunk)
+
     def _send(self, code, body=b"", ctype="text/plain; charset=utf-8", extra=None):
+        self._drain()
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
@@ -571,11 +602,14 @@ class H(BaseHTTPRequestHandler):
         self._send(code, body, "application/json; charset=utf-8", {"Cache-Control": "no-store"})
 
     def _body(self):
+        self._read_body = True          # 內文的處置從這裡開始由自己負責，_drain 就不用再碰
         try:
             n = int(self.headers.get("Content-Length") or 0)
         except ValueError:
             n = 0
-        if n <= 0 or n > 8 * 1024 * 1024:
+        if n <= 0 or n > MAX_BODY:
+            if n > MAX_BODY:
+                self.close_connection = True
             self._json(400, {"error": "payload 大小不合法"})
             return None
         try:
