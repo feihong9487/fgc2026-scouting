@@ -10,7 +10,7 @@ const MP = {
   MAX: 3,                                    // 每一方最多三台，規則寫死的
   PAD: 250,                                  // 圖標中心離護欄至少這麼遠；等於出發區的中線，夾限才不會把剛擺好的機器人推開
   /* 出發位置：機器人開賽時待在自己那側的 REGIONAL ZONE（貼著護欄的 500 mm 寬長條）*/
-  START: {r:[[250,2050],[250,3500],[250,4950]], b:[[6750,2050],[6750,3500],[6750,4950]]}
+  START: {r:[[250,1300],[250,2800],[250,4300]], b:[[6750,1300],[6750,2800],[6750,4300]]}
 };
 const MP_SIDES = ['r','b'];
 const MP_LBL = {r:'R', b:'B'};
@@ -36,11 +36,14 @@ function mapClamp(v){ return Math.max(MP.PAD, Math.min(MP.F-MP.PAD, Math.round(v
 function mapStart(side,i){ const p=MP.START[side][i%MP.MAX]; return {x:p[0],y:p[1]}; }
 
 /* ---------- 場地 ---------- */
-/* 元件座標（mm，y 從放滅火器的那一邊往下算）：
-     滅火器 + 兩座抑制單元       上緣，x 1500–5500 的梯形，前緣在 y=1200
+/* 元件座標（mm，y 從放滅火器的那一邊往下算）。數字是直接從官方圖面 p2 量的：
+   以出發區的 500 × 4000 mm 校出 28.98 mm/px，場地內緣在圖上剛好是 241.5 px 見方，兩軸吻合。
+     滅火器 + 兩座抑制單元       後緣 x 1100–5900，前緣 y=1200 處 x 1826–5187；
+                                 斜的是「外側」那條邊，正面是一條長邊（每座約 1130 mm 寬）
+     滅火器 EXTINGUISHER         x 2950–4050，夾在兩座抑制單元中間
      支架 BRACE                  從火盾旁的護欄 (1200,6750) 拉到滅火器上緣外角 (2900,1200)
      火盾 FIRE SHIELD            下方兩個角，斜面朝場內，PORT 在斜面上
-     出發區 REGIONAL ZONE        貼左右護欄，500 寬 × 4000 長                                */
+     出發區 REGIONAL ZONE        貼左右護欄，500 寬 × 4060 長，y 768–4825（偏向結構那一側）  */
 const MP_BRACE = {
   r: {x1:1200, y1:6750, x2:2900, y2:1200},
   b: {x1:5800, y1:6750, x2:4100, y2:1200}
@@ -55,19 +58,19 @@ function mapFieldSVG(){
   let s='';
   s+=`<rect x="0" y="0" width="7000" height="7000" rx="60" class="mp-carpet"/>`;
   /* 聯盟站：在護欄外面，紅左藍右（照官方圖面的擺法） */
-  s+=`<rect x="-700" y="1100" width="480" height="4800" rx="40" class="mp-stn r"/>`;
-  s+=`<rect x="7220" y="1100" width="480" height="4800" rx="40" class="mp-stn b"/>`;
+  s+=`<rect x="-700" y="300" width="480" height="6400" rx="40" class="mp-stn r"/>`;
+  s+=`<rect x="7220" y="300" width="480" height="6400" rx="40" class="mp-stn b"/>`;
   s+=tx(-460,3500,t('mp.stnR'),'mp-t stn',-90)+tx(7460,3500,t('mp.stnB'),'mp-t stn',90);
   /* 出發區 */
-  s+=`<rect x="0" y="1400" width="500" height="4000" class="mp-zone r"/>`;
-  s+=`<rect x="6500" y="1400" width="500" height="4000" class="mp-zone b"/>`;
-  s+=tx(250,3500,t('mp.start'),'mp-t sm',-90)+tx(6750,3500,t('mp.start'),'mp-t sm',90);
+  s+=`<rect x="0" y="768" width="507" height="4057" class="mp-zone r"/>`;
+  s+=`<rect x="6493" y="768" width="507" height="4057" class="mp-zone b"/>`;
+  s+=tx(253,2800,t('mp.start'),'mp-t sm',-90)+tx(6747,2800,t('mp.start'),'mp-t sm',90);
   /* 抑制單元 ×2 + 滅火器：三塊拼起來就是官方圖上那個梯形 */
-  s+=`<polygon points="1500,0 2900,0 2900,1200 2600,1200" class="mp-sup r"/>`;
-  s+=`<polygon points="4100,0 5500,0 4400,1200 4100,1200" class="mp-sup b"/>`;
-  s+=`<rect x="2900" y="0" width="1200" height="1200" class="mp-ext"/>`;
-  /* 三個標籤排在不同高度：並排的話 SUPPRESSION／EXTINGUISHER 在手機上會疊在一起 */
-  s+=tx(2300,430,t('mp.sup'),'mp-t xs')+tx(4700,430,t('mp.sup'),'mp-t xs')+tx(3500,930,t('mp.ext'),'mp-t sm');
+  s+=`<polygon points="1100,0 2950,0 2950,1200 1826,1200" class="mp-sup r"/>`;
+  s+=`<polygon points="5900,0 4050,0 4050,1200 5174,1200" class="mp-sup b"/>`;
+  s+=`<rect x="2950" y="0" width="1100" height="1200" class="mp-ext"/>`;
+  /* 三個標籤同高並排：抑制單元的機身夠寬放得下，滅火器那格窄，用更小一級的字 */
+  s+=tx(2020,620,t('mp.sup'),'mp-t xs')+tx(4980,620,t('mp.sup'),'mp-t xs')+tx(3500,620,t('mp.ext'),'mp-t xxs');
   /* 支架：低端在火盾旁，ZONE 1 → 3 由低到高 */
   MP_SIDES.forEach(k=>{ const b=MP_BRACE[k];
     s+=mapBraceSeg(b,0,1/3)+mapBraceSeg(b,1/3,2/3)+mapBraceSeg(b,2/3,1);
