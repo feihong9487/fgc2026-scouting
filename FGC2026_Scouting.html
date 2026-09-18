@@ -604,7 +604,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 /* ───────── MAP：全場示意圖 + 可拖曳的機器人圖標 ─────────
    #mpField 的長寬比必須等於 SVG viewBox 的長寬比（8520 × 7300），不然 SVG 會置中留黑邊，
    拖曳時「螢幕座標 → 場地毫米」那段換算就會整個偏掉。改 viewBox 記得一起改這裡。 */
-#mpField{position:relative;width:100%;aspect-ratio:8520/7300;touch-action:none;user-select:none;-webkit-user-select:none}
+#mpField{position:relative;width:100%;aspect-ratio:8520/7300;touch-action:none;user-select:none;-webkit-user-select:none;container-type:inline-size}
 .mp-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
 .mp-carpet{fill:color-mix(in srgb,var(--ink) 7%,var(--panel-solid));stroke:none}
 .mp-rail{fill:none;stroke:var(--line-2);stroke-width:70}
@@ -631,17 +631,30 @@ svg.trend.dn polyline{stroke:var(--red)}
 .mp-t.xxs{font-size:126px}
 .mp-t.stn{font-size:186px;font-weight:900}
 .mp-t.zn{font-size:168px;font-weight:900;fill:var(--ink);opacity:.55}
-.mp-bot{position:absolute;width:10.4%;aspect-ratio:1;min-width:38px;transform:translate(-50%,-50%);
-  border-radius:50%;border:2.5px solid #fff;padding:0;cursor:grab;touch-action:none;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;
-  box-shadow:0 5px 16px rgba(0,0,0,.34);transition:box-shadow var(--d),transform var(--d-s) var(--e)}
-.mp-bot.r{background:var(--red)}
-.mp-bot.b{background:var(--blue)}
-.mp-bot .n{color:#fff;font-weight:900;font-size:13px;letter-spacing:-.02em;text-shadow:0 1px 2px rgba(0,0,0,.35)}
-.mp-bot .f{line-height:0;font-size:12px}
-.mp-bot .f img.flag{height:9px;width:auto;border-radius:1.5px;display:block}
-.mp-bot.drag{cursor:grabbing;transform:translate(-50%,-50%) scale(1.16);box-shadow:0 12px 30px rgba(0,0,0,.45);z-index:3}
-.mp-bot:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+/* 外層按鈕＝觸控區（透明、至少 40px 好按）；.dot ＝看得見的圖標，約場地的 7.4%
+   （機器人實際約 45 cm，等於場地的 6.4%），不會蓋掉底下的場地。 */
+.mp-bot{position:absolute;width:11%;aspect-ratio:1;min-width:40px;transform:translate(-50%,-50%);
+  background:none;border:0;padding:0;cursor:grab;touch-action:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform var(--d-s) var(--e)}
+.mp-bot .dot{width:68%;height:68%;min-width:17px;min-height:17px;border-radius:50%;border:2px solid #fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+  box-shadow:0 3px 10px rgba(0,0,0,.34);transition:box-shadow var(--d),transform var(--d-s) var(--e)}
+.mp-bot.r .dot{background:var(--red)}
+.mp-bot.b .dot{background:var(--blue)}
+.mp-bot .n{color:#fff;font-weight:900;font-size:10.5px;letter-spacing:-.03em;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.mp-bot .f{line-height:0;font-size:9px;margin-top:1px}
+.mp-bot .f img.flag{height:7px;width:auto;border-radius:1.5px;display:block}
+.mp-bot.drag{cursor:grabbing;z-index:3}
+.mp-bot.drag .dot{transform:scale(1.22);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.mp-bot:focus-visible{outline:none}
+.mp-bot:focus-visible .dot{outline:3px solid var(--ink);outline-offset:2px}
+/* 圓要跟著「地圖」縮放，不能跟著按鈕：按鈕有 40px 的觸控下限，地圖一小（例如橫向被高度
+   壓住時），圓就會相對變得很大。cqw 是 #mpField 寬度的百分比，這樣圓永遠是場地的 7.4%
+   ≈ 0.64 m，比實際機器人略大而已。不支援 cqw 的舊瀏覽器退回上面的 68%。 */
+@supports (width:1cqw){
+  .mp-bot .dot{width:7.4cqw;height:7.4cqw}
+}
 .mp-side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mp-side .f label{display:flex;align-items:center;gap:6px}
 .mp-side .dot{width:11px;height:11px;border-radius:50%;flex:none}
@@ -652,12 +665,17 @@ svg.trend.dn polyline{stroke:var(--red)}
 .mp-chip.r{border-color:color-mix(in srgb,var(--red) 45%,var(--line-2));color:var(--red)}
 .mp-chip.b{border-color:color-mix(in srgb,var(--blue) 45%,var(--line-2));color:var(--blue)}
 .mp-chip b{color:var(--ink);font-weight:700}
-@media (max-width:360px){ .mp-bot .n{font-size:11px} .mp-t{font-size:240px} }
+@media (max-width:360px){ .mp-bot .n{font-size:9.5px} .mp-t{font-size:240px} }
 
-/* 轉成橫向之後：高度才是瓶頸，把場地縮到剛好一屏，不用捲動就能整張看完。 */
+/* 轉成橫向之後高度才是瓶頸：光把場地縮到一屏還不夠，上面那張控制卡會把地圖整個推到畫面外。
+   所以改成左右兩欄 —— 控制在左、場地在右，兩邊都看得到，不用捲動。 */
 @media (orientation:landscape) and (max-height:620px){
-  #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 118px);height:calc(100dvh - 118px)}
+  #tab-map{display:grid;grid-template-columns:minmax(190px,250px) 1fr;gap:10px;align-items:start}
   #tab-map .intro{display:none}
+  #tab-map .card{margin:0}
+  #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 150px);height:calc(100dvh - 150px)}
+  .mp-side{grid-template-columns:1fr}
+  #mpFoot{display:none}
 }
 
 /* 全螢幕：把場地撐到整個畫面。這張圖接近正方形，所以真正決定大小的是螢幕的短邊 ——
@@ -3462,10 +3480,13 @@ function mapFieldSVG(){
 /* ---------- 圖標 ---------- */
 const mpPctX = mm=>((mm-MP.VB.x)/MP.VB.w*100);
 const mpPctY = mm=>((mm-MP.VB.y)/MP.VB.h*100);
+/* 按鈕本身是透明的觸控區，看得見的只有裡面那顆 .dot。
+   圖標照比例只會有場地的 6% 左右（機器人約 45 cm），手指按不到；分開之後
+   圓可以畫小、接近實際大小，按的範圍仍然維持在好按的尺寸。 */
 function mapTokenHTML(side,i,r){
   const nm=r.slug?nName(r.slug):(MP_LBL[side]+(i+1));
   return `<button class="mp-bot ${side}" data-s="${side}" data-i="${i}" style="left:${mpPctX(r.x).toFixed(3)}%;top:${mpPctY(r.y).toFixed(3)}%"
-    aria-label="${esc(nm)}"><span class="n">${MP_LBL[side]}${i+1}</span>${r.slug?`<span class="f">${nFlag(r.slug)}</span>`:''}</button>`;
+    aria-label="${esc(nm)}"><span class="dot"><span class="n">${MP_LBL[side]}${i+1}</span>${r.slug?`<span class="f">${nFlag(r.slug)}</span>`:''}</span></button>`;
 }
 function mapRender(){
   if(!DB||!$('mpField')) return;

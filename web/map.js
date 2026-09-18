@@ -89,10 +89,13 @@ function mapFieldSVG(){
 /* ---------- 圖標 ---------- */
 const mpPctX = mm=>((mm-MP.VB.x)/MP.VB.w*100);
 const mpPctY = mm=>((mm-MP.VB.y)/MP.VB.h*100);
+/* 按鈕本身是透明的觸控區，看得見的只有裡面那顆 .dot。
+   圖標照比例只會有場地的 6% 左右（機器人約 45 cm），手指按不到；分開之後
+   圓可以畫小、接近實際大小，按的範圍仍然維持在好按的尺寸。 */
 function mapTokenHTML(side,i,r){
   const nm=r.slug?nName(r.slug):(MP_LBL[side]+(i+1));
   return `<button class="mp-bot ${side}" data-s="${side}" data-i="${i}" style="left:${mpPctX(r.x).toFixed(3)}%;top:${mpPctY(r.y).toFixed(3)}%"
-    aria-label="${esc(nm)}"><span class="n">${MP_LBL[side]}${i+1}</span>${r.slug?`<span class="f">${nFlag(r.slug)}</span>`:''}</button>`;
+    aria-label="${esc(nm)}"><span class="dot"><span class="n">${MP_LBL[side]}${i+1}</span>${r.slug?`<span class="f">${nFlag(r.slug)}</span>`:''}</span></button>`;
 }
 function mapRender(){
   if(!DB||!$('mpField')) return;
