@@ -9,21 +9,30 @@ let rMatchFilter = 'all';    // all | mine | played | next
 /* ---------- helpers ---------- */
 const CONT_NAMES = window.CONTINENTS || {};
 /* 官方用 3 碼國碼 (TPE/JPN)，我們用 slug；靠國名與 ISO-2 兜起來 */
-const BY_NAME = {}, BY_CC = {};
+const BY_NAME = {}, BY_CC = {}, BY_WORDS = {};
+/* 標點和大小寫都不算數：「Korea, Republic of」跟「Republic of Korea」要能兜在一起 */
+const nkey = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const nwords = s => nkey(s).split(' ').filter(Boolean).sort().join(' ');
 NATIONS.forEach(n => {
-  BY_NAME[(n.name || '').toLowerCase()] = n;
+  [n.name].concat(n.alt || []).forEach(a => {
+    const k = nkey(a); if (k && !(k in BY_NAME)) BY_NAME[k] = n;
+    const w = nwords(a); if (!w) return;
+    BY_WORDS[w] = (w in BY_WORDS && BY_WORDS[w] !== n) ? null : n;   // 兩國撞同一組詞就作廢
+  });
   if (n.cc) BY_CC[n.cc.toLowerCase()] = n;
 });
 function nationOf(row) {
   const t = (row && row.team) || {};
   const cc2 = (t.countryCode || '').toLowerCase();
   if (cc2.length === 2 && BY_CC[cc2]) return BY_CC[cc2];
-  const nm = (t.country || t.shortName || t.name || '').toLowerCase();
-  if (BY_NAME[nm]) return BY_NAME[nm];
-  for (const n of NATIONS) {                       // 最後手段：寬鬆比對
-    const a = (n.name || '').toLowerCase();
-    if (nm && (a.includes(nm) || nm.includes(a))) return n;
-  }
+  const raw = t.country || t.shortName || t.name || '';
+  const k = nkey(raw);
+  if (BY_NAME[k]) return BY_NAME[k];
+  const w = nwords(raw);
+  if (w && BY_WORDS[w]) return BY_WORDS[w];
+  /* 以前這裡做 substring 寬鬆比對，207 國裡有 10 個會配錯人：
+     Romania→Oman、Somalia→Mali、Nigeria→Niger、Sudan→South Sudan、DR Congo→Congo…
+     認不出來就回 null，畫面會顯示官方原名 —— 寧可陌生，也不要掛上別國的國旗。 */
   return null;
 }
 function rowSlug(row) { const n = nationOf(row); return n ? n.slug : ''; }
@@ -32,16 +41,21 @@ function rowSlug(row) { const n = nationOf(row); return n ? n.slug : ''; }
    排名資料裡每一列同時有 teamKey 和國家，所以對照表直接從資料本身建。 */
 const KEY2SLUG = {};
 function buildKeyMap() {
-  ((OFF.data && OFF.data.rankings) || []).forEach(r => {
-    const n = nationOf(r);
-    if (n && r.teamKey) KEY2SLUG[String(r.teamKey).toUpperCase()] = n.slug;
-  });
+  const add = (key, n) => { if (key && n) KEY2SLUG[String(key).toUpperCase()] = n.slug; };
+  ((OFF.data && OFF.data.rankings) || []).forEach(r => add(r.teamKey, nationOf(r)));
+  /* 賽程通常比排名早公布。participants 身上如果帶得出國家就先建進來，
+     不然排名還沒出來的那幾天，整張賽程都對不到隊伍。 */
+  ((OFF.data && OFF.data.matches) || []).forEach(m => (m.participants || []).forEach(p => {
+    const k = String((p && p.teamKey) || '').toUpperCase();
+    if (!k || KEY2SLUG[k]) return;
+    add(k, nationOf(p && p.team ? p : { team: p }));
+  }));
 }
 function slugOfKey(k) {
-  k = String(k || '').toUpperCase();
-  if (KEY2SLUG[k]) return KEY2SLUG[k];
-  const n = BY_CC[k.slice(0, 2).toLowerCase()];   // 還沒有排名資料時的退路
-  return n ? n.slug : '';
+  /* 查不到就回空字串。以前這裡把三碼砍成兩碼當 ISO-2 猜，21 個常見碼裡有 7 個會猜錯：
+     CHN→瑞士、CHL→瑞士、MLT→馬利、COD/COG→哥倫比亞、GNB→幾內亞。
+     賽程配錯國家，就是派人去打聽錯的隊伍 —— 寧可查不到。 */
+  return KEY2SLUG[String(k || '').toUpperCase()] || '';
 }
 function rowLabel(row) {
   const n = nationOf(row), t = (row && row.team) || {};

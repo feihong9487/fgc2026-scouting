@@ -364,10 +364,15 @@ function pitFor(slug,ph){
   Object.entries(DB.pit).forEach(([k,v])=>{ if(pitSlugOf(k)===slug&&v&&v.ts&&!v.del&&(!best||v.ts>best.ts)) best=v; });
   return best;
 }
-function rec(){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
-  if(!DB.pit[k]||DB.pit[k].del) DB.pit[k]=blankPit();   // 刪掉之後再填等於重新開一份
-  return DB.pit[k]; }
-function touch(k,v){ const r=rec(); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); renderMine(); renderSched(); }
+/* make=true 才會真的在 DB.pit 裡建立紀錄。
+   只是要顯示就不能建 —— 以前 loadPit 一呼叫就建，而剛刪掉的那一份是「墓碑」（{del:true}），
+   會被這裡蓋成一份空白紀錄。墓碑一消失，下一次同步伺服器就把刪掉的那份送回來了。 */
+function rec(make){ if(!curTeam||!DB) return null; const k=pitKey(curTeam);
+  const cur=DB.pit[k];
+  if(cur&&!cur.del) return cur;
+  if(!make) return blankPit();                          // 給畫面用的空殼，不進 DB
+  return (DB.pit[k]=blankPit()); }                      // 刪掉之後再填等於重新開一份
+function touch(k,v){ const r=rec(true); if(!r) return; r[k]=v; r.ts=now(); r.scout=DB.cfg.scout; save(); showSaved(r.ts); renderMine(); renderSched(); }
 function showSaved(ts){
   const el=$('pSaved'); if(!el) return;
   el.textContent = ts ? t('sc.autosaved')+' '+fmtTime(ts) : t('sc.nothingYet');
@@ -497,7 +502,7 @@ function renderSelf(){ const el=$('pSelf'); const s=PROFILES[curTeam]; if(!curTe
   el.hidden=false; el.innerHTML=`<h2><span class="ic">📢</span>${esc(t('p.selfBy'))} ${nFlag(curTeam)} ${esc(nName(curTeam))}</h2>
     <div class="note">${esc(pitBits(s).join(' · '))}</div>${s.desc?`<p class="desc">${esc(s.desc)}</p>`:''}
     <div class="bar"><button class="btn" id="pUseSelf">${esc(t('p.copyIn'))}</button><span class="note" style="align-self:center">${esc(t('p.updated'))} ${esc(fmtDate(s.ts))}</span></div>`;
-  $('pUseSelf').onclick=()=>{ const r=rec(); ['cap','type','empty','sup','port','climb','climbSec','carry','carried','pos','roles','hp','drive','lang'].forEach(k=>{ if(s[k]!==undefined) r[k]=s[k]; }); r.ts=now(); save(); loadPit(); toast(t('p.copied'),'ok'); }; }
+  $('pUseSelf').onclick=()=>{ const r=rec(true); ['cap','type','empty','sup','port','climb','climbSec','carry','carried','pos','roles','hp','drive','lang'].forEach(k=>{ if(s[k]!==undefined) r[k]=s[k]; }); r.ts=now(); save(); loadPit(); toast(t('p.copied'),'ok'); }; }
 
 /* ---------- NATIONS ---------- */
 let tPhase='all';
@@ -661,7 +666,7 @@ $('schedN').oninput=e=>{ const p=plan(); p.n[pitPhase]=Math.max(1,Math.min(60,pa
 $('nLookup').onclick=()=>openPicker(sl=>openNation(sl));
 $('pSave').onclick=async()=>{
   if(!curTeam){ toast(t('sc.pickFirst')); return; }
-  const r=rec(); if(r&&!r.ts){ r.ts=now(); r.scout=DB.cfg.scout; }
+  const r=rec(true); if(r&&!r.ts){ r.ts=now(); r.scout=DB.cfg.scout; }
   saveNow();
   toast(t('sc.saved')+' · '+nName(curTeam)+' · '+(PHASE_LABEL[pitPhase]||pitPhase),'ok');
   haptic(18); sparkBurst($('pSave'),16); showSaved(r&&r.ts);
@@ -856,7 +861,7 @@ function setSync(k,c,extra){ SYNC.last={k,c:c||'',extra:extra||''}; const e=$('s
 function applyServer(s){ let ch=false, cfgCh=false; const sc=s.cfg||{}; SYNC.applying=true; try{
   /* scout 名字、主題、特效、最近選過的國家是這台裝置自己的；賽程計畫（plan）是全隊的，要跟著伺服器走。
      以前 cfg 整包換掉時 plan 沒有一起上傳，另一台裝置一動 cfg，這台的賽程表就被清空。 */
-  if(sc.ts&&sc.ts>(DB.cfg.ts||'')){ const keep={scout:DB.cfg.scout,theme:DB.cfg.theme,fx:DB.cfg.fx,recent:DB.cfg.recent}; if(!sc.plan) keep.plan=DB.cfg.plan;
+  if(sc.ts&&sc.ts>(DB.cfg.ts||'')){ const keep={scout:DB.cfg.scout,theme:DB.cfg.theme,fx:DB.cfg.fx,recent:DB.cfg.recent}; if(!sc.plan) keep.plan=DB.cfg.plan; if(!sc.map) keep.map=DB.cfg.map;
     DB.cfg=Object.assign(norm({cfg:sc}).cfg,keep); ch=true; cfgCh=true; }
   Object.entries(s.pit||{}).forEach(([k,v])=>{ const c=DB.pit[k]; if(!c||(v.ts||'')>(c.ts||'')){ DB.pit[k]=v; ch=true; } });
   if(ch&&typeof renderMine==='function') setTimeout(renderMine,0);
@@ -875,7 +880,9 @@ async function push(force){ if(!SYNC.on||SYNC.busy||!DB) return;
   if(!force&&!SYNC.dirty&&document.hidden) return;
   const sending=SYNC.dirty||force;
   SYNC.busy=true; $('syncBadge').classList.add('busy');
-  const body=sending?{rev:SYNC.rev,cfg:{custom:DB.cfg.custom,event:DB.cfg.event,plan:DB.cfg.plan,ts:DB.cfg.ts},pit:DB.pit,match:DB.match}:{rev:SYNC.rev};
+  /* cfg 是整包比 ts 換掉的，所以「全隊共用」的欄位每一個都要上傳。漏掉任何一個，
+     別台裝置一動 cfg，這台的那一份就會被 norm 重建成空的 —— plan 被這樣清過一次，map 也是。 */
+  const body=sending?{rev:SYNC.rev,cfg:{custom:DB.cfg.custom,event:DB.cfg.event,plan:DB.cfg.plan,map:DB.cfg.map,ts:DB.cfg.ts},pit:DB.pit,match:DB.match}:{rev:SYNC.rev};
   try{ const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),12000);
     const r=await fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json','X-Token':AUTH.token},signal:ctl.signal,body:JSON.stringify(body)});
     clearTimeout(to);
@@ -974,7 +981,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v32';
+const APP_VER='v33';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
