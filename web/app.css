@@ -638,18 +638,6 @@ svg.trend.dn polyline{stroke:var(--red)}
 .mp-chip b{color:var(--ink);font-weight:700}
 @media (max-width:360px){ .mp-bot .n{font-size:11px} .mp-t{font-size:240px} }
 
-/* 直向手機上場地被壓得很小（寬度就那麼多），提醒轉橫向；桌機和平板不會看到這行。 */
-.mp-rot{display:none}
-@media (orientation:portrait) and (max-width:620px){
-  .mp-rot{display:flex;gap:9px;align-items:center;margin:0 0 12px;padding:10px 13px;border-radius:13px;
-    border:1.5px dashed var(--line-2);background:color-mix(in srgb,var(--ember-soft,var(--line)) 70%,transparent);
-    color:var(--muted);font-size:12.5px;line-height:1.5}
-  .mp-rot .ic{font-size:19px;line-height:1;color:var(--ember);flex:none;
-    animation:mpRot 2.6s var(--e) infinite}
-  .mp-rot .zh{display:block;font-size:11.5px;opacity:.8}
-}
-@keyframes mpRot{0%,62%{transform:rotate(0)}78%{transform:rotate(90deg)}100%{transform:rotate(90deg)}}
-@media (prefers-reduced-motion:reduce){ .mp-rot .ic{animation:none} }
 /* 轉成橫向之後：高度才是瓶頸，把場地縮到剛好一屏，不用捲動就能整張看完。 */
 @media (orientation:landscape) and (max-height:620px){
   #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 118px);height:calc(100dvh - 118px)}
@@ -667,7 +655,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 body.mp-full{overflow:hidden}
 body.mp-full header,body.mp-full nav,body.mp-full footer,body.mp-full #mFab,
 body.mp-full #tab-map .intro,body.mp-full #tab-map .card:not(.mp-stage),
-body.mp-full #mpFoot,body.mp-full #mpCtl,body.mp-full .mp-rot{display:none}
+body.mp-full #mpFoot,body.mp-full #mpCtl{display:none}
 body.mp-full #tab-map .mp-stage{position:fixed;inset:0;z-index:50;margin:0;padding:6px;border:0;border-radius:0;
   background:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:none;animation:none}
 body.mp-full #mpField{max-width:100%;margin:0;

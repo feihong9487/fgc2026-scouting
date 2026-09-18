@@ -653,18 +653,6 @@ svg.trend.dn polyline{stroke:var(--red)}
 .mp-chip b{color:var(--ink);font-weight:700}
 @media (max-width:360px){ .mp-bot .n{font-size:11px} .mp-t{font-size:240px} }
 
-/* 直向手機上場地被壓得很小（寬度就那麼多），提醒轉橫向；桌機和平板不會看到這行。 */
-.mp-rot{display:none}
-@media (orientation:portrait) and (max-width:620px){
-  .mp-rot{display:flex;gap:9px;align-items:center;margin:0 0 12px;padding:10px 13px;border-radius:13px;
-    border:1.5px dashed var(--line-2);background:color-mix(in srgb,var(--ember-soft,var(--line)) 70%,transparent);
-    color:var(--muted);font-size:12.5px;line-height:1.5}
-  .mp-rot .ic{font-size:19px;line-height:1;color:var(--ember);flex:none;
-    animation:mpRot 2.6s var(--e) infinite}
-  .mp-rot .zh{display:block;font-size:11.5px;opacity:.8}
-}
-@keyframes mpRot{0%,62%{transform:rotate(0)}78%{transform:rotate(90deg)}100%{transform:rotate(90deg)}}
-@media (prefers-reduced-motion:reduce){ .mp-rot .ic{animation:none} }
 /* 轉成橫向之後：高度才是瓶頸，把場地縮到剛好一屏，不用捲動就能整張看完。 */
 @media (orientation:landscape) and (max-height:620px){
   #mpField{width:auto;max-width:100%;margin:0 auto;height:calc(100vh - 118px);height:calc(100dvh - 118px)}
@@ -682,7 +670,7 @@ svg.trend.dn polyline{stroke:var(--red)}
 body.mp-full{overflow:hidden}
 body.mp-full header,body.mp-full nav,body.mp-full footer,body.mp-full #mFab,
 body.mp-full #tab-map .intro,body.mp-full #tab-map .card:not(.mp-stage),
-body.mp-full #mpFoot,body.mp-full #mpCtl,body.mp-full .mp-rot{display:none}
+body.mp-full #mpFoot,body.mp-full #mpCtl{display:none}
 body.mp-full #tab-map .mp-stage{position:fixed;inset:0;z-index:50;margin:0;padding:6px;border:0;border-radius:0;
   background:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:none;animation:none}
 body.mp-full #mpField{max-width:100%;margin:0;
@@ -1080,7 +1068,6 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
   </div>
   <div class="card mp-stage">
     <button class="mp-exp" id="mpExp" aria-label="Full screen">⛶</button>
-    <p class="mp-rot" id="mpRot"><span class="ic" aria-hidden="true">↻</span><span><span data-i18n="mp.rotate">Turn your phone sideways — the field gets much bigger.</span><span class="zh" data-hint="mp.rotate"></span></span></p>
     <div id="mpField"></div>
     <p class="note" id="mpFoot" style="margin:12px 0 0"><span data-i18n="mp.hint">Drag a robot to move it. Tap it to name the country or take it off.</span> <span class="zh" data-hint="mp.hint"></span></p>
     <div class="row" id="mpCtl" style="margin-top:12px">
@@ -2880,7 +2867,7 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 (function(){
 const I = window.I18N, ADD = {
 en:{"nav.map":"Map","ab.map.t":"Strategy map","ab.map":"The full FGC 2026 field. Put up to three robots per alliance on it and drag them around while you talk through a match.",
- "mp.rotate":"Turn your phone sideways and tap ⛶ — that is when the field is biggest.","mp.expand":"Full screen","mp.exit":"Leave full screen",
+ "mp.expand":"Full screen","mp.exit":"Leave full screen",
  "mp.red":"Red robots","mp.blue":"Blue robots","mp.empty":"Add robots above, then drag them on the field.",
  "mp.hint":"Drag a robot to move it. Tap it to name the country or take it off.",
  "mp.scale":"Field drawn to scale from the official drawings (7 m × 7 m). Robot icons are enlarged so they can be tapped; BRACE zones are shown as equal thirds.",
@@ -2890,7 +2877,7 @@ en:{"nav.map":"Map","ab.map.t":"Strategy map","ab.map":"The full FGC 2026 field.
  "mp.ext":"EXTINGUISHER","mp.sup":"SUPPRESSION","mp.shield":"FIRE SHIELD","mp.start":"START","mp.stnR":"RED STATION","mp.stnB":"BLUE STATION"},
 
 "zh-Hant":{"nav.map":"地圖","ab.map.t":"戰術地圖","ab.map":"FGC 2026 全場場地。紅藍各最多放三台機器人，邊拖邊討論這場怎麼打。",
- "mp.rotate":"手機轉成橫向再點 ⛶ 放大，場地最大。","mp.expand":"全螢幕","mp.exit":"離開全螢幕",
+ "mp.expand":"全螢幕","mp.exit":"離開全螢幕",
  "mp.red":"紅方機器人","mp.blue":"藍方機器人","mp.empty":"先在上面加機器人，再到場地上拖。",
  "mp.hint":"拖曳機器人可以移動；點一下可以指定國家或把它拿掉。",
  "mp.scale":"場地照官方圖面等比例畫（7 公尺見方）。機器人圖標有放大，才點得到；支架的三個 ZONE 以等分表示。",
@@ -2900,7 +2887,7 @@ en:{"nav.map":"Map","ab.map.t":"Strategy map","ab.map":"The full FGC 2026 field.
  "mp.ext":"滅火器","mp.sup":"抑制單元","mp.shield":"火盾","mp.start":"出發區","mp.stnR":"紅方聯盟站","mp.stnB":"藍方聯盟站"},
 
 "zh-Hans":{"nav.map":"地图","ab.map.t":"战术地图","ab.map":"FGC 2026 全场场地。红蓝各最多放三台机器人，边拖边讨论这场怎么打。",
- "mp.rotate":"手机转成横向再点 ⛶ 放大，场地最大。","mp.expand":"全屏","mp.exit":"退出全屏",
+ "mp.expand":"全屏","mp.exit":"退出全屏",
  "mp.red":"红方机器人","mp.blue":"蓝方机器人","mp.empty":"先在上面加机器人，再到场地上拖。",
  "mp.hint":"拖动机器人可以移动；点一下可以指定国家或把它拿掉。",
  "mp.scale":"场地照官方图纸等比例绘制（7 米见方）。机器人图标有放大，才点得到；支架的三个 ZONE 以等分表示。",
@@ -2910,7 +2897,7 @@ en:{"nav.map":"Map","ab.map.t":"Strategy map","ab.map":"The full FGC 2026 field.
  "mp.ext":"灭火器","mp.sup":"抑制单元","mp.shield":"火盾","mp.start":"出发区","mp.stnR":"红方联盟站","mp.stnB":"蓝方联盟站"},
 
 es:{"nav.map":"Mapa","ab.map.t":"Mapa de estrategia","ab.map":"El campo completo de la FGC 2026. Pon hasta tres robots por alianza y arrástralos mientras planean el partido.",
- "mp.rotate":"Gira el teléfono y toca ⛶: así el campo se ve lo más grande posible.","mp.expand":"Pantalla completa","mp.exit":"Salir de pantalla completa",
+ "mp.expand":"Pantalla completa","mp.exit":"Salir de pantalla completa",
  "mp.red":"Robots rojos","mp.blue":"Robots azules","mp.empty":"Añade robots arriba y luego arrástralos por el campo.",
  "mp.hint":"Arrastra un robot para moverlo. Tócalo para asignarle un país o quitarlo.",
  "mp.scale":"Campo dibujado a escala según los planos oficiales (7 m × 7 m). Los iconos están agrandados para poder tocarlos; las ZONAS del BRACE se muestran en tercios iguales.",
@@ -2920,7 +2907,7 @@ es:{"nav.map":"Mapa","ab.map.t":"Mapa de estrategia","ab.map":"El campo completo
  "mp.start":"SALIDA","mp.stnR":"ESTACIÓN ROJA","mp.stnB":"ESTACIÓN AZUL"},
 
 fr:{"nav.map":"Carte","ab.map.t":"Carte de stratégie","ab.map":"Le terrain complet de la FGC 2026. Placez jusqu'à trois robots par alliance et déplacez-les en discutant du match.",
- "mp.rotate":"Mets ton téléphone à l'horizontale et touche ⛶ : c'est là que le terrain est le plus grand.","mp.expand":"Plein écran","mp.exit":"Quitter le plein écran",
+ "mp.expand":"Plein écran","mp.exit":"Quitter le plein écran",
  "mp.red":"Robots rouges","mp.blue":"Robots bleus","mp.empty":"Ajoutez des robots ci-dessus, puis faites-les glisser sur le terrain.",
  "mp.hint":"Faites glisser un robot pour le déplacer. Touchez-le pour lui donner un pays ou le retirer.",
  "mp.scale":"Terrain à l'échelle d'après les plans officiels (7 m × 7 m). Les icônes sont agrandies pour rester cliquables ; les ZONES du BRACE sont affichées en tiers égaux.",
@@ -2930,7 +2917,7 @@ fr:{"nav.map":"Carte","ab.map.t":"Carte de stratégie","ab.map":"Le terrain comp
  "mp.start":"DÉPART","mp.stnR":"STATION ROUGE","mp.stnB":"STATION BLEUE"},
 
 pt:{"nav.map":"Mapa","ab.map.t":"Mapa de estratégia","ab.map":"O campo completo da FGC 2026. Coloque até três robôs por aliança e arraste-os enquanto discutem a partida.",
- "mp.rotate":"Roda o telemóvel e toca em ⛶ — é assim que o campo fica maior.","mp.expand":"Ecrã inteiro","mp.exit":"Sair do ecrã inteiro",
+ "mp.expand":"Ecrã inteiro","mp.exit":"Sair do ecrã inteiro",
  "mp.red":"Robôs vermelhos","mp.blue":"Robôs azuis","mp.empty":"Adicione robôs acima e depois arraste-os no campo.",
  "mp.hint":"Arraste um robô para movê-lo. Toque nele para definir o país ou retirá-lo.",
  "mp.scale":"Campo em escala a partir dos desenhos oficiais (7 m × 7 m). Os ícones estão ampliados para poderem ser tocados; as ZONAS do BRACE aparecem em terços iguais.",
@@ -2940,7 +2927,7 @@ pt:{"nav.map":"Mapa","ab.map.t":"Mapa de estratégia","ab.map":"O campo completo
  "mp.start":"PARTIDA","mp.stnR":"ESTAÇÃO VERMELHA","mp.stnB":"ESTAÇÃO AZUL"},
 
 de:{"nav.map":"Karte","ab.map.t":"Strategiekarte","ab.map":"Das komplette FGC-2026-Feld. Stellt bis zu drei Roboter pro Allianz darauf und schiebt sie hin und her, während ihr das Match durchsprecht.",
- "mp.rotate":"Handy quer drehen und ⛶ antippen — so ist das Feld am größten.","mp.expand":"Vollbild","mp.exit":"Vollbild verlassen",
+ "mp.expand":"Vollbild","mp.exit":"Vollbild verlassen",
  "mp.red":"Rote Roboter","mp.blue":"Blaue Roboter","mp.empty":"Oben Roboter hinzufügen, dann auf dem Feld ziehen.",
  "mp.hint":"Roboter ziehen zum Verschieben. Antippen, um ein Land zu setzen oder ihn herunterzunehmen.",
  "mp.scale":"Feld maßstabsgetreu nach den offiziellen Zeichnungen (7 m × 7 m). Die Symbole sind vergrößert, damit man sie treffen kann; die BRACE-ZONEN sind als gleiche Drittel dargestellt.",
@@ -2950,7 +2937,7 @@ de:{"nav.map":"Karte","ab.map.t":"Strategiekarte","ab.map":"Das komplette FGC-20
  "mp.start":"START","mp.stnR":"ROTE STATION","mp.stnB":"BLAUE STATION"},
 
 it:{"nav.map":"Mappa","ab.map.t":"Mappa strategica","ab.map":"Il campo completo della FGC 2026. Metti fino a tre robot per alleanza e trascinali mentre discutete il match.",
- "mp.rotate":"Gira il telefono e tocca ⛶: così il campo è al massimo.","mp.expand":"Schermo intero","mp.exit":"Esci da schermo intero",
+ "mp.expand":"Schermo intero","mp.exit":"Esci da schermo intero",
  "mp.red":"Robot rossi","mp.blue":"Robot blu","mp.empty":"Aggiungi i robot qui sopra, poi trascinali sul campo.",
  "mp.hint":"Trascina un robot per spostarlo. Toccalo per assegnargli un paese o toglierlo.",
  "mp.scale":"Campo in scala dai disegni ufficiali (7 m × 7 m). Le icone sono ingrandite per poterle toccare; le ZONE del BRACE sono mostrate in terzi uguali.",
@@ -2960,7 +2947,7 @@ it:{"nav.map":"Mappa","ab.map.t":"Mappa strategica","ab.map":"Il campo completo 
  "mp.start":"PARTENZA","mp.stnR":"STAZIONE ROSSA","mp.stnB":"STAZIONE BLU"},
 
 ru:{"nav.map":"Карта","ab.map.t":"Карта стратегии","ab.map":"Полное поле FGC 2026. Поставьте до трёх роботов на альянс и двигайте их, пока обсуждаете матч.",
- "mp.rotate":"Поверните телефон и нажмите ⛶ — так поле будет самым большим.","mp.expand":"Во весь экран","mp.exit":"Выйти из полноэкранного режима",
+ "mp.expand":"Во весь экран","mp.exit":"Выйти из полноэкранного режима",
  "mp.red":"Красные роботы","mp.blue":"Синие роботы","mp.empty":"Добавьте роботов выше, затем перетаскивайте их по полю.",
  "mp.hint":"Перетащите робота, чтобы передвинуть. Нажмите, чтобы указать страну или убрать его.",
  "mp.scale":"Поле вычерчено в масштабе по официальным чертежам (7 м × 7 м). Значки увеличены, чтобы по ним можно было попасть; ЗОНЫ BRACE показаны равными третями.",
@@ -2970,7 +2957,7 @@ ru:{"nav.map":"Карта","ab.map.t":"Карта стратегии","ab.map":"
  "mp.start":"СТАРТ","mp.stnR":"КРАСНАЯ СТАНЦИЯ","mp.stnB":"СИНЯЯ СТАНЦИЯ"},
 
 ja:{"nav.map":"マップ","ab.map.t":"作戦マップ","ab.map":"FGC 2026 のフィールド全体です。各アライアンス最大3台までロボットを置いて、動かしながら試合の作戦を話せます。",
- "mp.rotate":"スマホを横向きにして ⛶ を押すと、フィールドが一番大きくなります。","mp.expand":"全画面","mp.exit":"全画面をやめる",
+ "mp.expand":"全画面","mp.exit":"全画面をやめる",
  "mp.red":"赤のロボット","mp.blue":"青のロボット","mp.empty":"上でロボットを追加してから、フィールド上でドラッグしてください。",
  "mp.hint":"ドラッグで移動、タップで国の割り当てや取り外しができます。",
  "mp.scale":"フィールドは公式図面どおりの縮尺（7 m × 7 m）です。ロボットのアイコンはタップしやすいように拡大してあり、BRACE の ZONE は3等分で表示しています。",
@@ -2980,7 +2967,7 @@ ja:{"nav.map":"マップ","ab.map.t":"作戦マップ","ab.map":"FGC 2026 のフ
  "mp.ext":"消火器","mp.sup":"抑制ユニット","mp.shield":"防火シールド","mp.start":"スタート","mp.stnR":"赤ステーション","mp.stnB":"青ステーション"},
 
 ko:{"nav.map":"맵","ab.map.t":"전략 맵","ab.map":"FGC 2026 전체 경기장입니다. 얼라이언스마다 최대 3대까지 로봇을 올려놓고 끌어가며 경기를 논의하세요.",
- "mp.rotate":"휴대폰을 가로로 돌리고 ⛶ 를 누르면 경기장이 가장 커집니다.","mp.expand":"전체 화면","mp.exit":"전체 화면 끄기",
+ "mp.expand":"전체 화면","mp.exit":"전체 화면 끄기",
  "mp.red":"레드 로봇","mp.blue":"블루 로봇","mp.empty":"위에서 로봇을 추가한 다음 경기장에서 끌어 보세요.",
  "mp.hint":"로봇을 끌면 이동하고, 누르면 국가를 지정하거나 뺄 수 있습니다.",
  "mp.scale":"경기장은 공식 도면 축척 그대로입니다(7 m × 7 m). 로봇 아이콘은 누르기 쉽도록 확대했고, BRACE의 ZONE은 3등분으로 표시했습니다.",
@@ -2990,7 +2977,7 @@ ko:{"nav.map":"맵","ab.map.t":"전략 맵","ab.map":"FGC 2026 전체 경기장�
  "mp.ext":"소화기","mp.sup":"진압 유닛","mp.shield":"방화막","mp.start":"시작","mp.stnR":"레드 스테이션","mp.stnB":"블루 스테이션"},
 
 vi:{"nav.map":"Bản đồ","ab.map.t":"Bản đồ chiến thuật","ab.map":"Toàn bộ sân thi đấu FGC 2026. Đặt tối đa ba robot cho mỗi liên minh rồi kéo chúng khi bàn chiến thuật.",
- "mp.rotate":"Xoay ngang điện thoại rồi chạm ⛶ — sân sẽ to nhất.","mp.expand":"Toàn màn hình","mp.exit":"Thoát toàn màn hình",
+ "mp.expand":"Toàn màn hình","mp.exit":"Thoát toàn màn hình",
  "mp.red":"Robot đỏ","mp.blue":"Robot xanh","mp.empty":"Thêm robot ở trên rồi kéo chúng trên sân.",
  "mp.hint":"Kéo robot để di chuyển. Chạm vào robot để đặt quốc gia hoặc lấy ra khỏi sân.",
  "mp.scale":"Sân được vẽ đúng tỉ lệ theo bản vẽ chính thức (7 m × 7 m). Biểu tượng robot được phóng to cho dễ chạm; các ZONE của BRACE hiển thị chia ba bằng nhau.",
@@ -3000,7 +2987,7 @@ vi:{"nav.map":"Bản đồ","ab.map.t":"Bản đồ chiến thuật","ab.map":"T
  "mp.start":"XUẤT PHÁT"},
 
 id:{"nav.map":"Peta","ab.map.t":"Peta strategi","ab.map":"Lapangan FGC 2026 lengkap. Taruh maksimal tiga robot per aliansi lalu geser-geser sambil membahas pertandingan.",
- "mp.rotate":"Putar ponsel ke mendatar lalu ketuk ⛶ — lapangan paling besar begitu.","mp.expand":"Layar penuh","mp.exit":"Keluar layar penuh",
+ "mp.expand":"Layar penuh","mp.exit":"Keluar layar penuh",
  "mp.red":"Robot merah","mp.blue":"Robot biru","mp.empty":"Tambahkan robot di atas, lalu geser di lapangan.",
  "mp.hint":"Geser robot untuk memindahkannya. Ketuk untuk memberi negara atau mengeluarkannya.",
  "mp.scale":"Lapangan digambar sesuai skala dari gambar resmi (7 m × 7 m). Ikon robot diperbesar agar bisa disentuh; ZONE pada BRACE ditampilkan sebagai tiga bagian sama besar.",
@@ -3010,7 +2997,7 @@ id:{"nav.map":"Peta","ab.map.t":"Peta strategi","ab.map":"Lapangan FGC 2026 leng
  "mp.start":"MULAI"},
 
 tr:{"nav.map":"Harita","ab.map.t":"Strateji haritası","ab.map":"FGC 2026 sahasının tamamı. Her ittifak için en fazla üç robot koyup maçı konuşurken sürükleyin.",
- "mp.rotate":"Telefonu yan çevirip ⛶ simgesine dokun — saha en büyük böyle olur.","mp.expand":"Tam ekran","mp.exit":"Tam ekrandan çık",
+ "mp.expand":"Tam ekran","mp.exit":"Tam ekrandan çık",
  "mp.red":"Kırmızı robotlar","mp.blue":"Mavi robotlar","mp.empty":"Yukarıdan robot ekleyin, sonra sahada sürükleyin.",
  "mp.hint":"Taşımak için robotu sürükleyin. Ülke atamak veya sahadan almak için dokunun.",
  "mp.scale":"Saha, resmi çizimlere göre ölçekli (7 m × 7 m). Robot simgeleri dokunulabilsin diye büyütüldü; BRACE ZONE'ları eşit üçte bir olarak gösteriliyor.",
@@ -3020,7 +3007,7 @@ tr:{"nav.map":"Harita","ab.map.t":"Strateji haritası","ab.map":"FGC 2026 sahas�
  "mp.start":"BAŞLANGIÇ"},
 
 ar:{"nav.map":"الخريطة","ab.map.t":"خريطة الاستراتيجية","ab.map":"ملعب FGC 2026 كاملاً. ضع حتى ثلاثة روبوتات لكل تحالف وحرّكها وأنتم تناقشون المباراة.",
- "mp.rotate":"أدر هاتفك أفقياً واضغط ⛶ — عندها يصبح الملعب في أكبر حجم.","mp.expand":"ملء الشاشة","mp.exit":"إنهاء ملء الشاشة",
+ "mp.expand":"ملء الشاشة","mp.exit":"إنهاء ملء الشاشة",
  "mp.red":"روبوتات الأحمر","mp.blue":"روبوتات الأزرق","mp.empty":"أضف الروبوتات بالأعلى ثم اسحبها على الملعب.",
  "mp.hint":"اسحب الروبوت لتحريكه. اضغط عليه لتحديد الدولة أو إزالته.",
  "mp.scale":"الملعب مرسوم بالمقياس حسب الرسومات الرسمية (٧ م × ٧ م). أيقونات الروبوتات مكبَّرة ليسهل لمسها، ومناطق BRACE معروضة كأثلاث متساوية.",
@@ -3029,7 +3016,7 @@ ar:{"nav.map":"الخريطة","ab.map.t":"خريطة الاستراتيجية",
  "mp.sheetNote":"الخريطة مشتركة مع كل الفريق وتتزامن بين أجهزتك."},
 
 fa:{"nav.map":"نقشه","ab.map.t":"نقشهٔ راهبرد","ab.map":"کل زمین FGC 2026. تا سه ربات برای هر اتحاد بگذارید و هنگام بحث دربارهٔ مسابقه آن‌ها را جابه‌جا کنید.",
- "mp.rotate":"گوشی را افقی بگیرید و ⛶ را بزنید — زمین در بیشترین اندازه می‌شود.","mp.expand":"تمام‌صفحه","mp.exit":"خروج از تمام‌صفحه",
+ "mp.expand":"تمام‌صفحه","mp.exit":"خروج از تمام‌صفحه",
  "mp.red":"ربات‌های قرمز","mp.blue":"ربات‌های آبی","mp.empty":"بالا ربات اضافه کنید، بعد روی زمین بکشید.",
  "mp.hint":"برای جابه‌جایی ربات را بکشید. برای تعیین کشور یا برداشتن آن، رویش بزنید.",
  "mp.scale":"زمین بر اساس نقشه‌های رسمی و با مقیاس رسم شده است (۷ م × ۷ م). نمادهای ربات بزرگ‌تر شده‌اند تا بتوان لمسشان کرد؛ ZONEهای BRACE به سه بخش مساوی نشان داده شده‌اند.",
@@ -3038,7 +3025,7 @@ fa:{"nav.map":"نقشه","ab.map.t":"نقشهٔ راهبرد","ab.map":"کل ز�
  "mp.sheetNote":"این نقشه برای کل تیم است و بین دستگاه‌های شما همگام می‌شود."},
 
 hi:{"nav.map":"मैप","ab.map.t":"रणनीति मैप","ab.map":"पूरा FGC 2026 मैदान। हर अलायंस के लिए तीन तक रोबोट रखें और मैच पर बात करते हुए उन्हें खिसकाएँ।",
- "mp.rotate":"फ़ोन आड़ा करके ⛶ दबाएँ — तब मैदान सबसे बड़ा दिखता है।","mp.expand":"पूर्ण स्क्रीन","mp.exit":"पूर्ण स्क्रीन से बाहर",
+ "mp.expand":"पूर्ण स्क्रीन","mp.exit":"पूर्ण स्क्रीन से बाहर",
  "mp.red":"लाल रोबोट","mp.blue":"नीले रोबोट","mp.empty":"ऊपर रोबोट जोड़ें, फिर मैदान पर खींचें।",
  "mp.hint":"रोबोट को खींचकर हिलाएँ। देश चुनने या हटाने के लिए उस पर टैप करें।",
  "mp.scale":"मैदान आधिकारिक ड्रॉइंग के अनुपात में बनाया गया है (7 मी × 7 मी)। रोबोट के आइकॉन बड़े किए गए हैं ताकि टैप हो सकें; BRACE के ZONE बराबर तिहाई में दिखाए गए हैं।",
@@ -3047,7 +3034,7 @@ hi:{"nav.map":"मैप","ab.map.t":"रणनीति मैप","ab.map":"�
  "mp.sheetNote":"यह मैप पूरी टीम का है और आपके सभी डिवाइस पर सिंक होता है।"},
 
 bn:{"nav.map":"ম্যাপ","ab.map.t":"কৌশলের ম্যাপ","ab.map":"পুরো FGC 2026 মাঠ। প্রতি অ্যালায়েন্সে তিনটি পর্যন্ত রোবট বসিয়ে ম্যাচ নিয়ে আলোচনা করতে করতে সরান।",
- "mp.rotate":"ফোন আড়াআড়ি করে ⛶ চাপুন — তখনই মাঠ সবচেয়ে বড় দেখায়।","mp.expand":"পূর্ণ স্ক্রিন","mp.exit":"পূর্ণ স্ক্রিন বন্ধ",
+ "mp.expand":"পূর্ণ স্ক্রিন","mp.exit":"পূর্ণ স্ক্রিন বন্ধ",
  "mp.red":"লাল রোবট","mp.blue":"নীল রোবট","mp.empty":"উপরে রোবট যোগ করুন, তারপর মাঠে টেনে সরান।",
  "mp.hint":"সরাতে রোবট টেনে নিন। দেশ দিতে বা তুলে নিতে ট্যাপ করুন।",
  "mp.scale":"মাঠ অফিশিয়াল ড্রয়িং অনুযায়ী মাপমতো আঁকা (৭ মি × ৭ মি)। ট্যাপ করার সুবিধার্থে রোবটের আইকন বড় করা হয়েছে; BRACE-এর ZONE সমান তিন ভাগে দেখানো হয়েছে।",
@@ -3056,7 +3043,7 @@ bn:{"nav.map":"ম্যাপ","ab.map.t":"কৌশলের ম্যাপ",
  "mp.sheetNote":"ম্যাপটি পুরো দলের এবং আপনার সব ডিভাইসে সিঙ্ক হয়।"},
 
 ur:{"nav.map":"نقشہ","ab.map.t":"حکمتِ عملی کا نقشہ","ab.map":"FGC 2026 کا پورا میدان۔ ہر الائنس کے لیے تین تک روبوٹ رکھیں اور میچ پر بات کرتے ہوئے انہیں کھسکائیں۔",
- "mp.rotate":"فون آڑا کر کے ⛶ دبائیں — تب میدان سب سے بڑا نظر آتا ہے۔","mp.expand":"پوری اسکرین","mp.exit":"پوری اسکرین سے نکلیں",
+ "mp.expand":"پوری اسکرین","mp.exit":"پوری اسکرین سے نکلیں",
  "mp.red":"سرخ روبوٹ","mp.blue":"نیلے روبوٹ","mp.empty":"اوپر روبوٹ شامل کریں، پھر میدان پر کھینچیں۔",
  "mp.hint":"ہلانے کے لیے روبوٹ کو کھینچیں۔ ملک مقرر کرنے یا ہٹانے کے لیے اس پر ٹیپ کریں۔",
  "mp.scale":"میدان سرکاری ڈرائنگ کے مطابق پیمانے پر بنایا گیا ہے (۷ م × ۷ م)۔ روبوٹ کے آئیکن بڑے کیے گئے ہیں تاکہ ٹیپ ہو سکیں؛ BRACE کے ZONE برابر تہائیوں میں دکھائے گئے ہیں۔",
@@ -3065,7 +3052,7 @@ ur:{"nav.map":"نقشہ","ab.map.t":"حکمتِ عملی کا نقشہ","ab.map"
  "mp.sheetNote":"یہ نقشہ پوری ٹیم کا ہے اور آپ کے تمام آلات پر سنک ہوتا ہے۔"},
 
 sw:{"nav.map":"Ramani","ab.map.t":"Ramani ya mkakati","ab.map":"Uwanja mzima wa FGC 2026. Weka hadi roboti tatu kwa kila muungano na uzivute mnapojadili mchezo.",
- "mp.rotate":"Geuza simu ulalo kisha gusa ⛶ — hapo uwanja ndio mkubwa zaidi.","mp.expand":"Skrini nzima","mp.exit":"Toka skrini nzima",
+ "mp.expand":"Skrini nzima","mp.exit":"Toka skrini nzima",
  "mp.red":"Roboti nyekundu","mp.blue":"Roboti za bluu","mp.empty":"Ongeza roboti hapo juu, kisha zivute uwanjani.",
  "mp.hint":"Vuta roboti ili kuihamisha. Iguse ili kuweka nchi au kuiondoa.",
  "mp.scale":"Uwanja umechorwa kwa kipimo halisi kutoka michoro rasmi (m 7 × m 7). Alama za roboti zimekuzwa ili ziguswe kwa urahisi; ZONE za BRACE zimeonyeshwa kama theluthi sawa.",
