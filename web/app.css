@@ -663,3 +663,6 @@ body.mp-full #mpField{max-width:100%;margin:0;
   width:min(100vw - 12px, calc((100dvh - 12px) * 8520 / 7300));
   height:auto}
 body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right))}
+/* 登入頁「或」分隔線（訪客按鈕上方） */
+.or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}

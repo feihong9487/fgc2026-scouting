@@ -54,6 +54,12 @@ Just open <https://fgc-scout.duckdns.org> and pick your country. The first time
 your team signs in you need a claim code, which Team Chinese Taipei sends to
 your team directly. That instance is free for every team.
 
+Just looking — a judge, a mentor, or a team that only decided to scout on the
+day? Open <https://fgc-scout.duckdns.org/guest> (or tap **continue as guest**
+on the sign-in page). Guests see the official rankings, the schedule and every
+published robot, can scout on their own phone and use the score calculator.
+Nothing a guest does is saved to the server: no sync, no publishing, no photos.
+
 Prefer something you can carry on a USB stick? `FGC2026_Scouting.html` is a
 single self-contained file (≈700 KB, all 20 languages and all flags inlined).
 Open it in any browser — no server, no internet, no sync.
@@ -132,6 +138,8 @@ All endpoints take `X-Token` from `/api/login` except where noted.
 | Method | Path | Purpose |
 |---|---|---|
 | `POST` | `/api/login` | `{team, password}` → `{token, mustChange}`; `409 needClaim` if unclaimed |
+| `GET` | `/api/guest` | no auth — read-only guest token; every write endpoint answers `403 {guest:true}` |
+| `GET` | `/guest` | redirects to `/?guest=1`, which signs in as guest automatically (poster QR) |
 | `POST` | `/api/claim` | `{team, code, password}` → `{token}`, first sign-in only |
 | `POST` | `/api/password` | change the team password |
 | `GET` | `/api/state` | whole dataset for your team |
