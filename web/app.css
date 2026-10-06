@@ -583,6 +583,20 @@ svg.trend.dn polyline{stroke:var(--red)}
 #schedList{max-height:none}
 @media (max-width:380px){ .sc-p .nm{display:none} .sc-cells{grid-template-columns:1fr 1fr} }
 
+/* 自由訪問：這次有來、還沒記過的國家，一格一國，點了直接開表單 */
+.vlab{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin:0 0 10px}
+.vlab .pill{margin-left:auto}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;max-height:340px;overflow-y:auto;overscroll-behavior:contain}
+.vgrid button{display:flex;align-items:center;gap:8px;min-width:0;min-height:44px;padding:6px 10px;
+  border:1.5px solid var(--line-2);border-radius:11px;background:color-mix(in srgb,var(--panel-solid) 55%,transparent);
+  color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+  transition:transform var(--d-s) var(--e),border-color var(--d-s),background var(--d-s)}
+.vgrid button:active{transform:scale(.96)}
+.vgrid button[aria-pressed=true]{border-color:var(--ember);background:var(--ember-soft)}
+.vgrid .fl{flex:none;font-size:18px;line-height:1}
+.vgrid img.flag{height:14px;width:auto;border-radius:2px}
+.vgrid .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
 /* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
 .seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}
 

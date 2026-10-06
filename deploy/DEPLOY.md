@@ -98,8 +98,7 @@ Get-Content $HOME\.ssh\id_ed25519_fgc.pub
 # 看服務狀態與日誌
 ssh root@<your-domain> "systemctl status fgc-scouting --no-pager; tail -30 /var/log/fgc-scouting.log"
 
-# 幫忘記密碼的隊伍重發：作廢舊帳號、登出他們所有裝置、發一張新的認領碼（資料不動）。
-# 更省事的是 .\deploy\claim.ps1 -Team nepal -Reissue，會直接把要私訊的連結放進剪貼簿。
+# 幫忘記密碼的隊伍重設：密碼恢復成預設的 password、登出他們所有裝置（資料不動）。
 ssh root@<your-domain> "cd /opt/fgc && sudo -u fgc python3 server.py --reset-password nepal"
 
 # 看目前有幾隊在用

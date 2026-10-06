@@ -598,6 +598,20 @@ svg.trend.dn polyline{stroke:var(--red)}
 #schedList{max-height:none}
 @media (max-width:380px){ .sc-p .nm{display:none} .sc-cells{grid-template-columns:1fr 1fr} }
 
+/* 自由訪問：這次有來、還沒記過的國家，一格一國，點了直接開表單 */
+.vlab{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin:0 0 10px}
+.vlab .pill{margin-left:auto}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;max-height:340px;overflow-y:auto;overscroll-behavior:contain}
+.vgrid button{display:flex;align-items:center;gap:8px;min-width:0;min-height:44px;padding:6px 10px;
+  border:1.5px solid var(--line-2);border-radius:11px;background:color-mix(in srgb,var(--panel-solid) 55%,transparent);
+  color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+  transition:transform var(--d-s) var(--e),border-color var(--d-s),background var(--d-s)}
+.vgrid button:active{transform:scale(.96)}
+.vgrid button[aria-pressed=true]{border-color:var(--ember);background:var(--ember-soft)}
+.vgrid .fl{flex:none;font-size:18px;line-height:1}
+.vgrid img.flag{height:14px;width:auto;border-radius:2px}
+.vgrid .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
 /* 計分機：手冊上不可能的選項（例如我們沒人在 Zone 3 卻選「6 台 Zone 3」）會被停用 */
 .seg button:disabled{opacity:.32;cursor:not-allowed;filter:saturate(.3)}
 
@@ -728,46 +742,13 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
       <div class="f"><label><span data-i18n="auth.who">Who are you?</span> <span class="zh" data-hint="auth.who"></span></label>
         <button class="cbtn" id="aTeam" data-v=""><span class="fl">🌍</span><span class="ph" data-i18n="auth.selectCountry">Select your country…</span><span class="arr">›</span></button></div>
       <div class="f"><label><span data-i18n="auth.pw">Team password</span></label>
-        <div class="pw"><input type="password" id="aPw" placeholder="••••••••" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
+        <div class="pw"><input type="password" id="aPw" placeholder="password" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
       <button class="btn pri wide" id="aGo" data-i18n="auth.signin">Sign in</button>
-      <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. First time here? The organizer gives your team a claim code.</p>
+      <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. The password is &quot;password&quot; until your team changes it.</p>
       <p class="err" id="aErr" hidden></p>
       <div class="or"><span data-i18n="auth.or">or</span></div>
       <button class="btn wide" id="aGuest" data-i18n="auth.guest">👀 Just looking — continue as guest</button>
       <p class="note" data-i18n="auth.guestNote">Guests can see rankings, schedules and every published robot, scout on this phone and use the calculator. Nothing is saved to the server.</p>
-    </div>
-
-    <div id="authClaim" class="auth-view" hidden>
-      <div class="who" id="aWhoC"></div>
-      <div class="warn" style="margin:4px 0 14px">
-        <b data-i18n="auth.claimT">This nation has not been claimed yet</b>
-        <span data-i18n="auth.claimH">Ask the organizer for your team’s claim code. It is sent to your team only, and works once.</span>
-      </div>
-      <div class="f"><label><span data-i18n="auth.claimCode">Claim code</span></label>
-        <input type="text" id="aCode" placeholder="ABCD-2345" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false"></div>
-      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
-        <input type="password" id="aCNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
-      <div class="f"><input type="password" id="aCNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
-      <div class="warn nudge" style="margin:2px 0 12px">
-        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
-      </div>
-      <button class="btn pri wide" id="aClaimGo" data-i18n="auth.claimGo">Claim and start</button>
-      <p class="err" id="aErrC" hidden></p>
-      <div class="row" style="margin-top:8px"><button class="btn" id="aCBack" data-i18n="auth.back">Back</button></div>
-    </div>
-
-    <div id="authSet" class="auth-view" hidden>
-      <div class="who" id="aWho"></div>
-      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
-        <input type="password" id="aNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
-      <div class="f"><input type="password" id="aNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
-      <div class="warn nudge" style="margin:2px 0 12px">
-        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
-      </div>
-      <button class="btn pri wide" id="aSet" data-i18n="auth.saveStart">Save &amp; start scouting</button>
-      <p class="note" data-i18n="auth.shareNote">Share it only with your own team. Forgot it? Ask the organizer to reset it.</p>
-      <p class="err" id="aErr2" hidden></p>
-      <div class="row" style="margin-top:8px"><button class="btn" id="aBack" data-i18n="auth.back">Back</button></div>
     </div>
 
     <div id="authOffline" class="auth-view" hidden>
@@ -826,14 +807,23 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
 <!-- ───────── PIT ───────── -->
 <section id="tab-pit" hidden>
   <div class="intro"><span class="ii">🔍</span><div><b data-i18n="ab.scout.t">…</b><p data-i18n="ab.scout">…</p><span class="zh" data-hint="ab.scout"></span></div></div>
-  <div class="card" id="scHead">
-    <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
-    <div class="f"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="sc.phase"></span></label>
+  <div class="card" id="scModeCard">
+    <div class="seg n2" id="scMode">
+      <button data-v="ally">🤝 <span data-i18n="sc.modeAlly">My allies</span></button>
+      <button data-v="visit">🚶 <span data-i18n="sc.modeVisit">Visit any team</span></button>
+    </div>
+    <p class="note" id="scModeH" style="margin:10px 0 0"></p>
+    <div class="f" style="margin:14px 0 0"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="sc.phase"></span></label>
       <div class="seg n3" id="scPhase">
         <button data-v="prac" data-c="gray" data-i18n="m.practice">Practice</button>
         <button data-v="qual" data-i18n="m.quals">Quals</button>
         <button data-v="play" data-c="z3" data-i18n="m.playoffs">Playoffs</button>
       </div></div>
+  </div>
+
+  <div id="scAlly">
+  <div class="card" id="scHead">
+    <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
     <div class="f"><label><span data-i18n="m.match">Match</span> <span class="zh" data-hint="m.match"></span></label>
       <div class="step" data-k="scMatch" style="max-width:240px"><button data-d="-1">−</button><input type="number" id="scMatch" inputmode="numeric" value="1"><button data-d="1">+</button></div></div>
     <div class="f"><label><span data-i18n="m.slotA">Teammate A</span></label>
@@ -841,10 +831,6 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
     <div class="f"><label><span data-i18n="m.slotB">Teammate B</span></label>
       <button class="cbtn" id="scB" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
     <div class="seg n2" id="scWho" hidden style="margin-top:4px"></div>
-  </div>
-  <div class="card">
-    <div class="f" style="margin:0"><label><span data-i18n="sc.other">Or scout any other nation</span> <span class="zh" data-hint="sc.other"></span></label>
-      <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
   </div>
   <div class="card" id="scSched">
     <h2><span class="ic">📅</span><span data-i18n="sc.sched">My matches</span>
@@ -855,12 +841,18 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
     <p class="note" id="schedSrc" hidden style="margin:0 0 10px"></p>
     <div class="list" id="schedList"></div>
   </div>
+  </div>
 
-  <div class="card" id="scMine">
-    <h2><span class="ic">📋</span><span data-i18n="sc.mine">What you have recorded</span>
-      <span class="pill" id="mineCount">0</span></h2>
-    <p class="note" style="margin:-6px 0 12px" data-i18n="sc.mineH">Tap a row to open it again and change it. The ✕ deletes it.</p>
-    <div class="list" id="mineList"></div>
+  <div id="scVisit" hidden>
+  <div class="card">
+    <h2><span class="ic">🚶</span><span data-i18n="sc.visitT">Pit visit</span></h2>
+    <div class="f" style="margin:0"><label><span data-i18n="sc.visitPick">Which team are you talking to?</span></label>
+      <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
+    <div id="visitTodo" hidden style="margin-top:16px">
+      <label class="vlab"><span data-i18n="sc.todo">At the event, not visited yet</span> <span class="pill" id="todoCount">0</span></label>
+      <div class="vgrid" id="todoGrid"></div>
+    </div>
+  </div>
   </div>
 
   <div id="pitBody" hidden>
@@ -931,6 +923,13 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
     <p class="note" id="pSaved" style="margin:10px 0 0;text-align:center"></p>
   </div>
   </div>
+  <div class="card" id="scMine">
+    <h2><span class="ic">📋</span><span data-i18n="sc.mine">What you have recorded</span>
+      <span class="pill" id="mineCount">0</span></h2>
+    <p class="note" style="margin:-6px 0 12px" data-i18n="sc.mineH">Tap a row to open it again and change it. The ✕ deletes it.</p>
+    <div class="list" id="mineList"></div>
+  </div>
+
   <div class="card" id="scPub">
     <h2><span class="ic">📢</span><span data-i18n="sc.pub">Robots teams have published</span></h2>
     <p class="note" style="margin:-6px 0 12px" data-i18n="sc.pubH">What each nation says about its own robot. Tap one to open its page.</p>
@@ -984,7 +983,7 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
   <div class="card">
     <h2><span class="ic">📢</span><span data-i18n="r.title">Our robot</span> <span class="pill" data-i18n="r.shared">shared</span><span class="zh" data-hint="r.title"></span></h2>
     <p class="note" data-i18n="r.intro">Fill this in once and publish — every signed-in team can read it in their Pit tab, and you can read theirs. Honest numbers help partners plan the huddle.</p>
-    <div class="warn" id="rGuest" hidden><span data-i18n="r.guestBanner">You are a guest: this page stays on your phone and is never published. Sign in with your team's claim code to share your robot.</span></div>
+    <div class="warn" id="rGuest" hidden><span data-i18n="r.guestBanner">You are a guest: this page stays on your phone and is never published. Sign in as your team to share your robot.</span></div>
     <div class="f" style="margin-top:12px"><button class="tg" id="rPub" aria-pressed="false"><span data-i18n="r.publish">Publish to all teams</span> <span class="zh" data-hint="r.publish"></span></button></div>
     <div class="warn nudge" id="rNudge" hidden>
       <span data-i18n="r.nudge">Saved — but only your team can see it. Publish it so the teams you play with can plan around your robot, and you can read theirs.</span>
@@ -3100,6 +3099,49 @@ Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
 
 </script>
 <script>
+// FGC 2026 Scouting — translations part 9: pit visits (record any team, not only this match's allies)
+// and sign-in without claim codes (every nation starts with the password "password").
+// Strings that used to mention claim codes are dropped from the other languages so they fall back
+// to English instead of telling teams to ask for a code that no longer exists.
+(function(){
+const I = window.I18N, ADD = {
+en:{"sc.modeAlly":"My allies","sc.modeVisit":"Visit any team",
+ "sc.allyH":"Before a match: pick this match's two allies and go ask them.",
+ "sc.visitH":"Walk the pits and record any team, whether or not you play with them.",
+ "sc.visitT":"Pit visit","sc.visitPick":"Which team are you talking to?","sc.todo":"At the event, not visited yet",
+ "ab.scout":"Two ways to fill this in: before a match, pick your two allies and go ask them; or walk the pits and record any team you visit. Answers are kept per nation, so one visit is enough.",
+ "auth.defaultNote":"Each nation has its own account and its own data. The password is \"password\" until your team changes it.",
+ "menu.guestNote":"Guest mode — nothing is saved to the server. Sign in as your team to sync and publish.",
+ "r.guestCant":"Guest mode cannot publish or upload — sign in as your team",
+ "r.guestBanner":"You are a guest: this page stays on your phone and is never published. Sign in as your team to share your robot."},
+
+"zh-Hant":{"sc.modeAlly":"這場盟友","sc.modeVisit":"自由訪問",
+ "sc.allyH":"開打之前：選這一場的兩個盟友，下去問他們。",
+ "sc.visitH":"在維修區隨便走，哪一國都能記，不一定要跟你們同隊。",
+ "sc.visitT":"維修區訪問","sc.visitPick":"你現在在問哪一國？","sc.todo":"這次有來、還沒問過的",
+ "ab.scout":"兩種用法：開打前選這場的兩個盟友下去問；或是在維修區隨便逛，遇到哪一國就記哪一國。資料照國家存，同一國問過一次就夠。",
+ "auth.defaultNote":"每一隊有自己的帳號和資料。密碼預設是 password，想換可以登入後在選單裡改。",
+ "menu.guestNote":"訪客模式：不會存到伺服器。用隊伍身分登入才能同步和公開。",
+ "r.guestCant":"訪客模式不能公開或上傳，請用隊伍身分登入",
+ "r.guestBanner":"你是訪客：這一頁只留在你的手機上，不會公開。要分享你們的機器人請用隊伍身分登入。"},
+
+"zh-Hans":{"sc.modeAlly":"这场盟友","sc.modeVisit":"自由访问",
+ "sc.allyH":"开打之前：选这一场的两个盟友，下去问他们。",
+ "sc.visitH":"在维修区随便走，哪一国都能记，不一定要跟你们同队。",
+ "sc.visitT":"维修区访问","sc.visitPick":"你现在在问哪一国？","sc.todo":"这次有来、还没问过的",
+ "ab.scout":"两种用法：开打前选这场的两个盟友下去问；或者在维修区随便逛，遇到哪一国就记哪一国。资料按国家存，同一国问过一次就够。",
+ "auth.defaultNote":"每一队有自己的账号和数据。密码默认是 password，想换可以登录后在菜单里改。",
+ "menu.guestNote":"访客模式：不会存到服务器。用队伍身份登录才能同步和公开。",
+ "r.guestCant":"访客模式不能公开或上传，请用队伍身份登录",
+ "r.guestBanner":"你是访客：这一页只留在你的手机上，不会公开。要分享你们的机器人请用队伍身份登录。"}
+};
+const STALE = ["auth.defaultNote","menu.guestNote","r.guestCant","r.guestBanner","ab.scout"];
+Object.keys(I).forEach(function(l){ if(!ADD[l]) STALE.forEach(function(k){ delete I[l][k]; }); });
+Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });
+})();
+
+</script>
+<script>
 'use strict';
 /* FGC 2026 Scouting — live ladder / match history / analytics, fed by results.first.global */
 
@@ -3662,7 +3704,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); setPitMode(pitMode); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -3703,12 +3745,11 @@ async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Token':AUTH.token},body:body?JSON.stringify(body):undefined});
   let d={}; try{ d=await r.json(); }catch(e){}
   if(r.status===401){ signedOut(); throw new Error(t('s.again')); }
-  if(!r.ok){ const e=new Error(d.error||('HTTP '+r.status)); e.status=r.status; e.needClaim=!!d.needClaim; throw e; }
+  if(!r.ok){ const e=new Error(d.error||('HTTP '+r.status)); e.status=r.status; throw e; }
   return d;
 }
 function showAuth(view){ $('auth').hidden=false; $('main').hidden=true; $('nav').hidden=true; $('mFab').hidden=true; document.querySelector('header').hidden=true;
-  ['authLogin','authSet','authClaim','authOffline'].forEach(id=>$(id).hidden=(id!==view));
-  if(view==='authSet') $('aWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><b>${esc(nName(AUTH.team))}</b> <span class="zh">${esc(nSub(AUTH.team))}</span>`; }
+  ['authLogin','authOffline'].forEach(id=>$(id).hidden=(id!==view)); }
 function showErr(el,msg){ el.textContent=msg; el.hidden=!msg; }
 function signedOut(){ AUTH.token=''; SYNC.on=false; try{ localStorage.removeItem('fgc.auth'); }catch(e){} setSync('s.signedOut'); showAuth('authLogin'); }
 function boot(team){
@@ -3732,49 +3773,19 @@ function afterLogin(d){
   try{ localStorage.setItem('fgc.auth',JSON.stringify({token:d.token,team:d.team})); }catch(e){}
   LAST_LOGIN=d.prevLogin||null;
   $('aPw').value=''; haptic(18);
-  /* 只有認領碼制度之前開的舊帳號會 mustChange；一定要改掉那個共用密碼，不能再「先跳過」 */
-  if(d.mustChange) showAuth('authSet'); else boot(d.team);
+  boot(d.team);
 }
-let LAST_LOGIN=null, CLAIMING='';
+let LAST_LOGIN=null;
+const DEFAULT_PW='password';
 $('aGo').onclick=async()=>{
-  const tm=$('aTeam').dataset.v, pw=$('aPw').value;
+  /* 每一國的預設密碼都是 password；空白就當作預設密碼，少打一次字 */
+  const tm=$('aTeam').dataset.v, pw=$('aPw').value||DEFAULT_PW;
   if(!tm){ flash($('aTeam')); showErr($('aErr'),t('auth.errCountry')); return; }
   showErr($('aErr'),''); $('aGo').disabled=true;
   try{ afterLogin(await api('/api/login',{team:tm,password:pw})); }
-  catch(e){
-    /* 這個國家還沒有人認領 → 需要主辦方發的認領碼，不能用共用密碼進來 */
-    if(e.needClaim){ CLAIMING=tm; showClaim(tm); }
-    else { showErr($('aErr'),e.message); flash($('aPw')); }
-  }
+  catch(e){ showErr($('aErr'),e.message); flash($('aPw')); }
   finally{ $('aGo').disabled=false; }
 };
-function showClaim(tm){
-  $('aWhoC').innerHTML=`<span class="fl">${nFlag(tm)}</span><b>${esc(nName(tm))}</b> <span class="zh">${esc(nSub(tm))}</span>`;
-  $('aCode').value=''; $('aCNew').value=''; $('aCNew2').value=''; showErr($('aErrC'),'');
-  showAuth('authClaim');
-}
-$('aCBack').onclick=()=>{ CLAIMING=''; showAuth('authLogin'); };
-$('aClaimGo').onclick=async()=>{
-  const code=$('aCode').value.trim(), n=$('aCNew').value, n2=$('aCNew2').value;
-  showErr($('aErrC'),'');
-  if(!code){ flash($('aCode')); showErr($('aErrC'),t('auth.needCode')); return; }
-  if(n.length<4){ flash($('aCNew')); showErr($('aErrC'),t('auth.pwShort')); return; }
-  if(n!==n2){ flash($('aCNew2')); showErr($('aErrC'),t('auth.pwNoMatch')); return; }
-  $('aClaimGo').disabled=true;
-  try{ afterLogin(await api('/api/claim',{team:CLAIMING,code,password:n})); }
-  catch(e){ showErr($('aErrC'),e.message); flash($('aCode')); }
-  finally{ $('aClaimGo').disabled=false; }
-};
-$('aSet').onclick=async()=>{
-  const n=$('aNew').value, n2=$('aNew2').value;
-  if(n.length<4){ showErr($('aErr2'),t('auth.errShort')); flash($('aNew')); return; }
-  if(n!==n2){ showErr($('aErr2'),t('auth.errMatch')); flash($('aNew2')); return; }
-  showErr($('aErr2'),''); $('aSet').disabled=true;
-  try{ await api('/api/password',{current:'password',new:n}); $('aNew').value=$('aNew2').value=''; toast(t('auth.pwSet'),'ok'); boot(AUTH.team); }
-  catch(e){ showErr($('aErr2'),e.message); }
-  finally{ $('aSet').disabled=false; }
-};
-$('aBack').onclick=()=>{ api('/api/logout').catch(()=>{}); signedOut(); };
 async function guestLogin(){ showErr($('aErr'),''); $('aGuest').disabled=true;
   try{ afterLogin(await api('/api/guest')); }
   catch(e){ showErr($('aErr'),e.message); }
@@ -4020,7 +4031,55 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
-$('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine(); haptic(12); });
+$('pCountry').onclick=()=>openPicker(sl=>{ visitPick(sl); haptic(12); });
+
+/* ---------- 兩種打聽方式：盟友（照賽程）或自由訪問（在維修區隨便走，哪一國都能記） ---------- */
+let pitMode='ally'; try{ if(localStorage.getItem('fgc.pitMode')==='visit') pitMode='visit'; }catch(e){}
+function setPitMode(m){
+  pitMode=m==='visit'?'visit':'ally';
+  try{ localStorage.setItem('fgc.pitMode',pitMode); }catch(e){}
+  /* 再點一次已選的那顆，segInit 會回傳空字串 —— 那就維持原本的模式 */
+  segInit($('scMode'),pitMode,v=>{ if(v&&v!==pitMode){ setPitMode(v); pitModeSwitched(); haptic(12); } else setPitMode(pitMode); });
+  $('scAlly').hidden=pitMode!=='ally'; $('scVisit').hidden=pitMode!=='visit';
+  $('scModeH').textContent=t(pitMode==='visit'?'sc.visitH':'sc.allyH');
+  renderTodo();
+}
+/* 換模式時表單跟著換：盟友模式只顯示這場的盟友，訪問模式顯示剛剛在問的那一國 */
+function pitModeSwitched(){
+  if(pitMode==='visit'){ setCbtn($('pCountry'),curTeam); return; }
+  const pl=plan();
+  if(curTeam&&curTeam!==pl.a&&curTeam!==pl.b){ curTeam=pl.a||pl.b||''; loadPit(); scWhoRender(); renderMine(); }
+}
+function visitPick(sl){
+  if(pitMode!=='visit') setPitMode('visit');
+  curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine();
+  $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
+}
+/* 從別的地方（國家頁、紀錄列表）打開某一國：不是這場盟友就切到訪問模式 */
+function pitOpen(sl){
+  const pl=plan();
+  if(pitMode==='ally'&&(sl===pl.a||sl===pl.b)){ curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); renderMine(); return; }
+  if(pitMode!=='visit') setPitMode('visit');
+  curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine();
+}
+/* 這次比賽有來、但我們還沒記過的國家。名單從官方排名和賽程來；官方資料還沒出來就不顯示 */
+function eventSlugs(){
+  const d=(typeof OFF!=='undefined'&&OFF.data)||{}, set=new Set();
+  (d.rankings||[]).forEach(r=>{ const sl=rowSlug(r); if(sl) set.add(sl); });
+  (d.matches||[]).forEach(m=>(m.participants||[]).forEach(x=>{ const sl=slugOfKey(x&&x.teamKey); if(sl) set.add(sl); }));
+  set.delete(AUTH.team);
+  return [...set];
+}
+function renderTodo(){
+  const box=$('visitTodo'); if(!box||!DB) return;
+  if(pitMode!=='visit'){ box.hidden=true; return; }
+  const done=new Set(pitRows().map(x=>x.slug));
+  const todo=eventSlugs().filter(sl=>!done.has(sl)).sort((a,b)=>nName(a).localeCompare(nName(b)));
+  box.hidden=!todo.length;
+  $('todoCount').textContent=todo.length;
+  $('todoGrid').innerHTML=todo.map(sl=>`<button data-v="${esc(sl)}"${sl===curTeam?' aria-pressed="true"':''}><span class="fl">${nFlag(sl)}</span><span class="nm">${esc(nName(sl))}</span></button>`).join('');
+  $('todoGrid').querySelectorAll('button').forEach(b=>b.onclick=()=>{ visitPick(b.dataset.v); haptic(12); });
+}
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
 /* 每個賽段預設開幾列。手冊：模擬賽每隊一場、季後賽每個聯盟四場、決賽兩場；
@@ -4062,7 +4121,7 @@ function scLoad(){
   });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
-  scWhoRender(); mPlanBar();
+  scWhoRender(); mPlanBar(); setPitMode(pitMode);
 }
 $('scA').onclick=()=>scPick('A'); $('scB').onclick=()=>scPick('B');
 $('scMatch').oninput=e=>{ plan().match=parseInt(e.target.value,10)||0; planSave(); mPlanBar(); renderSched(); };
@@ -4155,6 +4214,7 @@ function renderMine(){
   const list=$('mineList'); if(!list) return;
   const rows=pitRows();
   const cnt=$('mineCount'); if(cnt) cnt.textContent=rows.length;
+  renderTodo();
   if(!rows.length){ list.innerHTML=`<div class="empty">${esc(t('sc.mineNone'))}</div>`; return; }
   list.innerHTML=rows.map(x=>{
     const here=(x.slug===curTeam&&x.phase===pitPhase);
@@ -4175,7 +4235,7 @@ function openPitRecord(key){
   const slug=pitSlugOf(key), ph=pitPhaseOf(key);
   pitPhase=ph; plan().phase=ph; planSave();
   segInit($('scPhase'),ph,v=>{ pitPhase=v||'qual'; plan().phase=pitPhase; planSave(); if(curTeam) loadPit(); scWhoRender(); renderMine(); });
-  curTeam=slug; setCbtn($('pCountry'),slug); loadPit(); renderMine();
+  pitOpen(slug);
   toast(t('m.editing')+' \u00b7 '+nName(slug)+' \u00b7 '+(PHASE_LABEL[ph]||ph));
   haptic(12);
   $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
@@ -4272,7 +4332,7 @@ let SCHED_FROM_OFFICIAL=false;
 function autoSched(){
   if(!DB||AUTH.offline) return;
   const n=importSched();
-  renderSched();
+  renderSched(); renderTodo();
   if(n) toast(t('sc.autoLoaded')+' '+n,'ok');
 }
 $('schedN').oninput=e=>{ const p=plan(); p.n[pitPhase]=Math.max(1,Math.min(60,parseInt(e.target.value,10)||1)); planSave(); renderSched(); };
@@ -4341,7 +4401,7 @@ function openNation(slug){ if(!slug||!DB) return; NATION=slug;
   $('nation').hidden=false; document.body.classList.add('lock'); $('nation').scrollTop=0; haptic(12);
   const close=()=>{ $('nation').hidden=true; document.body.classList.remove('lock'); NATION=''; };
   $('nClose').onclick=close; $('nClose2').onclick=close;
-  $('nPit').onclick=()=>{ close(); curTeam=slug; setCbtn($('pCountry'),slug); loadPit(); document.querySelector('nav button[data-tab=pit]').click(); }; }
+  $('nPit').onclick=()=>{ close(); pitOpen(slug); document.querySelector('nav button[data-tab=pit]').click(); }; }
 
 /* ---------- OUR ROBOT (public profile, shared with every team) ---------- */
 let PROFILES={}; try{ PROFILES=JSON.parse(localStorage.getItem('fgc2026.profiles')||'{}')||{}; }catch(e){ PROFILES={}; }
@@ -4594,7 +4654,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v33';
+const APP_VER='v34';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
@@ -4608,23 +4668,10 @@ const APP_VER='v33';
   }; })();
 
 /* ---------- init ---------- */
-/* 主辦方發的一鍵認領連結：?claim=<slug>&code=<CODE>
-   帶進畫面後立刻把網址清乾淨，免得留在網址列或被截圖傳出去。 */
-function claimFromURL(){
-  try{
-    const q=new URLSearchParams(location.search);
-    const tm=(q.get('claim')||'').trim().toLowerCase(), code=(q.get('code')||'').trim();
-    if(!tm||!NMAP[tm]) return null;
-    history.replaceState(null,'',location.pathname);
-    return {team:tm,code:code};
-  }catch(e){ return null; }
-}
-
 (async function init(){
   window.addEventListener('pagehide',saveNow); window.addEventListener('beforeunload',saveNow);
   applyLang(); applyFX();
   if(!HTTP&&$('cInstall')) $('cInstall').hidden=true;
-  const invite=claimFromURL();
   const wantGuest=/[?&]guest=1/.test(location.search);
   if(wantGuest){ try{ history.replaceState(null,'','./'); }catch(e){} }
   const last=(()=>{ try{ return localStorage.getItem('fgc.team')||''; }catch(e){ return ''; } })();
@@ -4632,19 +4679,11 @@ function claimFromURL(){
   setSync('s.connecting');
   try{ const a=JSON.parse(localStorage.getItem('fgc.auth')||'null');
     if(a&&a.token){ AUTH.token=a.token; const me=await api('/api/me'); AUTH.team=me.team; AUTH.guest=!!me.guest||me.team===GUEST;
-      if(me.mustChange){ showAuth('authSet'); } else boot(me.team); return; } }
+      boot(me.team); return; } }
   catch(e){}
   if(wantGuest){
     /* 海報 QR：fgc-scout.duckdns.org/guest → 這裡。沒登入過就直接以訪客進入 */
     showAuth('authLogin'); await guestLogin(); return;
-  }
-  if(invite){
-    CLAIMING=invite.team;
-    setCbtn($('aTeam'),invite.team,t('auth.selectCountry'));
-    setSync('s.notSigned');
-    showClaim(invite.team);
-    if(invite.code){ $('aCode').value=invite.code; setTimeout(()=>$('aCNew').focus(),250); }
-    return;
   }
   if(last&&NMAP[last]) setCbtn($('aTeam'),last,t('auth.selectCountry'));
   setSync('s.notSigned'); showAuth('authLogin');

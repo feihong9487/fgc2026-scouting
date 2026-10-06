@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="fgc2026-192.png">
 <link rel="apple-touch-icon" href="fgc2026-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="app.css?v=33">
+<link rel="stylesheet" href="app.css?v=34">
 </head>
 <body>
 <div id="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><div class="noise"></div>
@@ -40,46 +40,13 @@
       <div class="f"><label><span data-i18n="auth.who">Who are you?</span> <span class="zh" data-hint="auth.who"></span></label>
         <button class="cbtn" id="aTeam" data-v=""><span class="fl">🌍</span><span class="ph" data-i18n="auth.selectCountry">Select your country…</span><span class="arr">›</span></button></div>
       <div class="f"><label><span data-i18n="auth.pw">Team password</span></label>
-        <div class="pw"><input type="password" id="aPw" placeholder="••••••••" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
+        <div class="pw"><input type="password" id="aPw" placeholder="password" autocomplete="current-password"><button type="button" class="eye" id="aEye" aria-label="show">👁</button></div></div>
       <button class="btn pri wide" id="aGo" data-i18n="auth.signin">Sign in</button>
-      <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. First time here? The organizer gives your team a claim code.</p>
+      <p class="note" data-i18n="auth.defaultNote">Each nation has its own account and its own data. The password is &quot;password&quot; until your team changes it.</p>
       <p class="err" id="aErr" hidden></p>
       <div class="or"><span data-i18n="auth.or">or</span></div>
       <button class="btn wide" id="aGuest" data-i18n="auth.guest">👀 Just looking — continue as guest</button>
       <p class="note" data-i18n="auth.guestNote">Guests can see rankings, schedules and every published robot, scout on this phone and use the calculator. Nothing is saved to the server.</p>
-    </div>
-
-    <div id="authClaim" class="auth-view" hidden>
-      <div class="who" id="aWhoC"></div>
-      <div class="warn" style="margin:4px 0 14px">
-        <b data-i18n="auth.claimT">This nation has not been claimed yet</b>
-        <span data-i18n="auth.claimH">Ask the organizer for your team’s claim code. It is sent to your team only, and works once.</span>
-      </div>
-      <div class="f"><label><span data-i18n="auth.claimCode">Claim code</span></label>
-        <input type="text" id="aCode" placeholder="ABCD-2345" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false"></div>
-      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
-        <input type="password" id="aCNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
-      <div class="f"><input type="password" id="aCNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
-      <div class="warn nudge" style="margin:2px 0 12px">
-        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
-      </div>
-      <button class="btn pri wide" id="aClaimGo" data-i18n="auth.claimGo">Claim and start</button>
-      <p class="err" id="aErrC" hidden></p>
-      <div class="row" style="margin-top:8px"><button class="btn" id="aCBack" data-i18n="auth.back">Back</button></div>
-    </div>
-
-    <div id="authSet" class="auth-view" hidden>
-      <div class="who" id="aWho"></div>
-      <div class="f"><label><span data-i18n="auth.setTitle">Set your team password</span> <span class="zh" data-hint="auth.setTitle"></span></label>
-        <input type="password" id="aNew" data-i18n-ph="auth.newPw" placeholder="new password" autocomplete="new-password"></div>
-      <div class="f"><input type="password" id="aNew2" data-i18n-ph="auth.repeat" placeholder="repeat it" autocomplete="new-password"></div>
-      <div class="warn nudge" style="margin:2px 0 12px">
-        <span data-i18n="auth.sharedWarn">Everyone on your team signs in with this one password, on every phone and tablet you use. Agree on it together and write it down before you continue.</span>
-      </div>
-      <button class="btn pri wide" id="aSet" data-i18n="auth.saveStart">Save &amp; start scouting</button>
-      <p class="note" data-i18n="auth.shareNote">Share it only with your own team. Forgot it? Ask the organizer to reset it.</p>
-      <p class="err" id="aErr2" hidden></p>
-      <div class="row" style="margin-top:8px"><button class="btn" id="aBack" data-i18n="auth.back">Back</button></div>
     </div>
 
     <div id="authOffline" class="auth-view" hidden>
@@ -138,14 +105,23 @@
 <!-- ───────── PIT ───────── -->
 <section id="tab-pit" hidden>
   <div class="intro"><span class="ii">🔍</span><div><b data-i18n="ab.scout.t">…</b><p data-i18n="ab.scout">…</p><span class="zh" data-hint="ab.scout"></span></div></div>
-  <div class="card" id="scHead">
-    <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
-    <div class="f"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="sc.phase"></span></label>
+  <div class="card" id="scModeCard">
+    <div class="seg n2" id="scMode">
+      <button data-v="ally">🤝 <span data-i18n="sc.modeAlly">My allies</span></button>
+      <button data-v="visit">🚶 <span data-i18n="sc.modeVisit">Visit any team</span></button>
+    </div>
+    <p class="note" id="scModeH" style="margin:10px 0 0"></p>
+    <div class="f" style="margin:14px 0 0"><label><span data-i18n="m.phase">Phase</span> <span class="zh" data-hint="sc.phase"></span></label>
       <div class="seg n3" id="scPhase">
         <button data-v="prac" data-c="gray" data-i18n="m.practice">Practice</button>
         <button data-v="qual" data-i18n="m.quals">Quals</button>
         <button data-v="play" data-c="z3" data-i18n="m.playoffs">Playoffs</button>
       </div></div>
+  </div>
+
+  <div id="scAlly">
+  <div class="card" id="scHead">
+    <h2><span class="ic">🔍</span><span data-i18n="sc.title">This match</span><span class="zh" data-hint="sc.title"></span></h2>
     <div class="f"><label><span data-i18n="m.match">Match</span> <span class="zh" data-hint="m.match"></span></label>
       <div class="step" data-k="scMatch" style="max-width:240px"><button data-d="-1">−</button><input type="number" id="scMatch" inputmode="numeric" value="1"><button data-d="1">+</button></div></div>
     <div class="f"><label><span data-i18n="m.slotA">Teammate A</span></label>
@@ -153,10 +129,6 @@
     <div class="f"><label><span data-i18n="m.slotB">Teammate B</span></label>
       <button class="cbtn" id="scB" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
     <div class="seg n2" id="scWho" hidden style="margin-top:4px"></div>
-  </div>
-  <div class="card">
-    <div class="f" style="margin:0"><label><span data-i18n="sc.other">Or scout any other nation</span> <span class="zh" data-hint="sc.other"></span></label>
-      <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
   </div>
   <div class="card" id="scSched">
     <h2><span class="ic">📅</span><span data-i18n="sc.sched">My matches</span>
@@ -167,12 +139,18 @@
     <p class="note" id="schedSrc" hidden style="margin:0 0 10px"></p>
     <div class="list" id="schedList"></div>
   </div>
+  </div>
 
-  <div class="card" id="scMine">
-    <h2><span class="ic">📋</span><span data-i18n="sc.mine">What you have recorded</span>
-      <span class="pill" id="mineCount">0</span></h2>
-    <p class="note" style="margin:-6px 0 12px" data-i18n="sc.mineH">Tap a row to open it again and change it. The ✕ deletes it.</p>
-    <div class="list" id="mineList"></div>
+  <div id="scVisit" hidden>
+  <div class="card">
+    <h2><span class="ic">🚶</span><span data-i18n="sc.visitT">Pit visit</span></h2>
+    <div class="f" style="margin:0"><label><span data-i18n="sc.visitPick">Which team are you talking to?</span></label>
+      <button class="cbtn" id="pCountry" data-v=""><span class="fl">🌍</span><span class="ph">Select country…</span><span class="arr">›</span></button></div>
+    <div id="visitTodo" hidden style="margin-top:16px">
+      <label class="vlab"><span data-i18n="sc.todo">At the event, not visited yet</span> <span class="pill" id="todoCount">0</span></label>
+      <div class="vgrid" id="todoGrid"></div>
+    </div>
+  </div>
   </div>
 
   <div id="pitBody" hidden>
@@ -243,6 +221,13 @@
     <p class="note" id="pSaved" style="margin:10px 0 0;text-align:center"></p>
   </div>
   </div>
+  <div class="card" id="scMine">
+    <h2><span class="ic">📋</span><span data-i18n="sc.mine">What you have recorded</span>
+      <span class="pill" id="mineCount">0</span></h2>
+    <p class="note" style="margin:-6px 0 12px" data-i18n="sc.mineH">Tap a row to open it again and change it. The ✕ deletes it.</p>
+    <div class="list" id="mineList"></div>
+  </div>
+
   <div class="card" id="scPub">
     <h2><span class="ic">📢</span><span data-i18n="sc.pub">Robots teams have published</span></h2>
     <p class="note" style="margin:-6px 0 12px" data-i18n="sc.pubH">What each nation says about its own robot. Tap one to open its page.</p>
@@ -296,7 +281,7 @@
   <div class="card">
     <h2><span class="ic">📢</span><span data-i18n="r.title">Our robot</span> <span class="pill" data-i18n="r.shared">shared</span><span class="zh" data-hint="r.title"></span></h2>
     <p class="note" data-i18n="r.intro">Fill this in once and publish — every signed-in team can read it in their Pit tab, and you can read theirs. Honest numbers help partners plan the huddle.</p>
-    <div class="warn" id="rGuest" hidden><span data-i18n="r.guestBanner">You are a guest: this page stays on your phone and is never published. Sign in with your team's claim code to share your robot.</span></div>
+    <div class="warn" id="rGuest" hidden><span data-i18n="r.guestBanner">You are a guest: this page stays on your phone and is never published. Sign in as your team to share your robot.</span></div>
     <div class="f" style="margin-top:12px"><button class="tg" id="rPub" aria-pressed="false"><span data-i18n="r.publish">Publish to all teams</span> <span class="zh" data-hint="r.publish"></span></button></div>
     <div class="warn nudge" id="rNudge" hidden>
       <span data-i18n="r.nudge">Saved — but only your team can see it. Publish it so the teams you play with can plan around your robot, and you can read theirs.</span>
@@ -474,17 +459,18 @@
   <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg><span data-i18n="nav.data">Data</span><span class="zh" data-hint="nav.data"></span></button>
 </nav>
 
-<script src="nations.js?v=33"></script>
-<script src="i18n.js?v=33"></script>
-<script src="i18n2.js?v=33"></script>
-<script src="i18n3.js?v=33"></script>
-<script src="i18n4.js?v=33"></script>
-<script src="i18n5.js?v=33"></script>
-<script src="i18n6.js?v=33"></script>
-<script src="i18n7.js?v=33"></script>
-<script src="i18n8.js?v=33"></script>
-<script src="ranks.js?v=33"></script>
-<script src="map.js?v=33"></script>
-<script src="app.js?v=33"></script>
+<script src="nations.js?v=34"></script>
+<script src="i18n.js?v=34"></script>
+<script src="i18n2.js?v=34"></script>
+<script src="i18n3.js?v=34"></script>
+<script src="i18n4.js?v=34"></script>
+<script src="i18n5.js?v=34"></script>
+<script src="i18n6.js?v=34"></script>
+<script src="i18n7.js?v=34"></script>
+<script src="i18n8.js?v=34"></script>
+<script src="i18n9.js?v=34"></script>
+<script src="ranks.js?v=34"></script>
+<script src="map.js?v=34"></script>
+<script src="app.js?v=34"></script>
 </body>
 </html>

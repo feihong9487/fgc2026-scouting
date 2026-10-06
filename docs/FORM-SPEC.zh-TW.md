@@ -13,8 +13,8 @@
 | 步驟 | 內容 |
 |---|---|
 | Who are you? | 下拉選自己的國家（175 隊，來源 first.global；名單若有缺可在 `web/nations.js` 加） |
-| Team password | 全隊共用一組密碼（至少 4 字）。**沒有預設密碼**：還沒被認領的國家不能登入 |
-| 第一次登入 | 主辦方用 `deploy\claim.ps1 -Team <slug>` 取得一次性認領連結，一對一私訊給該隊；他們打開連結（或在登入頁輸入認領碼）並在同一步設好自己的密碼。忘記密碼 → 主辦執行 `claim.ps1 -Team <slug> -Reissue`（作廢舊帳號、登出所有裝置、重發一張碼，資料不動） |
+| Team password | 全隊共用一組密碼。**預設密碼是 `password`**（密碼欄留空也會當成 `password`），不需要認領碼 |
+| 第一次登入 | 選國家、輸入 `password` 就能用。想換密碼可以登入後在右上角國旗徽章裡改（至少 4 字）。忘記改過的密碼 → 主辦執行 `server.py --reset-password <slug>`（恢復成 `password`、登出所有裝置，資料不動） |
 | 之後 | 右上角國旗徽章 → 改密碼 / 登出。同一隊所有裝置自動同步；不同隊互相看不到彼此的 scouting 資料 |
 
 離線單檔 `FGC2026_Scouting.html`（`python build_single.py` 產生）：iPad 直接開檔可用，但不同步、不能登入/發布。
@@ -49,6 +49,12 @@
 ---
 
 ## 2. Pit（維修區訪談，一隊一筆，自動存檔）
+
+最上方切換兩種模式：
+- **這場盟友**：填場次跟這場的兩個盟友（官方賽程出來後會自動帶入），下去問他們。
+- **自由訪問**：在維修區隨便走，選任何一國就能記，不一定要跟我們同隊。官方名單出來後，下面會列出「這次有來、還沒問過的」國家，點一下直接開表單；記過的就會從清單消失。
+
+兩種模式存的是同一份資料（照國家、照賽段各一份），之後在「你記過的」列表都點得回來。
 
 若該隊已發布自己的機器介紹，Pit 最上方會先顯示「📢 Self-reported by …」，一鍵可帶入成我們的答案。
 
@@ -127,7 +133,7 @@ REGIONAL ALLIANCE 分數 = ⌈SUPPRESSION × (1 + Σ 三台 CLIMB MULTIPLIER)⌉
 
 ## 7. 系統
 
-- `server.py`：靜態站 + API（`/api/login`、`/api/claim`、`/api/me`、`/api/password`、`/api/logout`、`/api/state`、`/api/sync`、`/api/official`、`/api/profile`、`/api/profiles`、`/api/photo`、`/api/photo/delete`）；資料在 `data/`（`accounts.json` PBKDF2 雜湊、`claims.json` 認領碼、`sessions.json`、`teams/<slug>.json`、`profiles.json`、`photos/`、`official.json`、`audit.log`），每日備份 `backups/`。登入／認領失敗 5 分鐘內 8 次會暫停。
+- `server.py`：靜態站 + API（`/api/login`、`/api/me`、`/api/password`、`/api/logout`、`/api/state`、`/api/sync`、`/api/official`、`/api/profile`、`/api/profiles`、`/api/photo`、`/api/photo/delete`）；資料在 `data/`（`accounts.json` PBKDF2 雜湊、`sessions.json`、`teams/<slug>.json`、`profiles.json`、`photos/`、`official.json`、`audit.log`），每日備份 `backups/`。登入失敗 5 分鐘內 8 次會暫停。
 - 同步：有改動就立刻 POST `/api/sync`（X-Token），沒改動每 30 秒帶 rev 輪詢一次（伺服器沒變就回 `nochange`），以時間戳合併；賽程計畫（plan）也在 cfg 裡跟著同步。離線照常可填。機器介紹每 60 秒更新一次，伺服器上比較新的版本會覆蓋本機（本機還沒存的修改除外）。
 - 時間：資料裡的時間戳一律是 ISO；畫面上全部轉成裝置本地時間（在仁川就是 KST）。
 - 照片網址 `/photos/<slug>/<hex>.jpg` 是公開的（不含機密）。

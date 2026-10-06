@@ -2,7 +2,7 @@
 
 伺服器若在「還沒讀請求內文」的情況下就回應，剩下的位元組會留在 socket 裡，
 被反向代理（Caddy）重用連線時變成下一個請求的起始行，表現為 501 Unsupported method。
-下一個請求可能是別隊的登入或認領 —— 一個人被擋下，順手弄壞另一個人的驗證。
+下一個請求可能是別隊的登入 —— 一個人被擋下，順手弄壞另一個人的驗證。
 
 第二組測試（同一條連線上連續丟好幾個帶內文的請求）不能省：BaseHTTPRequestHandler
 在一條連線上共用同一個 handler 物件，第一版修正忘了把「內文讀過了」的旗標逐次歸零，
@@ -70,10 +70,10 @@ def send_all(label, requests, expect_last="200"):
 REJECTED = [
     ("sync 壞 token",   req(b"POST", b"/api/sync", b'{"rev":0}', b"bogus")),
     ("password 未登入", req(b"POST", b"/api/password", b'{"current":"x","new":"yyyy"}')),
-    ("claim 錯的碼",    req(b"POST", b"/api/claim", b'{"team":"ireland","code":"X","password":"test1234"}')),
+    ("刪照片 未登入",   req(b"POST", b"/api/photo/delete", b'{"url":"/photos/x/0000000000000000.jpg"}')),
     ("profile 未登入",  req(b"POST", b"/api/profile", b"{}")),
     ("login 隊名不合法", req(b"POST", b"/api/login", b'{"team":"NOPE!!","password":"whatever12"}')),
-    ("login 未認領",    req(b"POST", b"/api/login", b'{"team":"kenya","password":"whatever12"}')),
+    ("login 密碼錯",    req(b"POST", b"/api/login", b'{"team":"kenya","password":"whatever12"}')),
     ("photo 未登入",    req(b"POST", b"/api/photo", b'{"jpg":"x"}')),
 ]
 
@@ -88,7 +88,7 @@ res.append(send_all("被拒 → 正常 → 被拒 → GET",
                     [REJECTED[0][1], GET_HEALTH, REJECTED[1][1], GET_HEALTH]))
 
 print("── 內文過大：不吞，直接收掉連線 ──")
-huge = CRLF.join([b"POST /api/claim HTTP/1.1", b"Host: x", b"Content-Type: application/json",
+huge = CRLF.join([b"POST /api/login HTTP/1.1", b"Host: x", b"Content-Type: application/json",
                   b"Content-Length: 20000000"]) + CRLF + CRLF + b"{}"
 s = socket.create_connection(("127.0.0.1", PORT), 5); s.settimeout(5)
 f = s.makefile("rwb"); f.write(huge); f.flush()

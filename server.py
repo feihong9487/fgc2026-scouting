@@ -6,25 +6,22 @@ FGC 2026 Scouting — 伺服器（靜態網站 + 每隊獨立帳號/資料 + 多
 用法：
     python server.py                          # port 8080
     python server.py --port 8080 --host 0.0.0.0
-    python server.py --gen-claims             # 替所有還沒認領的國家發認領碼
-    python server.py --claim-link nepal       # 印出可以私訊給該隊的一鍵認領連結
-    python server.py --reset-password nepal   # 作廢該隊帳號、登出所有裝置、發一張新的認領碼
-    python server.py --audit 40               # 最近 40 筆登入/認領/改密碼紀錄
+    python server.py --reset-password nepal   # 該隊密碼恢復成預設的 password，登出所有裝置
+    python server.py --revoke-all             # 所有隊伍都恢復成預設密碼
+    python server.py --audit 40               # 最近 40 筆登入/改密碼紀錄
 
 帳號：
     每一個參賽國家（web/nations.js 裡的 slug）就是一個帳號，全隊共用。
-    沒被認領的國家不能登入：第一次要用主辦方私下發的一次性認領碼，並在同一步自己設密碼，
-    所以不存在共用的預設密碼。之後只有知道該隊密碼的人能看到／寫入該隊的 scouting 資料。
+    預設密碼一律是 password，直接登入就能用；想換的隊伍可以在選單裡自己改。
     上面的 CLI 指令是另一個程序直接改 data/ 裡的檔案，伺服器每次碰帳號前都會檢查檔案有沒有變，
-    所以發碼、作廢都不需要重啟服務。
+    所以重設密碼不需要重啟服務。
 
 路由：
     GET  /                      → web/index.html
     GET  /<static>              → web/ 內的 css / js / 國旗
     GET  /health                → 健康檢查（不用登入）
     GET  /install               → 手機安裝頁；/install.mobileconfig 動態產生 iOS Web Clip 描述檔
-    POST /api/login             {team, password}         → {token, team, mustChange}；未認領回 409 needClaim
-    POST /api/claim             {team, code, password}   → {token, team}
+    POST /api/login             {team, password}         → {token, team, mustChange}
     GET  /api/me                X-Token                  → {team, mustChange, lastLogin, prevLogin}
     POST /api/password          X-Token {current,new}    → {ok}
     POST /api/logout            X-Token
@@ -38,7 +35,6 @@ FGC 2026 Scouting — 伺服器（靜態網站 + 每隊獨立帳號/資料 + 多
 
 資料：
     data/accounts.json          帳號（PBKDF2 雜湊）
-    data/claims.json            認領碼（等同密碼，不進 git）
     data/sessions.json          登入 token
     data/teams/<slug>.json      每隊的 scouting 資料
     data/profiles.json          各隊的機器介紹；data/photos/ 照片
@@ -72,15 +68,12 @@ OFFICIAL = {"fetched": "", "error": "", "build": "", "data": {}, "history": []}
 OFFICIAL_POLL = 120          # 秒；--official-poll 可調，0 = 關閉
 HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時）
 
-CLAIMS = os.path.join(DATA_DIR, "claims.json")   # 每個國家的認領碼，只有主辦方能發
-CLAIM = {}
 AUDIT_LOG = os.path.join(DATA_DIR, "audit.log")  # 所有登入/改密碼事件，出事時可以追
 MAX_BODY = 8 * 1024 * 1024     # 請求內文上限；_body 和 _drain 共用同一個門檻
-CLAIM_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # 拿掉容易看錯的 I O 0 1
 
-DEFAULT_PASSWORD = "password"   # 只有舊帳號還吃這個；新帳號一律走認領碼
+DEFAULT_PASSWORD = "password"   # 還沒改過密碼的國家都用這個登入
 
-# 訪客模式：給評審和當天才想用的隊伍。不用認領碼就能登入，只能看官方排名／賽程／各隊公開的機器介紹、
+# 訪客模式：給評審和當天才想用的隊伍。不用密碼就能登入，只能看官方排名／賽程／各隊公開的機器介紹、
 # 在自己手機上做 scouting、用計分機；不能發布機器介紹、不能上傳照片、不能把任何東西存到伺服器。
 # token 是固定的（從 data/guest.secret 推導），所以不佔 sessions.json，重開伺服器也不會失效。
 GUEST_SLUG = "guest"
@@ -168,10 +161,10 @@ def _now():
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
-# ── 帳號／認領碼／session 三個檔案是伺服器和 CLI 共用的 ──
-# --gen-claims、--claim-link、--reset-password 是另一個程序，直接改檔案。伺服器如果只認記憶體裡那份，
-# 新發的認領碼對不上（「認領碼不正確」），作廢的帳號又會在下一次登入時被寫回去。
-# 所以：自己寫檔時記下 mtime，每次碰這三份資料前先看檔案有沒有被別人動過，有就重讀。
+# ── 帳號／session 兩個檔案是伺服器和 CLI 共用的 ──
+# --reset-password、--revoke-all 是另一個程序，直接改檔案。伺服器如果只認記憶體裡那份，
+# 重設過的帳號會在下一次登入時被寫回去。
+# 所以：自己寫檔時記下 mtime，每次碰這些資料前先看檔案有沒有被別人動過，有就重讀。
 _MT = {}
 
 
@@ -186,7 +179,7 @@ def _save(path, obj):
 
 def _reload_auth():
     """檔案被別的程序改過就重讀。呼叫前必須持有 LOCK。"""
-    for path, d in ((ACCOUNTS, ACC), (CLAIMS, CLAIM), (SESSIONS, SESS)):
+    for path, d in ((ACCOUNTS, ACC), (SESSIONS, SESS)):
         try:
             mt = os.path.getmtime(path)
         except OSError:
@@ -289,7 +282,7 @@ def _hash(pw, salt):
 
 
 def audit(event, slug, ip, ua="", note=""):
-    """每一次登入、認領、改密碼都寫一行，出事時才查得到是誰。"""
+    """每一次登入、改密碼都寫一行，出事時才查得到是誰。"""
     try:
         rec = {"t": _now(), "event": event,
                "team": slug or "", "ip": ip or "", "ua": (ua or "")[:120], "note": note}
@@ -299,82 +292,14 @@ def audit(event, slug, ip, ua="", note=""):
         pass        # 稽核失敗不能害到正常請求
 
 
-def new_claim_code():
-    return "-".join("".join(secrets.choice(CLAIM_ALPHA) for _ in range(4)) for _ in range(2))
-
-
-PREV_KEEP = 6       # 每國最多記幾張被換掉的舊碼，夠涵蓋一場比賽裡的換碼次數
-
-
-def _norm_code(code):
-    return re.sub(r"[^A-Za-z0-9]", "", str(code or "")).upper()
-
-
-def issue_claim(slug):
-    """發一張新的認領碼給某國並回傳。呼叫前必須持有 LOCK。
-
-    舊碼要留著（只留正規化後的字串，反正已經作廢了）。--gen-claims / --rotate-unused
-    換碼的那一刻，之前私訊出去的連結就全部失效了，但拿到連結的隊伍完全看不出來：
-    他們點下去只會看到「認領碼不正確」，跟打錯字是同一句話，於是一直重試。愛爾蘭就這樣
-    卡了三天。記著舊碼，check_claim 才有辦法回一句「這條連結過期了，去要新的」。
-    """
-    old = CLAIM.get(slug) or {}
-    prev = list(old.get("prev") or [])
-    if old.get("code") and not old.get("used"):
-        prev.append({"code": _norm_code(old["code"]), "issued": old.get("issued", ""),
-                     "replaced": _now()})
-    code = new_claim_code()
-    CLAIM[slug] = {"code": code, "used": False, "issued": _now(),
-                   "usedAt": "", "ip": "", "prev": prev[-PREV_KEEP:]}
-    _save(CLAIMS, CLAIM)
-    return code
-
-
-def check_claim(slug, code):
-    """認領碼對不對。呼叫前必須持有 LOCK。"""
-    c = CLAIM.get(slug)
-    if not c or c.get("used"):
-        return False
-    given = _norm_code(code)
-    want = _norm_code(c.get("code", ""))
-    return bool(want) and hmac.compare_digest(given, want)
-
-
-def stale_claim(slug, code):
-    """這組碼是不是這一國「以前」的碼（被換掉的，或已經用過的那張）。
-
-    回傳 True 代表對方手上的連結是真的，只是過期了 —— 這跟打錯字要講不一樣的話。
-    """
-    c = CLAIM.get(slug)
-    if not c:
-        return False
-    given = _norm_code(code)
-    if not given:
-        return False
-    olds = [_norm_code(p.get("code", "")) for p in (c.get("prev") or [])]
-    if c.get("used"):
-        olds.append(_norm_code(c.get("code", "")))
-    return any(o and hmac.compare_digest(given, o) for o in olds)
-
-
-def burn_claim(slug, ip):
-    c = CLAIM.get(slug)
-    if c:
-        c["used"] = True
-        c["usedAt"] = _now()
-        c["ip"] = ip or ""
-        _save(CLAIMS, CLAIM)
-
-
 def check_password(slug, pw):
     """回傳 (ok, must_change)。呼叫前必須持有 LOCK。"""
     a = ACC.get(slug)
     if a is None:
-        # 還沒被認領的國家不能用密碼登入。以前這裡放行預設密碼，等於門是開的：
-        # 任何人都能挑一個國家進去再把密碼改掉，把真正的隊伍鎖在外面。
-        return False, True
+        # 還沒改過密碼的國家：用預設密碼登入。不強制改，想改的隊伍自己去選單改。
+        return hmac.compare_digest(pw.encode("utf-8"), DEFAULT_PASSWORD.encode("utf-8")), False
     ok = hmac.compare_digest(_hash(pw, a["salt"]), a["hash"])
-    return ok, not a.get("changed", False)
+    return ok, False
 
 
 def set_password(slug, pw):
@@ -386,10 +311,11 @@ def set_password(slug, pw):
 
 
 def note_login(slug, ip):
-    """呼叫前必須持有 LOCK。"""
+    """呼叫前必須持有 LOCK。還沒有帳號紀錄的國家（用預設密碼）在這裡建一筆，才記得住上次登入。"""
     a = ACC.get(slug)
     if not a:
-        return
+        salt = secrets.token_hex(16)
+        a = ACC[slug] = {"salt": salt, "hash": _hash(DEFAULT_PASSWORD, salt), "changed": False, "ts": _now()}
     a["prevLogin"] = a.get("lastLogin", {})
     a["lastLogin"] = {"t": _now(), "ip": ip or ""}
     _save(ACCOUNTS, ACC)
@@ -547,7 +473,6 @@ class H(BaseHTTPRequestHandler):
             line = " ".join(str(a) for a in args) or str(fmt)
         if "/api/sync" in line or "/health" in line or "/api/me" in line:
             return
-        line = re.sub(r"([?&]code=)[^&\s]+", r"\1***", line)   # 認領連結裡的碼不進日誌
         try:
             sys.stdout.write("[%s] %s\n" % (self.log_date_time_string(), line))
             sys.stdout.flush()
@@ -568,7 +493,7 @@ class H(BaseHTTPRequestHandler):
         只要有一條路徑在還沒讀內文就先回應 —— 401、400、429、訪客的 403 都是 ——
         那幾個位元組就留在 socket 裡，變成「下一個請求」的開頭，伺服器看到的是
         `{"rev":0}POST /api/password` 這種東西，回 501。而那個下一個請求很可能是
-        別隊的登入或認領：一個人被擋下，順手把另一個人的驗證也弄壞。
+        別隊的登入：一個人被擋下，順手把另一個人的驗證也弄壞。
         """
         if getattr(self, "_read_body", False):
             return
@@ -633,7 +558,7 @@ class H(BaseHTTPRequestHandler):
         slug = self._team()
         if slug == GUEST_SLUG:
             self._json(403, {"error": "訪客模式只能看，不能存到伺服器 / Guest mode is read-only — "
-                                      "sign in with your team's claim code to save or publish", "guest": True})
+                                      "sign in as your team to save or publish", "guest": True})
             return None
         return slug
 
@@ -697,7 +622,7 @@ class H(BaseHTTPRequestHandler):
                         "accounts": len(ACC), "sessions": len(SESS)}
             return self._json(200, info)
         if p == "/api/guest":
-            # 訪客登入：不用密碼、不用認領碼。只記一筆 audit 方便看有多少人用過。
+            # 訪客登入：不用密碼。只記一筆 audit 方便看有多少人用過。
             audit("login-guest", GUEST_SLUG, self._ip(), self.headers.get("User-Agent", ""))
             return self._json(200, {"token": guest_token(), "team": GUEST_SLUG, "guest": True, "mustChange": False})
         if p == "/api/me":
@@ -709,7 +634,7 @@ class H(BaseHTTPRequestHandler):
             with LOCK:
                 _reload_auth()
                 a = ACC.get(slug, {})
-                must = not a.get("changed", False)
+                must = False
                 last = dict(a.get("lastLogin") or {})
                 prev = dict(a.get("prevLogin") or {})
             return self._json(200, {"team": slug, "mustChange": must, "lastLogin": last, "prevLogin": prev})
@@ -786,12 +711,6 @@ class H(BaseHTTPRequestHandler):
             ua = self.headers.get("User-Agent", "")
             with LOCK:
                 _reload_auth()
-                claimed = slug in ACC
-                if not claimed:
-                    audit("login-unclaimed", slug, ip, ua)
-                    return self._json(409, {"error": "這個國家還沒有人認領，需要認領碼 / "
-                                                     "This nation has not been claimed yet — a claim code is required",
-                                            "needClaim": True})
                 ok, must = check_password(slug, pw)
                 if not ok:
                     FAILS.setdefault(ip, []).append(time.time())
@@ -802,44 +721,6 @@ class H(BaseHTTPRequestHandler):
                 tok = new_session(slug)
                 audit("login-ok", slug, ip, ua)
             return self._json(200, {"token": tok, "team": slug, "mustChange": must, "prevLogin": prev})
-
-        if p == "/api/claim":
-            ip = self._ip()
-            if too_many_fails(ip):
-                return self._json(429, {"error": "嘗試太多次，5 分鐘後再試 / Too many attempts"})
-            d = self._body()
-            if d is None:
-                return
-            slug = str(d.get("team") or "").strip().lower()
-            code = str(d.get("code") or "")
-            pw = str(d.get("password") or "")
-            ua = self.headers.get("User-Agent", "")
-            if not re.fullmatch(r"[a-z0-9-]{2,64}", slug) or (NATION_SLUGS and slug not in NATION_SLUGS):
-                return self._json(400, {"error": "不是有效的隊伍 / Unknown team"})
-            if len(pw) < 4:
-                return self._json(400, {"error": "密碼至少 4 個字 / Password must be at least 4 characters"})
-            with LOCK:
-                _reload_auth()
-                if slug in ACC:
-                    audit("claim-taken", slug, ip, ua)
-                    return self._json(409, {"error": "這個國家已經被認領了，請直接登入 / "
-                                                     "Already claimed — sign in with your team password"})
-                if not check_claim(slug, code):
-                    FAILS.setdefault(ip, []).append(time.time())
-                    # 碼是真的、只是被換掉了 → 要講「連結過期」，不然對方會一直重打同一串。
-                    if stale_claim(slug, code):
-                        audit("claim-stale", slug, ip, ua)
-                        return self._json(403, {"error":
-                            "這條連結已經失效，請向主辦方要一條新的 / "
-                            "This link has expired — ask the organizer for a new one"})
-                    audit("claim-fail", slug, ip, ua)
-                    return self._json(403, {"error": "認領碼不正確 / Wrong claim code"})
-                set_password(slug, pw)
-                burn_claim(slug, ip)
-                note_login(slug, ip)
-                tok = new_session(slug)
-                audit("claim-ok", slug, ip, ua)
-            return self._json(200, {"token": tok, "team": slug, "mustChange": False})
 
         if p == "/api/logout":
             tok = self.headers.get("X-Token", "")
@@ -860,8 +741,6 @@ class H(BaseHTTPRequestHandler):
             new = str(d.get("new") or "")
             if len(new) < 4 or len(new) > 128:
                 return self._json(400, {"error": "新密碼至少 4 個字 / New password too short"})
-            if new == DEFAULT_PASSWORD:
-                return self._json(400, {"error": "不能用預設密碼 / Cannot keep the default password"})
             with LOCK:
                 _reload_auth()
                 ok, _ = check_password(slug, cur)
@@ -980,24 +859,11 @@ def main():
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--host", default="0.0.0.0", help="0.0.0.0 允許區網連入；127.0.0.1 只允許本機/隧道")
     ap.add_argument("--reset-password", metavar="SLUG",
-                    help="把該隊帳號作廢並發一張新的認領碼（舊的密碼重設已經不安全，不再支援）")
-    ap.add_argument("--gen-claims", action="store_true",
-                    help="替所有還沒認領的國家產生認領碼，印出清單後結束（清單請私下發，不要貼群組）")
-    ap.add_argument("--show-claim", metavar="SLUG", help="印出某一國目前的認領碼")
-    ap.add_argument("--rotate-unused", action="store_true",
-                    help="把所有還沒用掉的認領碼全部換新（外流時用，已認領的帳號不受影響）")
-    ap.add_argument("--yes", action="store_true",
-                    help="不要問我，直接做（給 --rotate-unused 這種會波及所有隊伍的動作用）")
-    ap.add_argument("--claim-status", action="store_true",
-                    help="列出每一國的狀態（claimed / ready / none），給工具讀的")
-    ap.add_argument("--claim-link", metavar="SLUG",
-                    help="印出可以直接私訊給該隊的一鍵認領連結")
-    ap.add_argument("--base-url", default="https://fgc-scout.duckdns.org/",
-                    help="產生認領連結時用的網址")
+                    help="把該隊密碼恢復成預設的 password，並登出該隊所有裝置")
     ap.add_argument("--audit", nargs="?", const=40, type=int, metavar="N",
-                    help="印出最近 N 筆登入/認領/改密碼紀錄")
+                    help="印出最近 N 筆登入/改密碼紀錄")
     ap.add_argument("--revoke-all", action="store_true",
-                    help="把所有帳號作廢並重發認領碼（資料保留）。外洩後重新開帳用")
+                    help="所有隊伍的密碼都恢復成預設的 password、全部登出（資料保留）")
     ap.add_argument("--official-poll", type=int, default=120,
                     help="幾秒抓一次 results.first.global 的官方比分（預設 120）")
     ap.add_argument("--no-official", action="store_true", help="完全不抓官方比分")
@@ -1008,8 +874,6 @@ def main():
     ACC = _read_json(ACCOUNTS, {}) or {}
     SESS = _read_json(SESSIONS, {}) or {}
     PROF = _read_json(PROFILES, {}) or {}
-    global CLAIM
-    CLAIM = _read_json(CLAIMS, {}) or {}
     global OFFICIAL, OFFICIAL_POLL
     OFFICIAL = _read_json(OFFICIAL_FILE, OFFICIAL) or OFFICIAL
     OFFICIAL_POLL = 0 if a.no_official else a.official_poll
@@ -1024,117 +888,8 @@ def main():
         ACC.pop(slug, None)
         _save(ACCOUNTS, ACC)
         _drop_sessions(slug)
-        code = issue_claim(slug)
-        audit("reissue", slug, "cli")
-        print(f"[ok] {slug} 的帳號已作廢，該隊所有裝置已登出。資料沒有動。")
-        print(f"     新的認領碼：{code}")
-        print(f"     請私訊給該隊本人，不要貼在群組。他們用這組碼登入並自己設密碼。")
-        return
-
-    if a.gen_claims:
-        pool = sorted(NATION_SLUGS) if NATION_SLUGS else sorted(set(list(ACC) + list(CLAIM)))
-        made = []
-        for slug in pool:
-            if slug in ACC:
-                continue                       # 已經有人認領了，不重發
-            c = CLAIM.get(slug)
-            if c and not c.get("used"):
-                continue                       # 已經有一張沒用掉的
-            made.append((slug, issue_claim(slug)))
-        print(f"[ok] 新發了 {len(made)} 張認領碼。已認領的國家不會重發。")
-        print("     這份清單等同密碼，請私下一對一發給各隊，不要貼群組、不要進 git。")
-        for slug, code in made:
-            print(f"  {slug:<24} {code}")
-        print(f"\n     完整清單存在 {CLAIMS}")
-        return
-
-    if a.show_claim:
-        slug = a.show_claim.strip().lower()
-        c = CLAIM.get(slug)
-        if slug in ACC:
-            print(f"[info] {slug} 已經被認領了（{ACC[slug].get('ts','')}）。要重發請用 --reset-password {slug}")
-        elif not c:
-            print(f"[info] {slug} 還沒有認領碼，跑 --gen-claims 產生")
-        elif c.get("used"):
-            print(f"[info] {slug} 的認領碼已經被用掉了（{c.get('usedAt','')} from {c.get('ip','')}）")
-        else:
-            print(f"{slug} 的認領碼：{c['code']}（{c.get('issued','')} 發出）")
-            prev = c.get("prev") or []
-            if prev:
-                # 換過碼 = 之前私訊出去的連結已經失效。隊伍說「碼不對」時第一個要看這個。
-                print(f"[note] 這一國換過 {len(prev)} 次碼，最後一次 {prev[-1].get('replaced','')}。")
-                print("       如果他們手上的連結比這個時間早，那條已經失效了，重發一條給他們。")
-        return
-
-    if a.rotate_unused:
-        # 這行會讓「所有已經私訊出去、還沒被用掉的連結」一次全部失效，而隊伍那邊只會看到
-        # 登入失敗。9/15 它被連跑兩次、中間隔 13 分鐘，第二次把第一次剛發出去的連結也清掉了。
-        # 所以現在要明講後果並要人點頭；腳本裡用請加 --yes。
-        pend = [s for s in sorted(set(list(CLAIM) + (list(NATION_SLUGS) if NATION_SLUGS else [])))
-                if s not in ACC and not (CLAIM.get(s) or {}).get("used")]
-        if not a.yes:
-            print(f"[warn] 這會換掉 {len(pend)} 張還沒用掉的認領碼。")
-            print("       所有已經發出去、對方還沒點的連結都會失效，而且他們只會看到登入失敗。")
-            print("       確定要換（外流時才需要）請輸入 yes：", end="", flush=True)
-            try:
-                if input().strip().lower() != "yes":
-                    print("[info] 沒有換，什麼都沒動。")
-                    return
-            except EOFError:
-                print("\n[info] 沒有互動輸入可用，什麼都沒動。要在腳本裡跑請加 --yes。")
-                return
-        n = 0
-        for slug in sorted(set(list(CLAIM) + (list(NATION_SLUGS) if NATION_SLUGS else []))):
-            if slug in ACC:
-                continue                     # 已經認領的不動，他們用的是自己的密碼
-            c = CLAIM.get(slug)
-            if c and c.get("used"):
-                continue                     # 用掉的碼本來就沒用了
-            issue_claim(slug)
-            n += 1
-        audit("rotate-unused", "", "cli", note="%d codes" % n)
-        print("[ok] 換掉了 %d 張還沒用掉的認領碼。之前發出去但還沒被用的連結全部失效。" % n)
-        print("     已經認領的隊伍不受影響，照樣用自己的密碼登入。")
-        return
-
-    if a.claim_status:
-        pool = sorted(NATION_SLUGS) if NATION_SLUGS else sorted(set(list(ACC) + list(CLAIM)))
-        for slug in pool:
-            if slug in ACC:
-                st = "claimed"
-            else:
-                c = CLAIM.get(slug)
-                st = "ready" if (c and not c.get("used")) else "none"
-            print("%s	%s" % (slug, st))
-        return
-
-    if a.claim_link:
-        slug = a.claim_link.strip().lower()
-        c = CLAIM.get(slug)
-        if slug in ACC:
-            print(f"[info] {slug} 已經認領過了。要重發請用 --reset-password {slug}")
-            return
-        if not c or c.get("used"):
-            issue_claim(slug)
-            c = CLAIM[slug]
-            print(f"[info] {slug} 原本沒有可用的碼，已經發一張新的")
-        base = a.base_url if a.base_url.endswith("/") else a.base_url + "/"
-        link = f"{base}?claim={slug}&code={c['code']}"
-        name = NATION_NAMES.get(slug, slug)
-        # 留一筆「這一國拿過連結」。沒有這筆紀錄，隊伍回報登入不了時，稽核檔裡只看得到
-        # claim-fail，看不出來他們手上那條是什麼時候發的、是不是已經被換碼洗掉了。
-        audit("claim-link", slug, "cli", note="issued %s" % c.get("issued", ""))
-        print()
-        print("把下面整段私訊給該隊（不要貼群組）：")
-        print("-" * 64)
-        print(f"Here is your team's sign-in link for the FGC 2026 scouting app.")
-        print(f"Open it on your phone, then choose a password for your whole team:")
-        print(f"{link}")
-        print(f"The link works once and is only for {name}. Keep the password")
-        print(f"somewhere everyone on your team can find it.")
-        print("-" * 64)
-        print()
-        print(f"（認領碼本身：{c['code']}，如果他們想手動輸入）")
+        audit("reset", slug, "cli")
+        print(f"[ok] {slug} 的密碼已恢復成 {DEFAULT_PASSWORD}，該隊所有裝置已登出。資料沒有動。")
         return
 
     if a.audit is not None:
@@ -1158,10 +913,8 @@ def main():
         _save(ACCOUNTS, ACC)
         SESS.clear()
         _save(SESSIONS, SESS)
-        made = [(slug, issue_claim(slug)) for slug in (sorted(NATION_SLUGS) if NATION_SLUGS else [])]
         audit("revoke-all", "", "cli", note=f"{n} accounts")
-        print(f"[ok] {n} 個帳號全部作廢，所有裝置登出。各隊的 scouting 資料都沒有動。")
-        print(f"     重新發了 {len(made)} 張認領碼，用 --show-claim <slug> 查單一國家。")
+        print(f"[ok] {n} 個帳號全部恢復成預設密碼 {DEFAULT_PASSWORD}，所有裝置登出。各隊的 scouting 資料都沒有動。")
         return
 
     if not os.path.isfile(os.path.join(WEB, "index.html")):
@@ -1185,12 +938,11 @@ def main():
             print(f"  區網      http://{ip}:{a.port}/   ← 同一個 Wi-Fi 的 iPad 用這個")
         except Exception:
             pass
-    print(f"  隊伍數    {len(NATION_SLUGS) or '（不限）'}   已認領 {len(ACC)} 隊   待用認領碼 {sum(1 for c in CLAIM.values() if not c.get('used'))} 張")
+    print(f"  隊伍數    {len(NATION_SLUGS) or '（不限）'}   登入過 {len(ACC)} 隊   預設密碼 {DEFAULT_PASSWORD}")
     print(f"  資料目錄  {DATA_DIR}")
     print(f"  每日備份  {BACKUP_DIR}")
     print(f"  官方比分  {'每 %d 秒抓一次 results.first.global' % OFFICIAL_POLL if OFFICIAL_POLL else '關閉'}")
-    print(f"  認領碼    python server.py --gen-claims / --show-claim <slug>")
-    print(f"  重發帳號  python server.py --reset-password <slug>")
+    print(f"  重設密碼  python server.py --reset-password <slug>")
     print(f"  稽核紀錄  python server.py --audit 40")
     print("=" * 60)
     print("  Ctrl+C 停止")

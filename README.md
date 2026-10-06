@@ -32,7 +32,9 @@ whether they can carry you.
   robot status, driver rating.
 - **Pit scouting** — capacity, shooter type (single / dual / triple / waterfall),
   time to empty a full load, climb height and speed, preferred field position
-  (tap it on a map of the field), roles, languages, breakdowns.
+  (tap it on a map of the field), roles, languages, breakdowns. Ask this
+  match's two allies, or switch to **Visit any team** and record whoever you
+  meet in the pits; it lists the teams at the event you have not visited yet.
 - **Your robot, shared** — fill your own specs in once and hit **Publish**.
   Every signed-in team can then read it, and you can read theirs. Optional photos.
 - **Nation pages** — a 6-axis radar (self-reported vs. what we observed), a
@@ -50,9 +52,9 @@ explicitly publish is shared.
 
 ## Using it without running anything
 
-Just open <https://fgc-scout.duckdns.org> and pick your country. The first time
-your team signs in you need a claim code, which Team Chinese Taipei sends to
-your team directly. That instance is free for every team.
+Just open <https://fgc-scout.duckdns.org>, pick your country and sign in with
+the password `password`. Change it from the flag menu if you want your own.
+That instance is free for every team.
 
 Just looking — a judge, a mentor, or a team that only decided to scout on the
 day? Open <https://fgc-scout.duckdns.org/guest> (or tap **continue as guest**
@@ -86,27 +88,21 @@ Every nation in `web/nations.js` is an account, and one account is shared by
 everyone on that team. Passwords are PBKDF2-SHA256 with a per-team salt. There
 is no email, no personal data, and no third-party service involved.
 
-A nation that nobody has claimed yet cannot be signed into at all. Claiming it
-takes a single-use code that only the organiser can issue, and the team sets
-its own password in the same step, so there is never a shared default password
-in play. Earlier versions did have one, which let anyone take over a nation
-that had not signed in yet and lock the real team out.
+Every nation starts with the password `password` (leaving the field empty
+means the same thing). There are no claim codes. A team can set its own
+password from the flag menu after signing in. Anyone who knows the default can
+sign in as a nation that has not changed it, so teams that care should change
+it early.
 
 Organiser commands:
 
 ```bash
-python3 server.py --gen-claims             # issue a code per unclaimed nation
-python3 server.py --show-claim <slug>      # read one back
-python3 server.py --reset-password <slug>  # void an account, issue a fresh code
-python3 server.py --revoke-all             # void every account, reissue (after a leak)
-python3 server.py --audit 40               # recent logins, claims, password changes
+python3 server.py --reset-password <slug>  # back to "password", sign out every device
+python3 server.py --revoke-all             # every nation back to "password"
+python3 server.py --audit 40               # recent logins and password changes
 ```
 
-Send a code to that team and no one else. The list is as sensitive as a
-password file: it lives in `data/claims.json`, which is git-ignored, and it
-should never be posted to a group chat.
-
-Every login, failed login, claim and password change is recorded in
+Every login, failed login and password change is recorded in
 `data/audit.log` with time, nation, IP and user agent. Teams also see their
 previous sign-in time and IP in the Data tab.
 
@@ -124,8 +120,8 @@ web/
   flags/              175 SVG flags
   sw.js               offline cache
   install.html        iOS profile / PWA install page
-deploy/               setup.sh, push.ps1, pull-data.ps1, claim.ps1, runbook
-tools/                small Windows app for handing out claim links (build it yourself)
+deploy/               setup.sh, push.ps1, pull-data.ps1, runbook
+tools/                keep-alive regression test
 docs/                 form specification (Traditional Chinese)
 ```
 
@@ -137,10 +133,9 @@ All endpoints take `X-Token` from `/api/login` except where noted.
 
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/api/login` | `{team, password}` → `{token, mustChange}`; `409 needClaim` if unclaimed |
+| `POST` | `/api/login` | `{team, password}` → `{token}`; the password is `password` until the team changes it |
 | `GET` | `/api/guest` | no auth — read-only guest token; every write endpoint answers `403 {guest:true}` |
 | `GET` | `/guest` | redirects to `/?guest=1`, which signs in as guest automatically (poster QR) |
-| `POST` | `/api/claim` | `{team, code, password}` → `{token}`, first sign-in only |
 | `POST` | `/api/password` | change the team password |
 | `GET` | `/api/state` | whole dataset for your team |
 | `POST` | `/api/sync` | send changes, receive merged state (or `{nochange}`) |

@@ -49,7 +49,7 @@ function applyLang(){ relabel(); document.documentElement.lang=LANG; document.do
   SLOTS.forEach(L=>{ const b=$(L+'Country'); if(b&&!b.dataset.v) setCbtn(b,'',t('m.whichCountry')); });
   if(!$('pCountry').dataset.v) setCbtn($('pCountry'),'');
   if(DB&&$('mWho')) $('mWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><span><span class="lb">${esc(t('m.weAre'))}</span><b>${esc(nName(AUTH.team))}</b></span>`;
-    if(DB){ renderMList(); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
+    if(DB){ renderMList(); setPitMode(pitMode); if(!$('tab-teams').hidden&&rMode==='teams') renderTeams(); if(!$('tab-pit').hidden&&curTeam) loadPit(); if(!$('tab-robot').hidden) robotLoad(); calc(); if(!$('tab-map').hidden) mapRender(); if(!$('tab-data').hidden) refreshData(); }
   if(SYNC.last.k) setSync(SYNC.last.k,SYNC.last.c,SYNC.last.extra); }
 function setLang(l){ if(!DICT[l]) return; LANG=l; try{ localStorage.setItem('fgc.lang',l); }catch(e){} applyLang(); }
 document.addEventListener('change',e=>{ if(e.target.matches('select.langsel')) setLang(e.target.value); });
@@ -90,12 +90,11 @@ async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Token':AUTH.token},body:body?JSON.stringify(body):undefined});
   let d={}; try{ d=await r.json(); }catch(e){}
   if(r.status===401){ signedOut(); throw new Error(t('s.again')); }
-  if(!r.ok){ const e=new Error(d.error||('HTTP '+r.status)); e.status=r.status; e.needClaim=!!d.needClaim; throw e; }
+  if(!r.ok){ const e=new Error(d.error||('HTTP '+r.status)); e.status=r.status; throw e; }
   return d;
 }
 function showAuth(view){ $('auth').hidden=false; $('main').hidden=true; $('nav').hidden=true; $('mFab').hidden=true; document.querySelector('header').hidden=true;
-  ['authLogin','authSet','authClaim','authOffline'].forEach(id=>$(id).hidden=(id!==view));
-  if(view==='authSet') $('aWho').innerHTML=`<span class="fl">${nFlag(AUTH.team)}</span><b>${esc(nName(AUTH.team))}</b> <span class="zh">${esc(nSub(AUTH.team))}</span>`; }
+  ['authLogin','authOffline'].forEach(id=>$(id).hidden=(id!==view)); }
 function showErr(el,msg){ el.textContent=msg; el.hidden=!msg; }
 function signedOut(){ AUTH.token=''; SYNC.on=false; try{ localStorage.removeItem('fgc.auth'); }catch(e){} setSync('s.signedOut'); showAuth('authLogin'); }
 function boot(team){
@@ -119,49 +118,19 @@ function afterLogin(d){
   try{ localStorage.setItem('fgc.auth',JSON.stringify({token:d.token,team:d.team})); }catch(e){}
   LAST_LOGIN=d.prevLogin||null;
   $('aPw').value=''; haptic(18);
-  /* 只有認領碼制度之前開的舊帳號會 mustChange；一定要改掉那個共用密碼，不能再「先跳過」 */
-  if(d.mustChange) showAuth('authSet'); else boot(d.team);
+  boot(d.team);
 }
-let LAST_LOGIN=null, CLAIMING='';
+let LAST_LOGIN=null;
+const DEFAULT_PW='password';
 $('aGo').onclick=async()=>{
-  const tm=$('aTeam').dataset.v, pw=$('aPw').value;
+  /* 每一國的預設密碼都是 password；空白就當作預設密碼，少打一次字 */
+  const tm=$('aTeam').dataset.v, pw=$('aPw').value||DEFAULT_PW;
   if(!tm){ flash($('aTeam')); showErr($('aErr'),t('auth.errCountry')); return; }
   showErr($('aErr'),''); $('aGo').disabled=true;
   try{ afterLogin(await api('/api/login',{team:tm,password:pw})); }
-  catch(e){
-    /* 這個國家還沒有人認領 → 需要主辦方發的認領碼，不能用共用密碼進來 */
-    if(e.needClaim){ CLAIMING=tm; showClaim(tm); }
-    else { showErr($('aErr'),e.message); flash($('aPw')); }
-  }
+  catch(e){ showErr($('aErr'),e.message); flash($('aPw')); }
   finally{ $('aGo').disabled=false; }
 };
-function showClaim(tm){
-  $('aWhoC').innerHTML=`<span class="fl">${nFlag(tm)}</span><b>${esc(nName(tm))}</b> <span class="zh">${esc(nSub(tm))}</span>`;
-  $('aCode').value=''; $('aCNew').value=''; $('aCNew2').value=''; showErr($('aErrC'),'');
-  showAuth('authClaim');
-}
-$('aCBack').onclick=()=>{ CLAIMING=''; showAuth('authLogin'); };
-$('aClaimGo').onclick=async()=>{
-  const code=$('aCode').value.trim(), n=$('aCNew').value, n2=$('aCNew2').value;
-  showErr($('aErrC'),'');
-  if(!code){ flash($('aCode')); showErr($('aErrC'),t('auth.needCode')); return; }
-  if(n.length<4){ flash($('aCNew')); showErr($('aErrC'),t('auth.pwShort')); return; }
-  if(n!==n2){ flash($('aCNew2')); showErr($('aErrC'),t('auth.pwNoMatch')); return; }
-  $('aClaimGo').disabled=true;
-  try{ afterLogin(await api('/api/claim',{team:CLAIMING,code,password:n})); }
-  catch(e){ showErr($('aErrC'),e.message); flash($('aCode')); }
-  finally{ $('aClaimGo').disabled=false; }
-};
-$('aSet').onclick=async()=>{
-  const n=$('aNew').value, n2=$('aNew2').value;
-  if(n.length<4){ showErr($('aErr2'),t('auth.errShort')); flash($('aNew')); return; }
-  if(n!==n2){ showErr($('aErr2'),t('auth.errMatch')); flash($('aNew2')); return; }
-  showErr($('aErr2'),''); $('aSet').disabled=true;
-  try{ await api('/api/password',{current:'password',new:n}); $('aNew').value=$('aNew2').value=''; toast(t('auth.pwSet'),'ok'); boot(AUTH.team); }
-  catch(e){ showErr($('aErr2'),e.message); }
-  finally{ $('aSet').disabled=false; }
-};
-$('aBack').onclick=()=>{ api('/api/logout').catch(()=>{}); signedOut(); };
 async function guestLogin(){ showErr($('aErr'),''); $('aGuest').disabled=true;
   try{ afterLogin(await api('/api/guest')); }
   catch(e){ showErr($('aErr'),e.message); }
@@ -407,7 +376,55 @@ function loadPit(){ const on=!!curTeam; $('pitBody').hidden=!on; if(!on) return;
 { const num={pCap:'cap',pEmpty:'empty',pClimbSec:'climbSec',pBreak:'breaks'};
   Object.entries(num).forEach(([id,k])=>$(id).oninput=e=>touch(k,parseInt(e.target.value,10)||0));
   $('pNotes').oninput=e=>touch('notes',e.target.value); }
-$('pCountry').onclick=()=>openPicker(sl=>{ curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine(); haptic(12); });
+$('pCountry').onclick=()=>openPicker(sl=>{ visitPick(sl); haptic(12); });
+
+/* ---------- 兩種打聽方式：盟友（照賽程）或自由訪問（在維修區隨便走，哪一國都能記） ---------- */
+let pitMode='ally'; try{ if(localStorage.getItem('fgc.pitMode')==='visit') pitMode='visit'; }catch(e){}
+function setPitMode(m){
+  pitMode=m==='visit'?'visit':'ally';
+  try{ localStorage.setItem('fgc.pitMode',pitMode); }catch(e){}
+  /* 再點一次已選的那顆，segInit 會回傳空字串 —— 那就維持原本的模式 */
+  segInit($('scMode'),pitMode,v=>{ if(v&&v!==pitMode){ setPitMode(v); pitModeSwitched(); haptic(12); } else setPitMode(pitMode); });
+  $('scAlly').hidden=pitMode!=='ally'; $('scVisit').hidden=pitMode!=='visit';
+  $('scModeH').textContent=t(pitMode==='visit'?'sc.visitH':'sc.allyH');
+  renderTodo();
+}
+/* 換模式時表單跟著換：盟友模式只顯示這場的盟友，訪問模式顯示剛剛在問的那一國 */
+function pitModeSwitched(){
+  if(pitMode==='visit'){ setCbtn($('pCountry'),curTeam); return; }
+  const pl=plan();
+  if(curTeam&&curTeam!==pl.a&&curTeam!==pl.b){ curTeam=pl.a||pl.b||''; loadPit(); scWhoRender(); renderMine(); }
+}
+function visitPick(sl){
+  if(pitMode!=='visit') setPitMode('visit');
+  curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine();
+  $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
+}
+/* 從別的地方（國家頁、紀錄列表）打開某一國：不是這場盟友就切到訪問模式 */
+function pitOpen(sl){
+  const pl=plan();
+  if(pitMode==='ally'&&(sl===pl.a||sl===pl.b)){ curTeam=sl; setCbtn($('pCountry'),''); loadPit(); scWhoRender(); renderMine(); return; }
+  if(pitMode!=='visit') setPitMode('visit');
+  curTeam=sl; setCbtn($('pCountry'),sl); loadPit(); renderMine();
+}
+/* 這次比賽有來、但我們還沒記過的國家。名單從官方排名和賽程來；官方資料還沒出來就不顯示 */
+function eventSlugs(){
+  const d=(typeof OFF!=='undefined'&&OFF.data)||{}, set=new Set();
+  (d.rankings||[]).forEach(r=>{ const sl=rowSlug(r); if(sl) set.add(sl); });
+  (d.matches||[]).forEach(m=>(m.participants||[]).forEach(x=>{ const sl=slugOfKey(x&&x.teamKey); if(sl) set.add(sl); }));
+  set.delete(AUTH.team);
+  return [...set];
+}
+function renderTodo(){
+  const box=$('visitTodo'); if(!box||!DB) return;
+  if(pitMode!=='visit'){ box.hidden=true; return; }
+  const done=new Set(pitRows().map(x=>x.slug));
+  const todo=eventSlugs().filter(sl=>!done.has(sl)).sort((a,b)=>nName(a).localeCompare(nName(b)));
+  box.hidden=!todo.length;
+  $('todoCount').textContent=todo.length;
+  $('todoGrid').innerHTML=todo.map(sl=>`<button data-v="${esc(sl)}"${sl===curTeam?' aria-pressed="true"':''}><span class="fl">${nFlag(sl)}</span><span class="nm">${esc(nName(sl))}</span></button>`).join('');
+  $('todoGrid').querySelectorAll('button').forEach(b=>b.onclick=()=>{ visitPick(b.dataset.v); haptic(12); });
+}
 
 /* ---------- 賽前打聽：賽程一出來，選這場的兩個盟友，再下去維修區找他們 ---------- */
 /* 每個賽段預設開幾列。手冊：模擬賽每隊一場、季後賽每個聯盟四場、決賽兩場；
@@ -449,7 +466,7 @@ function scLoad(){
   });
   $('scMatch').value=pl.match||1;
   setCbtn($('scA'),pl.a||'',t('m.whichCountry')); setCbtn($('scB'),pl.b||'',t('m.whichCountry'));
-  scWhoRender(); mPlanBar();
+  scWhoRender(); mPlanBar(); setPitMode(pitMode);
 }
 $('scA').onclick=()=>scPick('A'); $('scB').onclick=()=>scPick('B');
 $('scMatch').oninput=e=>{ plan().match=parseInt(e.target.value,10)||0; planSave(); mPlanBar(); renderSched(); };
@@ -542,6 +559,7 @@ function renderMine(){
   const list=$('mineList'); if(!list) return;
   const rows=pitRows();
   const cnt=$('mineCount'); if(cnt) cnt.textContent=rows.length;
+  renderTodo();
   if(!rows.length){ list.innerHTML=`<div class="empty">${esc(t('sc.mineNone'))}</div>`; return; }
   list.innerHTML=rows.map(x=>{
     const here=(x.slug===curTeam&&x.phase===pitPhase);
@@ -562,7 +580,7 @@ function openPitRecord(key){
   const slug=pitSlugOf(key), ph=pitPhaseOf(key);
   pitPhase=ph; plan().phase=ph; planSave();
   segInit($('scPhase'),ph,v=>{ pitPhase=v||'qual'; plan().phase=pitPhase; planSave(); if(curTeam) loadPit(); scWhoRender(); renderMine(); });
-  curTeam=slug; setCbtn($('pCountry'),slug); loadPit(); renderMine();
+  pitOpen(slug);
   toast(t('m.editing')+' \u00b7 '+nName(slug)+' \u00b7 '+(PHASE_LABEL[ph]||ph));
   haptic(12);
   $('pitBody').scrollIntoView({behavior:'smooth',block:'start'});
@@ -659,7 +677,7 @@ let SCHED_FROM_OFFICIAL=false;
 function autoSched(){
   if(!DB||AUTH.offline) return;
   const n=importSched();
-  renderSched();
+  renderSched(); renderTodo();
   if(n) toast(t('sc.autoLoaded')+' '+n,'ok');
 }
 $('schedN').oninput=e=>{ const p=plan(); p.n[pitPhase]=Math.max(1,Math.min(60,parseInt(e.target.value,10)||1)); planSave(); renderSched(); };
@@ -728,7 +746,7 @@ function openNation(slug){ if(!slug||!DB) return; NATION=slug;
   $('nation').hidden=false; document.body.classList.add('lock'); $('nation').scrollTop=0; haptic(12);
   const close=()=>{ $('nation').hidden=true; document.body.classList.remove('lock'); NATION=''; };
   $('nClose').onclick=close; $('nClose2').onclick=close;
-  $('nPit').onclick=()=>{ close(); curTeam=slug; setCbtn($('pCountry'),slug); loadPit(); document.querySelector('nav button[data-tab=pit]').click(); }; }
+  $('nPit').onclick=()=>{ close(); pitOpen(slug); document.querySelector('nav button[data-tab=pit]').click(); }; }
 
 /* ---------- OUR ROBOT (public profile, shared with every team) ---------- */
 let PROFILES={}; try{ PROFILES=JSON.parse(localStorage.getItem('fgc2026.profiles')||'{}')||{}; }catch(e){ PROFILES={}; }
@@ -981,7 +999,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v33';
+const APP_VER='v34';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();
@@ -995,23 +1013,10 @@ const APP_VER='v33';
   }; })();
 
 /* ---------- init ---------- */
-/* 主辦方發的一鍵認領連結：?claim=<slug>&code=<CODE>
-   帶進畫面後立刻把網址清乾淨，免得留在網址列或被截圖傳出去。 */
-function claimFromURL(){
-  try{
-    const q=new URLSearchParams(location.search);
-    const tm=(q.get('claim')||'').trim().toLowerCase(), code=(q.get('code')||'').trim();
-    if(!tm||!NMAP[tm]) return null;
-    history.replaceState(null,'',location.pathname);
-    return {team:tm,code:code};
-  }catch(e){ return null; }
-}
-
 (async function init(){
   window.addEventListener('pagehide',saveNow); window.addEventListener('beforeunload',saveNow);
   applyLang(); applyFX();
   if(!HTTP&&$('cInstall')) $('cInstall').hidden=true;
-  const invite=claimFromURL();
   const wantGuest=/[?&]guest=1/.test(location.search);
   if(wantGuest){ try{ history.replaceState(null,'','./'); }catch(e){} }
   const last=(()=>{ try{ return localStorage.getItem('fgc.team')||''; }catch(e){ return ''; } })();
@@ -1019,19 +1024,11 @@ function claimFromURL(){
   setSync('s.connecting');
   try{ const a=JSON.parse(localStorage.getItem('fgc.auth')||'null');
     if(a&&a.token){ AUTH.token=a.token; const me=await api('/api/me'); AUTH.team=me.team; AUTH.guest=!!me.guest||me.team===GUEST;
-      if(me.mustChange){ showAuth('authSet'); } else boot(me.team); return; } }
+      boot(me.team); return; } }
   catch(e){}
   if(wantGuest){
     /* 海報 QR：fgc-scout.duckdns.org/guest → 這裡。沒登入過就直接以訪客進入 */
     showAuth('authLogin'); await guestLogin(); return;
-  }
-  if(invite){
-    CLAIMING=invite.team;
-    setCbtn($('aTeam'),invite.team,t('auth.selectCountry'));
-    setSync('s.notSigned');
-    showClaim(invite.team);
-    if(invite.code){ $('aCode').value=invite.code; setTimeout(()=>$('aCNew').focus(),250); }
-    return;
   }
   if(last&&NMAP[last]) setCbtn($('aTeam'),last,t('auth.selectCountry'));
   setSync('s.notSigned'); showAuth('authLogin');
