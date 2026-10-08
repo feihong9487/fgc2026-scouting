@@ -179,8 +179,11 @@ function filterRows(rows) {
     return rCont === 'mine' ? n.cont === mine : n.cont === rCont;
   });
 }
+/* 官方資料是照隊伍編號排的，不是照名次。還沒有名次（0 或空）的排到最後 */
+const rankOf = r => (Number.isFinite(r.rank) && r.rank > 0) ? r.rank : 1e9;
+const byRank = (a, b) => rankOf(a) - rankOf(b) || (b.rankingScore || 0) - (a.rankingScore || 0);
 function ladderHTML() {
-  const rows = (OFF.data && OFF.data.rankings) || [];
+  const rows = ((OFF.data && OFF.data.rankings) || []).slice().sort(byRank);
   if (!rows.length) return emptyHTML();
   const mineRow = rows.find(r => rowSlug(r) === AUTH.team);
   const shown = filterRows(rows);
