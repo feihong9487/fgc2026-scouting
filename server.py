@@ -64,6 +64,8 @@ PHOTO_RE = re.compile(r"^/photos/([a-z0-9-]{2,64})/([a-f0-9]{16}\.(?:jpg|png|web
 # ── 官方即時比分（results.first.global 是 Next.js，資料直接嵌在頁面的 __NEXT_DATA__）──
 OFFICIAL_FILE = os.path.join(DATA_DIR, "official.json")
 OFFICIAL_SITE = "https://results.first.global/"
+OFFICIAL_API = "https://api.first.global/v1"   # 結果網站自己用的 API；不加 excludeMatchDetails 才有每台機器人的爬升
+OFFICIAL_YEAR = 2026
 OFFICIAL = {"fetched": "", "error": "", "build": "", "data": {}, "history": []}
 OFFICIAL_POLL = 120          # 秒；--official-poll 可調，0 = 關閉
 HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時）
@@ -384,10 +386,53 @@ def _official_parse(html):
     return doc.get("buildId", ""), (doc.get("props", {}).get("pageProps", {}) or {}).get("data", {}) or {}
 
 
+_BRACE_N = {"1": "One", "2": "Two", "3": "Three"}
+
+
+def official_compact(data):
+    """把每一場的計分細節（details）攤平成前端要用的幾個欄位，其餘丟掉。
+
+    完整的 details 每場二十幾個欄位，340 場全部送給每支手機太浪費。前端要的是：
+    每台機器人自己的爬升（BraceState：0 / .05 Contact / .1 / .2 / .3 Zone 1~3）、
+    有沒有幫隊友爬、兩個聯盟的爬升倍率（已經是 1 + 三台加總，例如 1.4）、抑制單元球數。
+    station 是兩位數：十位 1 = 紅、2 = 藍，個位 1~3 對到 RobotOne~Three。
+    還沒打的場次 details 全是 0（倍率也是 0），不能當成「沒爬」，所以只處理打過的。
+    """
+    for m in data.get("matches") or []:
+        if not isinstance(m, dict):
+            continue
+        dt = m.pop("details", None)
+        if not isinstance(dt, dict) or not m.get("played"):
+            continue
+        for c in ("red", "blue"):
+            m[c + "ClimbMultiplier"] = dt.get(c + "ClimbMultiplier")
+            m[c + "PartnerClimbPoints"] = dt.get(c + "PartnerClimbPoints")
+        m["redSuppressionUnitPoints"] = dt.get("wildfireInRedSuppressionUnit")
+        m["blueSuppressionUnitPoints"] = dt.get("wildfireInBlueSuppressionUnit")
+        m["wildfireInExtinguisher"] = dt.get("wildfireInExtinguisher")
+        m["coopertition"] = dt.get("coopertition")
+        for p in m.get("participants") or []:
+            st = str((p or {}).get("station") or "")
+            if len(st) != 2 or st[0] not in "12" or st[1] not in _BRACE_N:
+                continue
+            key = ("red" if st[0] == "1" else "blue") + "Robot" + _BRACE_N[st[1]]
+            p["brace"] = dt.get(key + "BraceState")
+            p["partnerClimb"] = dt.get(key + "PartnerClimb")
+    return data
+
+
 def official_fetch():
-    """先試 Next.js 的 JSON 端點（快），失敗就回頭解析整頁 HTML（穩）。"""
+    """先試官方 API（有每一場的計分細節），失敗就退回結果網站的 Next.js 資料（沒有細節）。"""
     import urllib.request
     hdr = {"User-Agent": "fgc2026-scouting/1.0 (+https://github.com/feihong9487/fgc2026-scouting)"}
+    try:
+        url = "%s?year=%d" % (OFFICIAL_API, OFFICIAL_YEAR)
+        with urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=30) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        if isinstance(data, dict) and isinstance(data.get("rankings"), list):
+            return OFFICIAL.get("build") or "", official_compact(data)
+    except Exception as e:
+        print("[official] API 失敗，改用結果網站：%s: %s" % (type(e).__name__, e))
     build = OFFICIAL.get("build") or ""
     if build:
         try:

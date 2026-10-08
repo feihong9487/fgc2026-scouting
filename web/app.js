@@ -734,6 +734,7 @@ function openNation(slug){ if(!slug||!DB) return; NATION=slug;
       ${pw!=null?`<div class="npower"><div class="npw">${pw}</div><div class="npl">${esc(t('n.power'))} <b>${esc(tier)}</b></div><div class="meter big"><i style="width:${pw}%"></i></div></div>`:''}
     </div>
     ${photos.length?`<div class="gallery">${photos.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="" loading="lazy"></a>`).join('')}</div>`:''}
+    ${typeof officialHistoryHTML==='function'?officialHistoryHTML(slug):''}
     <div class="card"><h2><span class="ic">📈</span>${esc(t('n.dims'))}</h2>
       ${(dA||dB)?radarSVG(dA,dB)+`<div class="legend">${dA?`<span><i class="self"></i>${esc(t('n.legSelf'))}</span>`:''}${dB?`<span><i class="ours"></i>${esc(t('n.legOurs'))}</span>`:''}</div>`:`<div class="empty">${esc(t('n.noDims'))}</div>`}
     </div>
@@ -743,6 +744,7 @@ function openNation(slug){ if(!slug||!DB) return; NATION=slug;
     ${self?`<div class="card self"><h2><span class="ic">📢</span>${esc(t('n.words'))}</h2><div class="note">${esc(pitBits(self).join(' · '))}</div>${self.desc?`<p class="desc">${esc(self.desc)}</p>`:''}<p class="note" style="margin-top:8px">${esc(t('p.updated'))} ${esc(fmtDate(self.ts))}</p></div>`:''}
     ${pit&&pit.ts?`<div class="card"><h2><span class="ic">🔧</span>${esc(t('n.pitNotes'))}</h2><div class="note">${esc(pitBits(pit).join(' · '))}</div>${pit.notes?`<p class="desc">${esc(pit.notes)}</p>`:''}</div>`:''}
     <div class="bar" style="padding-bottom:30px"><button class="btn pri" id="nPit">🔧 ${esc(t('n.scoutPit'))}</button><button class="btn" id="nClose2">${esc(t('n.close'))}</button></div>`;
+  if(typeof wireOfficialHistory==='function') wireOfficialHistory($('nBody'));
   $('nation').hidden=false; document.body.classList.add('lock'); $('nation').scrollTop=0; haptic(12);
   const close=()=>{ $('nation').hidden=true; document.body.classList.remove('lock'); NATION=''; };
   $('nClose').onclick=close; $('nClose2').onclick=close;
@@ -999,7 +1001,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v35';
+const APP_VER='v36';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

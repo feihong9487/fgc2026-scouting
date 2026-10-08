@@ -1,5 +1,6 @@
 // FGC 2026 Scouting — translations part 9: pit visits (record any team, not only this match's allies)
-// and sign-in without claim codes (every nation starts with the password "password").
+// sign-in without claim codes (every nation starts with the password "password"), and the official
+// match record on each nation page (score, own climb and alliance climb multiplier per match).
 // Strings that used to mention claim codes are dropped from the other languages so they fall back
 // to English instead of telling teams to ask for a code that no longer exists.
 (function(){
@@ -34,6 +35,28 @@ en:{"sc.modeAlly":"My allies","sc.modeVisit":"Visit any team",
  "r.guestCant":"访客模式不能公开或上传，请用队伍身份登录",
  "r.guestBanner":"你是访客：这一页只留在你的手机上，不会公开。要分享你们的机器人请用队伍身份登录。"}
 };
+/* 國家頁的官方戰績：每一場的比分、自己的爬升、聯盟爬升倍率 */
+const OFFREC = {
+en:{"n.offRec":"Official record","n.offAvgScore":"Avg alliance score","n.offAvgClimb":"Avg own climb","n.offClimbed":"Climbed",
+ "n.offAvgMult":"Avg alliance ×","n.offStrip":"Climb, match by match","n.offPlayed":"Played","n.offNext":"Coming up",
+ "n.offNoneYet":"No official matches played yet.","n.offW":"W","n.offL":"L","n.offT":"T","n.offAll":"Alliance",
+ "n.offPartner":"Lifted a partner","n.offNoShow":"No show","n.offWith":"with","n.offNoClimb":"No climb","n.offScore":"Score",
+ "n.offRobots":"Each robot's climb",
+ "n.offNote":"From the official results. Climb is this robot's own BRACE position (+0.05 to +0.30). Alliance × is the whole alliance's climb multiplier, 1 + all three robots. Tap a match for the full breakdown."},
+"zh-Hant":{"n.offRec":"官方戰績","n.offAvgScore":"平均聯盟得分","n.offAvgClimb":"平均自己爬升","n.offClimbed":"有爬升",
+ "n.offAvgMult":"平均聯盟倍率","n.offStrip":"每一場爬到哪","n.offPlayed":"打過的","n.offNext":"接下來",
+ "n.offNoneYet":"官方還沒有這一隊打完的比賽。","n.offW":"勝","n.offL":"敗","n.offT":"平","n.offAll":"聯盟",
+ "n.offPartner":"有幫隊友爬","n.offNoShow":"沒上場","n.offWith":"隊友","n.offNoClimb":"沒爬","n.offScore":"比分",
+ "n.offRobots":"每台機器人的爬升",
+ "n.offNote":"資料來自官方成績。爬升是這台機器人自己在 BRACE 的位置（+0.05 到 +0.30）；聯盟 × 是整個聯盟的爬升倍率，等於 1 加上三台的爬升。點一場可以看完整計分。"},
+"zh-Hans":{"n.offRec":"官方战绩","n.offAvgScore":"平均联盟得分","n.offAvgClimb":"平均自己爬升","n.offClimbed":"有爬升",
+ "n.offAvgMult":"平均联盟倍率","n.offStrip":"每一场爬到哪","n.offPlayed":"打过的","n.offNext":"接下来",
+ "n.offNoneYet":"官方还没有这一队打完的比赛。","n.offW":"胜","n.offL":"负","n.offT":"平","n.offAll":"联盟",
+ "n.offPartner":"有帮队友爬","n.offNoShow":"没上场","n.offWith":"队友","n.offNoClimb":"没爬","n.offScore":"比分",
+ "n.offRobots":"每台机器人的爬升",
+ "n.offNote":"数据来自官方成绩。爬升是这台机器人自己在 BRACE 的位置（+0.05 到 +0.30）；联盟 × 是整个联盟的爬升倍率，等于 1 加上三台的爬升。点一场可以看完整计分。"}
+};
+Object.keys(OFFREC).forEach(function(l){ Object.assign(ADD[l], OFFREC[l]); });
 const STALE = ["auth.defaultNote","menu.guestNote","r.guestCant","r.guestBanner","ab.scout"];
 Object.keys(I).forEach(function(l){ if(!ADD[l]) STALE.forEach(function(k){ delete I[l][k]; }); });
 Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });

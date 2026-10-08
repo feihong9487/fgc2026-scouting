@@ -699,3 +699,21 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
 /* 登入頁「或」分隔線（訪客按鈕上方） */
 .or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ───────── 國家頁：官方戰績（每一場的比分、自己的爬升、聯盟倍率）───────── */
+.lab2{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:16px 2px 8px}
+.cstrip{display:flex;flex-wrap:wrap;gap:6px}
+.cs{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:46px;padding:5px 6px;border-radius:9px;
+  font-size:13px;font-weight:900;color:#fff;line-height:1.15;background:var(--gray)}
+.cs b{font-size:10px;font-weight:800;opacity:.85}
+.cs.z3{background:var(--z3)}.cs.z2{background:var(--z2)}.cs.z1{background:var(--z1)}.cs.C{background:var(--warn)}
+.cs.none{background:var(--line);color:var(--muted)}
+.it.oh,.it.orb{gap:10px;align-items:flex-start}
+.it.oh .n,.it.orb .n{min-width:46px}
+.ohtop{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font-size:15px}
+.ohtop .tag{margin:0}
+.ohwho{margin-top:4px}
+.ohwho img.flag,.it.orb .d img.flag{height:13px;width:auto;border-radius:2px;vertical-align:-1px}
+.res{display:inline-block;min-width:24px;text-align:center;font-size:12px;font-weight:900;padding:2px 6px;border-radius:7px;color:#fff}
+.res.W{background:var(--ok)}.res.L{background:var(--red)}.res.T{background:var(--gray)}
+#sheet .menu .list{margin-top:4px}

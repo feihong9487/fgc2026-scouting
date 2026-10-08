@@ -57,6 +57,28 @@ function slugOfKey(k) {
      賽程配錯國家，就是派人去打聽錯的隊伍 —— 寧可查不到。 */
   return KEY2SLUG[String(k || '').toUpperCase()] || '';
 }
+/* 官方的 station 是兩位數：十位 1 = 紅、2 = 藍，個位是第幾台（11、12、13 / 21、22、23）。
+   以前這裡只認 'R…' / 'B…'，拿到數字會直接丟錯，整個賽程列表就畫不出來。 */
+function allianceOf(st) {
+  const c = String(st == null ? '' : st).toUpperCase().charAt(0);
+  return c === '1' || c === 'R' ? 'R' : c === '2' || c === 'B' ? 'B' : '';
+}
+/* 一台機器人的爬升（官方 BraceState：0 / .05 / .1 / .2 / .3）→ CLIMB_LABEL / CLIMB_TAG 的代碼 */
+function braceCode(v) {
+  if (v == null || v === '') return '';
+  const x = Math.round(+v * 100);
+  return x >= 30 ? '3' : x >= 20 ? '2' : x >= 10 ? '1' : x >= 5 ? 'C' : '0';
+}
+function braceTag(v) {
+  const c = braceCode(v);
+  if (!c) return '';
+  if (c === '0') return `<span class="tag">${esc(t('n.offNoClimb'))}</span>`;
+  return `<span class="tag ${CLIMB_TAG[c]}">${esc(CLIMB_LABEL[c])} +${(+v).toFixed(2)}</span>`;
+}
+const multTxt = v => (v ? '×' + (+v).toFixed(2) : '');
+/* 季後賽的 id 會從 1 重新算，所以一場比賽要用「賽段 + id」才認得出來 */
+const matchKey = m => (m.tournamentKey || '') + ':' + (m.id ?? '');
+const matchShort = nm => String(nm || '').replace(/^Ranking Match\s*/i, 'M');
 function rowLabel(row) {
   const n = nationOf(row), t = (row && row.team) || {};
   const name = n ? nName(n.slug) : (t.country || t.shortName || t.name || row.teamKey || '—');
@@ -126,10 +148,10 @@ function ranksDemo() {
       id: 'demo' + i, name: 'Qualification ' + (i + 1), field: (i % 2) + 1,
       played: i < 9, tournamentKey: 'qual',
       scheduledTime: new Date(Date.now() + (i - 9) * 7 * 60000).toISOString(),
-      participants: r.map(n => ({ teamKey: n.cc.toUpperCase(), station: 'RED' }))
-        .concat(b.map(n => ({ teamKey: n.cc.toUpperCase(), station: 'BLUE' }))),
+      participants: r.map((n, k) => ({ teamKey: n.cc.toUpperCase(), station: 11 + k, brace: i < 9 ? [0.3, 0.1, 0][(i + k) % 3] : undefined }))
+        .concat(b.map((n, k) => ({ teamKey: n.cc.toUpperCase(), station: 21 + k, brace: i < 9 ? [0.2, 0.05, 0][(i + k) % 3] : undefined }))),
       redScore: 120 + ((i * 13) % 90), blueScore: 110 + ((i * 29) % 95),
-      redClimbMultiplier: 0.4, blueClimbMultiplier: 0.3,
+      redClimbMultiplier: 1.4, blueClimbMultiplier: 1.25,
       redSuppressionUnitPoints: 74 + (i % 20), blueSuppressionUnitPoints: 68 + (i % 25),
       wildfireInExtinguisher: 30 + (i % 15), coopertition: [0, 10, 25, 40][i % 4],
     });
@@ -140,6 +162,7 @@ function ranksDemo() {
     [r.teamKey, Array.from({ length: 8 }, (_, i) => Math.max(1, r.rank + Math.round(Math.sin(i) * 4)))]));
   OFF.fetched = new Date().toISOString();
   OFF.demo = true; OFF.error = '';
+  buildKeyMap();
   renderRanks();
 }
 
@@ -231,13 +254,13 @@ function matchesHTML() {
   /* 「即將到來」要看最近的前 60 場；其他模式看最後 60 場、最新在上 */
   rows = rMatchFilter === 'next' ? rows.slice(0, 60) : rows.slice(-60).reverse();
   if (!rows.length) return `<div class="list"><div class="empty">${esc(t('rk.noneHere'))}</div></div>`;
-  const side = (m, s) => (m.participants || []).filter(p => (p.station || '').toUpperCase().startsWith(s))
+  const side = (m, s) => (m.participants || []).filter(p => allianceOf(p.station) === s)
     .map(p => { const sl = slugOfKey(p.teamKey); return sl ? nFlag(sl) : '🏳️'; }).join(' ');
   return '<div class="list">' + rows.map(m => {
     const rs = m.redScore ?? m.red_score, bs = m.blueScore ?? m.blue_score;
     const redWin = m.played && rs > bs, blueWin = m.played && bs > rs;
     const mine = (m.participants || []).some(p => myKeys.has(p.teamKey));
-    return `<div class="it mt${mine ? ' me' : ''}" data-mid="${esc(m.id || '')}">
+    return `<div class="it mt${mine ? ' me' : ''}" data-mid="${esc(matchKey(m))}">
       <div class="d">
         <div class="mhead"><b>${esc(m.name || ('Match ' + (m.id || '')))}</b>
           ${m.field ? `<span class="tag">F${m.field}</span>` : ''}
@@ -271,23 +294,109 @@ function wireRanks() {
 /* 單場比賽的官方計分細節 */
 const BRACE = { 0: 'None', 0.05: 'Contact', 0.1: 'Zone 1', 0.2: 'Zone 2', 0.3: 'Zone 3' };
 function matchSheet(id) {
-  const m = ((OFF.data && OFF.data.matches) || []).find(x => String(x.id) === String(id));
+  const m = ((OFF.data && OFF.data.matches) || []).find(x => matchKey(x) === String(id));
   if (!m) return;
   const line = (k, v) => v === undefined || v === null || v === '' ? '' : `<b>${esc(k)}</b><span>${esc(String(v))}</span>`;
+  const rs = m.redScore, bs = m.blueScore;
   const kv = [
+    line(t('n.offScore'), m.played ? `${rs ?? '—'} : ${bs ?? '—'}` : undefined),
     line(t('rk.suppression'), m.redSuppressionUnitPoints !== undefined
       ? `${m.redSuppressionUnitPoints} / ${m.blueSuppressionUnitPoints}` : undefined),
-    line(t('rk.climbMult'), m.redClimbMultiplier !== undefined
-      ? `×${(1 + (m.redClimbMultiplier || 0)).toFixed(2)} / ×${(1 + (m.blueClimbMultiplier || 0)).toFixed(2)}` : undefined),
+    line(t('rk.climbMult'), m.redClimbMultiplier != null
+      ? `${multTxt(m.redClimbMultiplier)} / ${multTxt(m.blueClimbMultiplier)}` : undefined),
     line(t('c.ext'), m.wildfireInExtinguisher),
     line(t('rk.coop'), m.coopertition),
     line(t('rk.field'), m.field),
     line(t('rk.time'), m.scheduledTime ? fmtDT(m.scheduledTime) : ''),
   ].filter(Boolean).join('');
-  openSheet(`<div class="hd"><b style="font-size:17px">${esc(m.name || 'Match')}</b>
+  const robots = (m.participants || []).slice()
+    .sort((a, b) => String(a.station).localeCompare(String(b.station)))
+    .map(p => {
+      const sl = slugOfKey(p.teamKey), al = allianceOf(p.station);
+      return `<div class="it orb" data-team="${esc(sl)}"><div class="n ${al}">${al || '?'}</div><div class="fl">${sl ? nFlag(sl) : '🏳️'}</div>
+        <div class="d"><b>${esc(sl ? nName(sl) : String(p.teamKey))}</b><br>${braceTag(p.brace)}${p.partnerClimb ? `<span class="tag ok">${esc(t('n.offPartner'))}</span>` : ''}${p.noShow ? `<span class="tag bad">${esc(t('n.offNoShow'))}</span>` : ''}</div></div>`;
+    }).join('');
+  const { sh, close } = openSheet(`<div class="hd"><b style="font-size:17px">${esc(m.name || 'Match')}</b>
       <button class="btn" data-close style="margin-left:auto;min-height:44px;padding:8px 14px">${esc(t('menu.close'))}</button></div>
     <div class="menu"><div class="kv">${kv || `<span class="note">${esc(t('rk.noDetail'))}</span>`}</div>
+      ${robots ? `<div class="lab2">${esc(t('n.offRobots'))}</div><div class="list">${robots}</div>` : ''}
       <p class="note" style="margin-top:12px">${esc(t('rk.fromOfficial'))}</p></div>`);
+  /* 點一台機器人 → 打開那一國的頁面，看它的歷史戰績 */
+  sh.querySelectorAll('.orb').forEach(el => el.onclick = () => {
+    if (!el.dataset.team) return;
+    close(); openNation(el.dataset.team);
+  });
+}
+
+/* ---------- 一國的官方戰績：每一場的比分、自己的爬升、整個聯盟的爬升倍率 ---------- */
+function teamMatches(slug) {
+  const keys = new Set(Object.keys(KEY2SLUG).filter(k => KEY2SLUG[k] === slug));
+  if (!keys.size) return [];
+  const out = [];
+  ((OFF.data && OFF.data.matches) || []).forEach(m => {
+    const ps = m.participants || [];
+    const me = ps.find(p => keys.has(String(p.teamKey).toUpperCase()));
+    if (!me) return;
+    const al = allianceOf(me.station);
+    const us = al === 'R' ? m.redScore : m.blueScore, them = al === 'R' ? m.blueScore : m.redScore;
+    out.push({
+      m, al, us, them,
+      mates: ps.filter(p => p !== me && allianceOf(p.station) === al).map(p => slugOfKey(p.teamKey)),
+      opps: ps.filter(p => allianceOf(p.station) && allianceOf(p.station) !== al).map(p => slugOfKey(p.teamKey)),
+      res: !m.played ? '' : us > them ? 'W' : us < them ? 'L' : 'T',
+      brace: me.brace, pc: !!me.partnerClimb, noShow: !!me.noShow,
+      mult: al === 'R' ? m.redClimbMultiplier : m.blueClimbMultiplier,
+    });
+  });
+  const when = x => tsOf(x.m.scheduledTime) || 0;
+  return out.sort((a, b) => when(a) - when(b) || (+a.m.id || 0) - (+b.m.id || 0));
+}
+function officialHistoryHTML(slug) {
+  const rows = teamMatches(slug);
+  if (!rows.length) return '';
+  const played = rows.filter(r => r.m.played), next = rows.filter(r => !r.m.played);
+  const climbs = played.filter(r => r.brace != null);
+  const avg = (arr, f) => arr.length ? arr.reduce((s, r) => s + (+f(r) || 0), 0) / arr.length : null;
+  const cnt = k => played.filter(r => r.res === k).length;
+  const avgScore = avg(played, r => r.us), avgClimb = avg(climbs, r => r.brace);
+  const mults = played.filter(r => r.mult), avgMult = avg(mults, r => r.mult);
+  const best = climbs.reduce((b, r) => Math.max(b, +r.brace || 0), 0);
+  const flags = list => list.map(sl => sl ? nFlag(sl) : '🏳️').join(' ');
+  const stat = (k, v, small) => `<div><div class="note">${esc(k)}</div><div class="stat"${small ? ' style="font-size:20px"' : ''}>${v}</div></div>`;
+  let h = `<div class="card" id="nOff"><h2><span class="ic">📜</span>${esc(t('n.offRec'))}</h2>`;
+  if (played.length) {
+    h += `<div class="row stats">
+      ${stat(t('n.matches'), played.length)}
+      ${stat(t('rk.record'), `${cnt('W')}-${cnt('L')}-${cnt('T')}`, true)}
+      ${stat(t('n.offAvgScore'), avgScore == null ? '—' : avgScore.toFixed(0))}
+      ${climbs.length ? stat(t('n.offAvgClimb'), '+' + avgClimb.toFixed(2), true) : ''}
+      ${climbs.length ? stat(t('n.offClimbed'), `${climbs.filter(r => r.brace > 0).length}/${climbs.length}`, true) : ''}
+      ${climbs.length ? stat(t('n.best'), esc(CLIMB_LABEL[braceCode(best)] || '—'), true) : ''}
+      ${mults.length ? stat(t('n.offAvgMult'), '×' + avgMult.toFixed(2), true) : ''}
+    </div>`;
+    if (climbs.length) {
+      /* 一場一格，顏色就是那一場爬到哪：一眼看出穩不穩 */
+      h += `<div class="lab2">${esc(t('n.offStrip'))}</div><div class="cstrip">${climbs.map(r => {
+        const c = braceCode(r.brace);
+        return `<span class="cs ${c === '0' ? 'none' : CLIMB_TAG[c]}" title="${esc(r.m.name || '')}"><b>${esc(matchShort(r.m.name))}</b>${esc(c === '0' ? '—' : c === 'C' ? 'C' : 'Z' + c)}</span>`;
+      }).join('')}</div>`;
+    }
+  } else {
+    h += `<p class="note">${esc(t('n.offNoneYet'))}</p>`;
+  }
+  const row = r => `<div class="it oh" data-mid="${esc(matchKey(r.m))}">
+      <div class="n ${r.al}">${esc(matchShort(r.m.name))}</div>
+      <div class="d">${r.m.played
+        ? `<div class="ohtop"><span class="res ${r.res}">${esc(t('n.off' + r.res))}</span><b>${r.us ?? '—'} : ${r.them ?? '—'}</b>${braceTag(r.brace)}${r.mult ? `<span class="tag">${esc(t('n.offAll'))} ${multTxt(r.mult)}</span>` : ''}${r.pc ? `<span class="tag ok">${esc(t('n.offPartner'))}</span>` : ''}${r.noShow ? `<span class="tag bad">${esc(t('n.offNoShow'))}</span>` : ''}</div>`
+        : `<div class="ohtop"><b>${esc(r.m.scheduledTime ? fmtMD(r.m.scheduledTime) : t('rk.upcoming'))}</b>${r.m.field ? `<span class="tag">F${r.m.field}</span>` : ''}</div>`}
+        <div class="note ohwho">${esc(t('n.offWith'))} ${flags(r.mates)} · vs ${flags(r.opps)}</div></div></div>`;
+  if (played.length) h += `<div class="lab2">${esc(t('n.offPlayed'))}</div><div class="list">${played.slice().reverse().map(row).join('')}</div>`;
+  if (next.length) h += `<div class="lab2">${esc(t('n.offNext'))}</div><div class="list">${next.map(row).join('')}</div>`;
+  h += `<p class="note" style="margin-top:10px">${esc(t('n.offNote'))}</p></div>`;
+  return h;
+}
+function wireOfficialHistory(root) {
+  root.querySelectorAll('#nOff .it.oh').forEach(el => el.onclick = () => matchSheet(el.dataset.mid));
 }
 
 /* ---------- 控制列 ---------- */

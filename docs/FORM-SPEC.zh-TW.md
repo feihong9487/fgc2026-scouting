@@ -92,9 +92,10 @@
 
 ## 3. Ranks（排名 · 官方即時榜 + 賽程 + 我們的偵察）
 
-- 三個模式：**Ladder** 官方排名（伺服器每 2 分鐘抓 results.first.global，顯示名次升降與走勢，前 24 名＝季後賽線）、**Matches** 官方賽程／比分（可篩「我的」「已打」「即將」，點一場看計分細節）、**Scouted** 我們自己記錄到的隊伍排名（Balls / Climb / Reliability / Matches，可按賽段篩）。點任何一隊都會打開國家頁。
+- 三個模式：**Ladder** 官方排名（照名次排，各洲也一樣；伺服器每 2 分鐘抓官方 API api.first.global，抓不到才退回 results.first.global，顯示名次升降與走勢，前 24 名＝季後賽線）、**Matches** 官方賽程／比分（可篩「我的」「已打」「即將」，點一場看計分細節）、**Scouted** 我們自己記錄到的隊伍排名（Balls / Climb / Reliability / Matches，可按賽段篩）。點任何一隊都會打開國家頁。
 - 官方賽程一抓到，Scout 分頁的「My matches」賽程表會自動填入每場的兩個盟友。
-- 國家頁內容：大國旗 hero、**Power 戰力分數 0–100**（🔥 Elite ≥80 / 💪 Strong ≥60 / 👍 Solid ≥40 / 🌱 Developing）、機器照片（若該隊有上傳）、**六維雷達圖**（Shooting 投得準 / Firepower 裝得多 / Speed 射得快 / Climb 爬升 / Support 背隊友 / Feeding 餵洞口；橘＝該隊自己說的，藍＝我們 Pit 問到的）、我們記錄到的比賽數據（場數、平均投球、平均 PORT、爬升率、最高爬升、故障）、他們自己的介紹、我們的 Pit 備註、「Scout them in Pit」。
+- 國家頁最上面是**官方戰績**：場數、勝敗平、平均聯盟得分、平均自己爬升（這台機器人在 BRACE 的位置 +0.05～+0.30）、有爬升的場數、最高爬升、平均聯盟爬升倍率（1 + 三台加總），一場一格的爬升色塊，以及每一場的比分／自己的爬升／聯盟倍率／隊友與對手，還有接下來的場次。點一場會打開官方計分細節，列出六台機器人各自爬到哪；再點一台就跳到那一國。
+- 國家頁其他內容：大國旗 hero、**Power 戰力分數 0–100**（🔥 Elite ≥80 / 💪 Strong ≥60 / 👍 Solid ≥40 / 🌱 Developing）、機器照片（若該隊有上傳）、**六維雷達圖**（Shooting 投得準 / Firepower 裝得多 / Speed 射得快 / Climb 爬升 / Support 背隊友 / Feeding 餵洞口；橘＝該隊自己說的，藍＝我們 Pit 問到的）、我們記錄到的比賽數據（場數、平均投球、平均 PORT、爬升率、最高爬升、故障）、他們自己的介紹、我們的 Pit 備註、「Scout them in Pit」。
 - 戰力權重：Shooting 25% / Firepower 20% / Speed 15% / Climb 25% / Support 10% / Feeding 5%（自己說的優先，沒有就用我們的 Pit 資料）。
 
 ---
