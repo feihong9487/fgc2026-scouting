@@ -68,7 +68,8 @@ OFFICIAL_API = "https://api.first.global/v1"   # 結果網站自己用的 API；
 OFFICIAL_YEAR = 2026
 OFFICIAL = {"fetched": "", "error": "", "build": "", "data": {}, "history": []}
 OFFICIAL_POLL = 120          # 秒；--official-poll 可調，0 = 關閉
-HISTORY_MAX = 240            # 名次快照上限（120 秒一筆 ≈ 8 小時）
+HISTORY_MAX = 600            # 名次快照上限（名次有變才記一筆，大約一場比賽一筆，夠涵蓋整個賽事）
+TREND_POINTS = 40            # 給前端畫名次走勢的點數：從整段歷史平均取樣，最後一筆一定在
 
 AUDIT_LOG = os.path.join(DATA_DIR, "audit.log")  # 所有登入/改密碼事件，出事時可以追
 MAX_BODY = 8 * 1024 * 1024     # 請求內文上限；_body 和 _drain 共用同一個門檻
@@ -475,10 +476,15 @@ def official_view():
     cur = hist[-1]["ranks"] if hist else {}
     prev = hist[-2]["ranks"] if len(hist) > 1 else {}
     movement = {k: prev[k] - v for k, v in cur.items() if k in prev and prev[k] != v}
-    spark = {}
-    for snap in hist[-20:]:
-        for k, v in snap["ranks"].items():
-            spark.setdefault(k, []).append(v)
+    # 走勢要看整個賽事，不是最後幾次更新：平均取樣 TREND_POINTS 個快照。
+    # 每一隊的陣列跟 sparkT 對齊，那次快照還沒有這一隊就放 null（前端會跳過）。
+    n = len(hist)
+    if n > TREND_POINTS:
+        idx = sorted({round(i * (n - 1) / (TREND_POINTS - 1)) for i in range(TREND_POINTS)})
+    else:
+        idx = list(range(n))
+    snaps = [hist[i] for i in idx]
+    spark = {k: [snap["ranks"].get(k) for snap in snaps] for k in cur}
     return {
         "fetched": OFFICIAL.get("fetched", ""),
         "error": OFFICIAL.get("error", ""),
@@ -486,6 +492,7 @@ def official_view():
         "data": data,
         "movement": movement,
         "spark": spark,
+        "sparkT": [snap.get("t", "") for snap in snaps],
     }
 
 

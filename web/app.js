@@ -744,9 +744,9 @@ function openNation(slug){ if(!slug||!DB) return; NATION=slug;
     ${self?`<div class="card self"><h2><span class="ic">📢</span>${esc(t('n.words'))}</h2><div class="note">${esc(pitBits(self).join(' · '))}</div>${self.desc?`<p class="desc">${esc(self.desc)}</p>`:''}<p class="note" style="margin-top:8px">${esc(t('p.updated'))} ${esc(fmtDate(self.ts))}</p></div>`:''}
     ${pit&&pit.ts?`<div class="card"><h2><span class="ic">🔧</span>${esc(t('n.pitNotes'))}</h2><div class="note">${esc(pitBits(pit).join(' · '))}</div>${pit.notes?`<p class="desc">${esc(pit.notes)}</p>`:''}</div>`:''}
     <div class="bar" style="padding-bottom:30px"><button class="btn pri" id="nPit">🔧 ${esc(t('n.scoutPit'))}</button><button class="btn" id="nClose2">${esc(t('n.close'))}</button></div>`;
-  if(typeof wireOfficialHistory==='function') wireOfficialHistory($('nBody'));
   $('nation').hidden=false; document.body.classList.add('lock'); $('nation').scrollTop=0; haptic(12);
-  const close=()=>{ $('nation').hidden=true; document.body.classList.remove('lock'); NATION=''; };
+  if(typeof wireOfficialHistory==='function') wireOfficialHistory($('nBody'));   // 顯示之後才接，圖表要量得到寬度
+  const close=()=>{ $('nation').hidden=true; document.body.classList.remove('lock'); NATION=''; if(typeof chTipHide==='function') chTipHide(); };
   $('nClose').onclick=close; $('nClose2').onclick=close;
   $('nPit').onclick=()=>{ close(); pitOpen(slug); document.querySelector('nav button[data-tab=pit]').click(); }; }
 
@@ -1001,7 +1001,7 @@ window.addEventListener('resize',(()=>{ let t; return ()=>{ clearTimeout(t); t=s
     .catch(()=>{}); }); })();
 
 /* ---------- 版本號：讓使用者一眼看出裝到哪一版 ---------- */
-const APP_VER='v36';
+const APP_VER='v37';
 (function(){ const el=$('appVer'); if(el) el.textContent=APP_VER;
   const b=$('verCheck'); if(!b) return;
   b.onclick=async e=>{ e.preventDefault();

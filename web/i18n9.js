@@ -57,6 +57,37 @@ en:{"n.offRec":"Official record","n.offAvgScore":"Avg alliance score","n.offAvgC
  "n.offNote":"数据来自官方成绩。爬升是这台机器人自己在 BRACE 的位置（+0.05 到 +0.30）；联盟 × 是整个联盟的爬升倍率，等于 1 加上三台的爬升。点一场可以看完整计分。"}
 };
 Object.keys(OFFREC).forEach(function(l){ Object.assign(ADD[l], OFFREC[l]); });
+/* 遊戲式排位：段位名稱、晉級進度、圖表 */
+const RANKED = {
+en:{"rk.t.chal":"Challenger","rk.t.master":"Master","rk.t.dia":"Diamond","rk.t.plat":"Platinum","rk.t.gold":"Gold",
+ "rk.t.silver":"Silver","rk.t.bronze":"Bronze","rk.t.unr":"Placements","rk.tierYou":"Your tier",
+ "rk.promoTo":"{n} places to {t}","rk.toFirst":"{n} places from #1","rk.atTop":"Top of the ladder",
+ "rk.placement":"In placements: no official match played yet.","rk.winRate":"Win rate","rk.avgClimb":"Avg climb",
+ "rk.trend":"Rank over time","rk.trendH":"Each point is an official update across the event; higher on the chart is a better rank.",
+ "rk.best":"Best","rk.table":"Show the numbers","rk.update":"Update","rk.rankCol":"Rank","rk.tierCol":"Tier",
+ "rk.dist":"Tier distribution","rk.distH":"How many teams sit in each tier. Yours is highlighted; tap a tier to jump to it.",
+ "rk.teams":"teams","rk.podium3":"Top 3","rk.podium3c":"Top 3 on this continent","rk.cut":"Playoff line · top 24",
+ "n.scoreChart":"Alliance score per match"},
+"zh-Hant":{"rk.t.chal":"王者","rk.t.master":"大師","rk.t.dia":"鑽石","rk.t.plat":"白金","rk.t.gold":"黃金",
+ "rk.t.silver":"白銀","rk.t.bronze":"青銅","rk.t.unr":"定級中","rk.tierYou":"你們的段位",
+ "rk.promoTo":"再前進 {n} 名升上 {t}","rk.toFirst":"距離第 1 名還差 {n} 名","rk.atTop":"站上頂端了",
+ "rk.placement":"定級中：還沒打過正式比賽。","rk.winRate":"勝率","rk.avgClimb":"平均爬升",
+ "rk.trend":"名次走勢","rk.trendH":"每一點是整個賽事中的一次官方更新；越上面名次越好。",
+ "rk.best":"最佳","rk.table":"顯示數字","rk.update":"更新時間","rk.rankCol":"名次","rk.tierCol":"段位",
+ "rk.dist":"段位分布","rk.distH":"每個段位有幾隊。你們的段位會亮起來；點一個段位直接跳過去。",
+ "rk.teams":"隊","rk.podium3":"頂尖三強","rk.podium3c":"這一洲的前三名","rk.cut":"季後賽晉級線 · 前 24 名",
+ "n.scoreChart":"每一場的聯盟得分"},
+"zh-Hans":{"rk.t.chal":"王者","rk.t.master":"大师","rk.t.dia":"钻石","rk.t.plat":"白金","rk.t.gold":"黄金",
+ "rk.t.silver":"白银","rk.t.bronze":"青铜","rk.t.unr":"定级中","rk.tierYou":"你们的段位",
+ "rk.promoTo":"再前进 {n} 名升上 {t}","rk.toFirst":"距离第 1 名还差 {n} 名","rk.atTop":"站上顶端了",
+ "rk.placement":"定级中：还没打过正式比赛。","rk.winRate":"胜率","rk.avgClimb":"平均爬升",
+ "rk.trend":"名次走势","rk.trendH":"每一点是整个赛事中的一次官方更新；越上面名次越好。",
+ "rk.best":"最佳","rk.table":"显示数字","rk.update":"更新时间","rk.rankCol":"名次","rk.tierCol":"段位",
+ "rk.dist":"段位分布","rk.distH":"每个段位有几队。你们的段位会亮起来；点一个段位直接跳过去。",
+ "rk.teams":"队","rk.podium3":"顶尖三强","rk.podium3c":"这一洲的前三名","rk.cut":"季后赛晋级线 · 前 24 名",
+ "n.scoreChart":"每一场的联盟得分"}
+};
+Object.keys(RANKED).forEach(function(l){ Object.assign(ADD[l], RANKED[l]); });
 const STALE = ["auth.defaultNote","menu.guestNote","r.guestCant","r.guestBanner","ab.scout"];
 Object.keys(I).forEach(function(l){ if(!ADD[l]) STALE.forEach(function(k){ delete I[l][k]; }); });
 Object.keys(ADD).forEach(function(l){ I[l]=Object.assign(I[l]||{},ADD[l]); });

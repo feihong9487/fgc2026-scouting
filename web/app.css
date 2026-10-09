@@ -5,6 +5,7 @@
   --red:#e5322d; --red-soft:rgba(229,50,45,.14); --blue:#2f6bff; --blue-soft:rgba(47,107,255,.14);
   --ok:#159a5b; --ok-soft:rgba(21,154,91,.14); --warn:#c47a09; --warn-soft:rgba(196,122,9,.14);
   --z1:#0891b2; --z2:#7c3aed; --z3:#e11d48; --gray:#8b93a1;
+  --c-acc:#e8590c; --c-acc-soft:rgba(232,89,12,.16); --c-dim:#8b93a1;
   --a1:#ffb36b; --a2:#ff6f91; --a3:#7cc7ff; --a4:#ffe08a; --a-op:.55; --noise-op:.06;
   --sh-1:0 1px 2px rgba(20,24,40,.05),0 4px 14px rgba(20,24,40,.06);
   --sh-2:0 10px 30px rgba(20,24,40,.12);
@@ -18,6 +19,7 @@
   --red:#ff5f57; --red-soft:rgba(255,95,87,.16); --blue:#5b8cff; --blue-soft:rgba(91,140,255,.16);
   --ok:#3ddc84; --ok-soft:rgba(61,220,132,.14); --warn:#f2b544; --warn-soft:rgba(242,181,68,.14);
   --z1:#22d3ee; --z2:#a78bfa; --z3:#fb7185; --gray:#6b7280;
+  --c-acc:#e8661f; --c-acc-soft:rgba(232,102,31,.2); --c-dim:#6b7280;
   --a1:#ff7a2e; --a2:#ff2d6f; --a3:#2d7dff; --a4:#ffcc4d; --a-op:.42; --noise-op:.09;
   --sh-1:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3); --sh-2:0 14px 40px rgba(0,0,0,.5);
 }}
@@ -27,6 +29,7 @@
   --red:#ff5f57; --red-soft:rgba(255,95,87,.16); --blue:#5b8cff; --blue-soft:rgba(91,140,255,.16);
   --ok:#3ddc84; --ok-soft:rgba(61,220,132,.14); --warn:#f2b544; --warn-soft:rgba(242,181,68,.14);
   --z1:#22d3ee; --z2:#a78bfa; --z3:#fb7185; --gray:#6b7280;
+  --c-acc:#e8661f; --c-acc-soft:rgba(232,102,31,.2); --c-dim:#6b7280;
   --a1:#ff7a2e; --a2:#ff2d6f; --a3:#2d7dff; --a4:#ffcc4d; --a-op:.42; --noise-op:.09;
   --sh-1:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3); --sh-2:0 14px 40px rgba(0,0,0,.5);
 }
@@ -717,3 +720,141 @@ body.mp-full .mp-exp{top:calc(10px + env(safe-area-inset-top));right:calc(10px +
 .res{display:inline-block;min-width:24px;text-align:center;font-size:12px;font-weight:900;padding:2px 6px;border-radius:7px;color:#fff}
 .res.W{background:var(--ok)}.res.L{background:var(--red)}.res.T{background:var(--gray)}
 #sheet .menu .list{margin-top:4px}
+
+/* ───────── 遊戲式排位：段位、徽章、頒獎台、圖表 ─────────
+   圖表顏色（--c-acc / --c-dim）是另外一組，跑過色盲與對比檢查：亮色 #e8590c、暗色 #e8661f，
+   原本的 --ember 在白底上對比只有 2.87:1，當圖表標記不夠。 */
+.t-chal{--t1:#ffe8a3;--t2:#ff7a1a;--t3:#c2185b}
+.t-master{--t1:#f5c2ff;--t2:#b45cf6;--t3:#5b1a9e}
+.t-dia{--t1:#bdf4ff;--t2:#3db7f5;--t3:#1d4fd8}
+.t-plat{--t1:#b4f7ea;--t2:#22b8a2;--t3:#0b6158}
+.t-gold{--t1:#ffeaa0;--t2:#e3a60c;--t3:#8a5a00}
+.t-silver{--t1:#f4f6f9;--t2:#a3adbd;--t3:#4b5565}
+.t-bronze{--t1:#ffd2b0;--t2:#c46d34;--t3:#6e2f0f}
+.t-unr{--t1:#e5e7eb;--t2:#9ca3af;--t3:#4b5563}
+
+/* 徽章 */
+svg.emb{flex:none;overflow:visible;filter:drop-shadow(0 6px 14px color-mix(in srgb,var(--t2) 45%,transparent))}
+svg.emb .shine{transform:skewX(-20deg) translateX(0)}
+svg.emb:not(.anim) .shine{display:none}
+svg.emb.anim .shine{animation:embShine 3.6s ease-in-out infinite}
+@keyframes embShine{0%{transform:skewX(-20deg) translateX(0)}55%,100%{transform:skewX(-20deg) translateX(200px)}}
+.temb{display:inline-grid;place-items:center;width:22px;height:24px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(180deg,var(--t1),var(--t2) 55%,var(--t3));color:#fff;font-size:8.5px;font-weight:900;letter-spacing:-.02em;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+
+/* 你們的段位卡 */
+.card.you[class*=" t-"]{border-color:color-mix(in srgb,var(--t2) 70%,transparent);
+  background:radial-gradient(120% 90% at 0% 0%,color-mix(in srgb,var(--t2) 24%,transparent),transparent 62%),var(--panel);
+  box-shadow:var(--sh-1),0 0 0 4px color-mix(in srgb,var(--t2) 16%,transparent),0 10px 40px color-mix(in srgb,var(--t2) 22%,transparent)}
+.youhero{display:flex;align-items:center;gap:16px}
+.embwrap{position:relative;flex:none;width:104px;height:104px}
+.divb{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);background:var(--panel-solid);border:1.5px solid var(--t2);color:var(--ink);
+  font-weight:900;font-size:12px;padding:1px 10px;border-radius:9px;box-shadow:var(--sh-1)}
+.youinfo{min-width:0;flex:1}
+.youinfo .lb{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.tname{font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-top:2px;
+  background:linear-gradient(135deg,var(--t3),var(--t2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.youteam{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:15px;min-width:0}
+.youteam b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.youteam img.flag{height:18px;width:auto;border-radius:3px}
+.yourank{display:flex;align-items:baseline;gap:4px;font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:2px}
+.yourank small{font-size:13px;color:var(--muted);font-weight:700}
+.promo{margin-top:18px}
+.pbar{height:10px;border-radius:6px;background:color-mix(in srgb,var(--t2) 20%,transparent);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--t3),var(--t2))}
+.plines{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.youstats{display:flex;align-items:center;gap:14px;margin-top:16px}
+.youstats .row.stats{flex:1;margin:0}
+.stat.sm{font-size:20px}
+
+/* 勝率環 */
+.ring{position:relative;width:76px;height:76px;flex:none}
+.ring svg{display:block}
+.ring .trk{fill:none;stroke:var(--c-acc-soft);stroke-width:8}
+.ring .arc{fill:none;stroke:var(--c-acc);stroke-width:8;stroke-linecap:round}
+.ring .rv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.ring .rv b{font-size:17px;font-weight:900;color:var(--ink)}
+.ring .rv span{font-size:9.5px;color:var(--muted);font-weight:700}
+
+/* 名次走勢圖 */
+.chwrap{margin-top:16px}
+.chwrap[hidden]{display:none}
+.ch-trend{width:100%}
+.ch-trend svg{display:block;width:100%;height:auto;touch-action:pan-y;outline:none}
+.ch-trend .grid{stroke:var(--line);stroke-width:1}
+.ch-trend .base{stroke:var(--line-2);stroke-width:1}
+.ch-trend .ax{fill:var(--muted);font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.ch-trend .line{fill:none;stroke:var(--c-acc);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ch-trend .area{fill:var(--c-acc);opacity:.1}
+.ch-trend .end,.ch-trend .hd,.ch-trend .pk{fill:var(--c-acc);stroke:var(--panel-solid);stroke-width:2}
+.ch-trend .xh{stroke:var(--muted);stroke-width:1}
+.ch-trend .lbl{fill:var(--ink);font-size:11px;font-weight:800}
+.ch-trend svg:focus-visible{outline:2px solid var(--c-acc);outline-offset:2px;border-radius:6px}
+.chnote{margin:4px 0 0;font-size:11.5px}
+.chtable{margin-top:6px;font-size:12.5px}
+.chtable summary{cursor:pointer;color:var(--muted);font-weight:700}
+.chtable table{width:100%;border-collapse:collapse;margin-top:6px;font-variant-numeric:tabular-nums}
+.chtable th,.chtable td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+.chtable th{color:var(--muted);font-weight:700}
+#chTip{position:fixed;z-index:130;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;max-width:240px;
+  padding:6px 10px;border-radius:10px;background:var(--panel-solid);border:1px solid var(--line-2);box-shadow:var(--sh-2);line-height:1.25}
+#chTip[hidden]{display:none}
+#chTip b{font-size:15px;font-weight:900;color:var(--ink)}
+#chTip span{font-size:11.5px;font-weight:600;color:var(--muted)}
+
+/* 頒獎台 */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:8px;padding-top:18px}
+.pod{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:0;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer;transition:transform var(--d-s) var(--e)}
+.pod:active{transform:scale(.97)}
+.pod .pfl{font-size:32px;line-height:1}
+.pod .pfl img.flag{height:28px;width:auto;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.pod.p1 .pfl img.flag{height:36px}
+.pnm{max-width:100%;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psc{font-size:12px;font-weight:800;color:var(--muted)}
+.pillar{width:100%;margin-top:4px;display:flex;justify-content:center;padding-top:8px;border-radius:12px 12px 4px 4px;color:#fff}
+.pod.p1 .pillar{height:96px;background:linear-gradient(180deg,#f7c948,#b07a00)}
+.pod.p2 .pillar{height:72px;background:linear-gradient(180deg,#cfd6df,#7c8696)}
+.pod.p3 .pillar{height:56px;background:linear-gradient(180deg,#e2a06c,#8f4f22)}
+.pnum{font-size:18px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.crown{position:absolute;top:-32px;font-size:22px;animation:crownBob 2.6s ease-in-out infinite}
+@keyframes crownBob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(6deg)}}
+
+/* 段位分布（強調式長條：你們的段位上色，其他灰色） */
+.dist{display:flex;flex-direction:column;gap:4px}
+.dbar{display:grid;grid-template-columns:minmax(110px,36%) 1fr;align-items:center;gap:10px;padding:4px 6px;border:0;border-radius:9px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:background var(--d-s)}
+.dbar:hover,.dbar:focus-visible{background:var(--line);outline:none}
+.dl{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;font-weight:800}
+.dl .dn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl .tag{margin:0}
+.dt{display:grid;grid-template-columns:1fr 30px;align-items:center;gap:6px;min-width:0}
+.dt i{display:block;height:14px;min-width:2px;border-radius:0 4px 4px 0;background:var(--c-dim)}
+.dbar.me .dt i{background:var(--c-acc)}
+.dt em{font-style:normal;font-size:12px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* 排行榜：段位分組、晉級線 */
+.it.lad[class*=" t-"]{border-left:3px solid var(--t2)}
+.it.lad .temb{margin-left:-4px}
+.tierhd{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;font-size:13px;font-weight:900;letter-spacing:.03em;border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--t2) 22%,transparent),transparent 70%);scroll-margin-top:90px}
+.tierhd .rng{margin-left:auto;font-size:12px;font-weight:800;color:var(--muted)}
+.cutline{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:11.5px;font-weight:900;letter-spacing:.05em;color:var(--ember)}
+.cutline::before,.cutline::after{content:"";flex:1;height:2px;border-radius:2px;background:var(--ember);opacity:.55}
+
+/* 國家頁：段位列、每場得分直條 */
+.ohero{display:flex;align-items:center;gap:14px;padding:12px;margin-bottom:6px;border-radius:16px;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--t2) 22%,transparent),transparent 72%);border:1px solid color-mix(in srgb,var(--t2) 40%,var(--line))}
+.ohi{flex:1;min-width:0;display:flex;flex-direction:column}
+.ohi b{font-size:20px;font-weight:900;letter-spacing:-.01em}
+.ohi span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.cols{display:flex;align-items:stretch;gap:2px;height:160px;padding-top:18px;overflow-x:auto}
+.col{flex:1 1 0;min-width:28px;display:flex;flex-direction:column;align-items:center;padding:0;border:0;background:none;color:var(--muted);font:inherit;cursor:pointer}
+.cplot{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--line-2)}
+.cbar{position:relative;width:min(24px,70%);min-height:2px;border-radius:4px 4px 0 0;background:var(--c-acc);transition:filter var(--d-s)}
+.cbar em{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-style:normal;font-size:11px;font-weight:900;color:var(--ink);white-space:nowrap}
+.col:hover .cbar,.col:focus-visible .cbar{filter:brightness(1.15)}
+.col:focus-visible{outline:none}
+.cx{margin-top:4px;font-size:10px;font-weight:700;white-space:nowrap}
+
+@media (prefers-reduced-motion:reduce){html:not(.fx-on) svg.emb.anim .shine,html:not(.fx-on) .crown{animation:none}}
+@media (prefers-color-scheme:dark){:root:not([data-t="light"]) .tname{background-image:linear-gradient(135deg,var(--t1),var(--t2))}}
+:root[data-t="dark"] .tname{background-image:linear-gradient(135deg,var(--t1),var(--t2))}

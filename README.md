@@ -37,6 +37,11 @@ whether they can carry you.
   meet in the pits; it lists the teams at the event you have not visited yet.
 - **Your robot, shared** — fill your own specs in once and hit **Publish**.
   Every signed-in team can then read it, and you can read theirs. Optional photos.
+- **Ranked ladder** — the live ranking shown like a game's ranked mode: tiers
+  (Challenger, Master, Diamond = the playoff line at 24, Platinum, Gold, Silver,
+  Bronze) with divisions and emblems, your promotion progress, win rate, a
+  rank-over-time chart for the whole event, a top-3 podium and the tier
+  distribution.
 - **Nation pages** — their official record match by match (score, win/loss,
   how high their own robot climbed, the alliance climb multiplier, what is
   coming up), a 6-axis radar (self-reported vs. what we observed), a power
